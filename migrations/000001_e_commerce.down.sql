@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS "order_products";
+DROP TABLE IF EXISTS "product";
+DROP TABLE IF EXISTS "orders";
+DROP TABLE IF EXISTS "customer";
+DROP TABLE IF EXISTS "admin";
+DROP TABLE IF EXISTS "brand";
+DROP TABLE IF EXISTS "category";
+DROP TABLE IF EXISTS "banner";
