@@ -26,7 +26,7 @@ func UploadFiles(file *multipart.Form) (*models.MultipleFileUploadResponse, erro
 		log.Fatal(err)
 	}
 
-	filePath := filepath.Join(cwd, "yourfile.txt")
+	filePath := filepath.Join(cwd, "serviceAccountKey.json")
 
 	// Initialize Firebase App with service account key
 	opt := option.WithCredentialsFile(filePath)
