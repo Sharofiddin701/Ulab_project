@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/url"
 	"os"
+	"path/filepath"
 
 	firebase "firebase.google.com/go"
 	"github.com/google/uuid"
@@ -20,8 +21,15 @@ import (
 func UploadFiles(file *multipart.Form) (*models.MultipleFileUploadResponse, error) {
 	var resp models.MultipleFileUploadResponse
 
+	cwd, err := filepath.Abs(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	filePath := filepath.Join(cwd, "yourfile.txt")
+
 	// Initialize Firebase App with service account key
-	opt := option.WithCredentialsFile("serviceAccountKey.json")
+	opt := option.WithCredentialsFile(filePath)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Println("Firebase App initialization error:", err)

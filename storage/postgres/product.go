@@ -7,7 +7,6 @@ import (
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
-	"time"
 
 	uuid "github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -102,23 +101,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 }
 
 func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey) (*models.Product, error) {
-	var (
-		query               string
-		id                  sql.NullString
-		is_favourite        sql.NullBool
-		image               sql.NullString
-		name                sql.NullString
-		product_categoty    sql.NullString
-		price               sql.NullFloat64
-		price_with_discount sql.NullFloat64
-		rating              sql.NullInt64
-		order_count         sql.NullInt64
-		created_at          sql.NullString
-		updated_at          sql.NullString
-		deleted_at          sql.NullString
-	)
-
-	query = `
+	query := `
 		SELECT 
 			id,
 			is_favourite,
@@ -129,12 +112,23 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 			price_with_discount,
 			rating,
 			order_count,
-			TO_CHAR(created_at,'dd/mm/yyyy'),
-			TO_CHAR(updated_at,'dd/mm/yyyy'),
-			TO_CHAR(deleted_at,'dd/mm/yyyy')
+			TO_CHAR(created_at, 'dd/mm/yyyy')
 		FROM "product" 
 		WHERE id = $1
 	`
+
+	var (
+		id                  sql.NullString
+		is_favourite        sql.NullBool
+		image               sql.NullString
+		name                sql.NullString
+		product_categoty    sql.NullString
+		price               sql.NullFloat64
+		price_with_discount sql.NullFloat64
+		rating              sql.NullInt64
+		order_count         sql.NullInt64
+		created_at          sql.NullString
+	)
 
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
@@ -147,16 +141,14 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		&rating,
 		&order_count,
 		&created_at,
-		&updated_at,
-		&deleted_at,
 	)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			u.log.Warn("no rows found for product ID: " + req.Id)
+			u.log.Warn("No product found with the given ID")
 			return nil, nil
 		}
-		u.log.Error("error while scanning data: " + err.Error())
+		u.log.Error("Error while scanning product data: " + err.Error())
 		return nil, err
 	}
 
@@ -171,8 +163,6 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Rating:              int(rating.Int64),
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
-		UpdatedAt:           updated_at.String,
-		DeletedAt:           deleted_at.String,
 	}, nil
 }
 
@@ -196,7 +186,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			price_with_discount,
 			rating,
 			order_count,
-			TO_CHAR(p.created_at, 'dd/mm/yyyy'),
+			TO_CHAR(created_at, 'dd/mm/yyyy')
 		FROM "product" 
 	`
 
@@ -219,8 +209,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 	for rows.Next() {
 		var (
-			product models.Product
-
+			id                  sql.NullString
 			is_favourite        sql.NullBool
 			image               sql.NullString
 			name                sql.NullString
@@ -230,13 +219,11 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			rating              sql.NullInt64
 			order_count         sql.NullInt64
 			created_at          sql.NullString
-			updated_at          sql.NullString
-			deleted_at          sql.NullString
 		)
 
 		err = rows.Scan(
 			&resp.Count,
-			&product.Id,
+			&id,
 			&is_favourite,
 			&image,
 			&name,
@@ -246,8 +233,6 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&rating,
 			&order_count,
 			&created_at,
-			&updated_at,
-			&deleted_at,
 		)
 		if err != nil {
 			u.log.Error("error while scanning product list data: " + err.Error())
@@ -255,7 +240,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		}
 
 		resp.Product = append(resp.Product, models.Product{
-			Id:                  product.Id,
+			Id:                  id.String,
 			Is_favourite:        is_favourite.Bool,
 			Image:               image.String,
 			Name:                name.String,
@@ -265,20 +250,13 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			Rating:              int(rating.Int64),
 			Order_count:         int(order_count.Int64),
 			CreatedAt:           created_at.String,
-			UpdatedAt:           updated_at.String,
-			DeletedAt:           deleted_at.String,
 		})
 	}
 	return resp, nil
 }
 
 func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (int64, error) {
-	var (
-		query  string
-		params map[string]interface{}
-	)
-
-	query = `
+	query := `
 		UPDATE "product"
 		SET
 			is_favourite = :is_favourite,
@@ -289,11 +267,12 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 			price_with_discount = :price_with_discount,
 			rating = :rating,
 			order_count = :order_count,
-			updated_at = :updated_at
+			updated_at = NOW()
 		WHERE id = :id
 	`
 
-	params = map[string]interface{}{
+
+	params := map[string]interface{}{
 		"id":                  req.Id,
 		"is_favourite":        req.Is_favourite,
 		"image":               req.Image,
@@ -303,7 +282,6 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 		"price_with_discount": req.Price_with_discount,
 		"rating":              req.Rating,
 		"order_count":         req.Order_count,
-		"updated_at":          time.Now(),
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)
@@ -317,10 +295,11 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 }
 
 func (u *productRepo) Delete(ctx context.Context, req *models.ProductPrimaryKey) error {
-	_, err := u.db.Exec(ctx, `UPDATE product SET deleted_at = $1 WHERE id = $2`, time.Now(), req.Id)
+	_, err := u.db.Exec(ctx, `DELETE from product WHERE id = $1`, req.Id)
 	if err != nil {
-		u.log.Error("error while deleting product: " + err.Error())
+		u.log.Error("error is while deleting product", logger.Error(err))
 		return err
 	}
+
 	return nil
 }
