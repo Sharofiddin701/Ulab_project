@@ -15,7 +15,7 @@ import (
 // @Description Create Brand
 // @Tags Brand
 // @Accept json
-// @Brandy json
+// @Brand json
 // @Param Brand body models.BrandCreate true "CreateBrandRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"

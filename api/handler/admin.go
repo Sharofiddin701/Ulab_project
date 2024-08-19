@@ -15,7 +15,7 @@ import (
 // @Description Create Admin
 // @Tags Admin
 // @Accept json
-// @Adminy json
+// @Admin json
 // @Param Admin body models.AdminCreate true "CreateAdminRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"

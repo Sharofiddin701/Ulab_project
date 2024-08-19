@@ -56,7 +56,7 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 
 	v1.POST("/product", h.CreateProduct)
 	v1.GET("/product/:id", h.GetByIdProduct)
-	v1.GET("/product", h.GetListProducts)
+	v1.GET("/product", h.GetListProduct)
 	v1.PUT("/product/:id", h.UpdateProduct)
 	v1.DELETE("/product/:id", h.DeleteProduct)
 

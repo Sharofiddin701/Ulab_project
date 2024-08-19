@@ -8,22 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create OrderProduct godoc
+// Create Product godoc
 // @ID create_product
 // @Router /e_commerce/api/v1/product [POST]
 // @Summary Create Product
 // @Description Create Product
 // @Tags Product
 // @Accept json
-// @Produce json
+// @Product json
 // @Param Product body models.ProductCreate true "CreateProductRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) CreateProduct(c *gin.Context) {
-	var productCreate models.ProductCreate
+	var newProduct models.ProductCreate
 
-	if err := c.ShouldBindJSON(&productCreate); err != nil {
+	if err := c.ShouldBindJSON(&newProduct); err != nil {
 		h.logger.Error("error in ShouldBindJSON: " + err.Error())
 		c.JSON(http.StatusBadRequest, Response{
 			Error: "Invalid input data",
@@ -31,7 +31,7 @@ func (h *handler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.storage.Product().Create(c.Request.Context(), &productCreate)
+	resp, err := h.storage.Product().Create(c.Request.Context(), &newProduct)
 	if err != nil {
 		h.logger.Error("error in Product.Create: " + err.Error())
 		c.JSON(http.StatusInternalServerError, Response{
@@ -53,7 +53,7 @@ func (h *handler) CreateProduct(c *gin.Context) {
 // @Description Get By ID Product
 // @Tags Product
 // @Accept json
-// @Produce json
+// @Product json
 // @Param id path string true "id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -92,22 +92,20 @@ func (h *handler) GetByIdProduct(c *gin.Context) {
 	})
 }
 
-// GetList Products godoc
-// @ID get_list_products
+// GetList Product godoc
+// @ID get_list_product
 // @Router /e_commerce/api/v1/product [GET]
-// @Summary Get List Products
-// @Description Get List Products
+// @Summary Get List Product
+// @Description Get List Product
 // @Tags Product
 // @Accept json
-// @Produce json
+// @Product json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
-// @Param category_id query string false "category_id"
-// @Param brand_id query string false "brand_id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) GetListProducts(c *gin.Context) {
+func (h *handler) GetListProduct(c *gin.Context) {
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
 		h.logger.Error("Invalid offset: " + err.Error())
@@ -126,14 +124,9 @@ func (h *handler) GetListProducts(c *gin.Context) {
 		return
 	}
 
-	categoryID := c.Query("category_id")
-	brandID := c.Query("brand_id")
-
 	resp, err := h.storage.Product().GetList(c.Request.Context(), &models.ProductGetListRequest{
-		Offset:     offset,
-		Limit:      limit,
-		CategoryId: categoryID,
-		BrandId:    brandID,
+		Offset: offset,
+		Limit:  limit,
 	})
 
 	if err != nil && err.Error() != "no rows in result set" {
@@ -157,7 +150,7 @@ func (h *handler) GetListProducts(c *gin.Context) {
 // @Description Update Product
 // @Tags Product
 // @Accept json
-// @Produce json
+// @Product json
 // @Param id path string true "id"
 // @Param Product body models.ProductUpdate true "UpdateProductRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
@@ -215,7 +208,7 @@ func (h *handler) UpdateProduct(c *gin.Context) {
 // @Description Delete Product
 // @Tags Product
 // @Accept json
-// @Produce json
+// @Product json
 // @Param id path string true "id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -239,6 +232,6 @@ func (h *handler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("Product Deleted Successfully!")
+	h.logger.Info("NewProduct Deleted Successfully!")
 	c.JSON(http.StatusNoContent, nil)
 }

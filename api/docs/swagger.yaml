@@ -165,43 +165,43 @@ definitions:
     type: object
   models.ProductCreate:
     properties:
-      brand_id:
+      image:
         type: string
-      category_id:
-        type: string
-      comment:
-        type: string
-      count:
-        type: integer
+      is_favourite:
+        type: boolean
       name:
         type: string
+      order_count:
+        type: integer
       price:
         type: integer
-      product_articl:
+      price_with_discount:
+        type: integer
+      product_categoty:
         type: string
-      product_image:
-        type: string
+      rating:
+        type: integer
     type: object
   models.ProductUpdate:
     properties:
-      brand_id:
-        type: string
-      category_id:
-        type: string
-      comment:
-        type: string
-      count:
-        type: integer
       id:
         type: string
+      image:
+        type: string
+      is_favourite:
+        type: boolean
       name:
         type: string
+      order_count:
+        type: integer
       price:
         type: integer
-      product_articl:
+      price_with_discount:
+        type: integer
+      product_categoty:
         type: string
-      product_image:
-        type: string
+      rating:
+        type: integer
     type: object
 info:
   contact: {}
@@ -485,8 +485,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.BannerCreate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1370,8 +1368,6 @@ paths:
         in: query
         name: customer_id
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1415,8 +1411,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.OrderCreate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1460,8 +1454,6 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1504,8 +1496,6 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1554,8 +1544,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.OrderUpdate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1610,8 +1598,6 @@ paths:
         in: query
         name: brand_id
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1655,8 +1641,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.OrderProductCreate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1700,8 +1684,6 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1744,8 +1726,6 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1794,8 +1774,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.OrderProductUpdate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1831,8 +1809,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get List Products
-      operationId: get_list_products
+      description: Get List Product
+      operationId: get_list_product
       parameters:
       - description: offset
         in: query
@@ -1842,16 +1820,6 @@ paths:
         in: query
         name: limit
         type: string
-      - description: category_id
-        in: query
-        name: category_id
-        type: string
-      - description: brand_id
-        in: query
-        name: brand_id
-        type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1880,7 +1848,7 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Get List Products
+      summary: Get List Product
       tags:
       - Product
     post:
@@ -1895,8 +1863,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ProductCreate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1940,8 +1906,6 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -1984,8 +1948,6 @@ paths:
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request
@@ -2034,8 +1996,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ProductUpdate'
-      produces:
-      - application/json
       responses:
         "200":
           description: Success Request

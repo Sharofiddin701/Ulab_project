@@ -15,7 +15,7 @@ import (
 // @Description Create Customer
 // @Tags Customer
 // @Accept json
-// @Customery json
+// @Customer json
 // @Param Customer body models.CustomerCreate true "CreateCustomerRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"

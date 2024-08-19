@@ -501,9 +501,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Banner"
                 ],
@@ -2085,9 +2082,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Order"
                 ],
@@ -2175,9 +2169,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Order"
                 ],
@@ -2258,9 +2249,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Order"
                 ],
@@ -2335,9 +2323,6 @@ const docTemplate = `{
             "put": {
                 "description": "Update Order",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -2425,9 +2410,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Order"
                 ],
@@ -2504,9 +2486,6 @@ const docTemplate = `{
             "get": {
                 "description": "Get List OrderProducts",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -2602,9 +2581,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "OrderProduct"
                 ],
@@ -2685,9 +2661,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "OrderProduct"
                 ],
@@ -2762,9 +2735,6 @@ const docTemplate = `{
             "put": {
                 "description": "Update OrderProduct",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -2852,9 +2822,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "OrderProduct"
                 ],
@@ -2929,18 +2896,15 @@ const docTemplate = `{
         },
         "/e_commerce/api/v1/product": {
             "get": {
-                "description": "Get List Products",
+                "description": "Get List Product",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Product"
                 ],
-                "summary": "Get List Products",
-                "operationId": "get_list_products",
+                "summary": "Get List Product",
+                "operationId": "get_list_product",
                 "parameters": [
                     {
                         "type": "string",
@@ -2952,18 +2916,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "limit",
                         "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "category_id",
-                        "name": "category_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "brand_id",
-                        "name": "brand_id",
                         "in": "query"
                     }
                 ],
@@ -3027,9 +2979,6 @@ const docTemplate = `{
             "post": {
                 "description": "Create Product",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -3112,9 +3061,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Product"
                 ],
@@ -3189,9 +3135,6 @@ const docTemplate = `{
             "put": {
                 "description": "Update Product",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -3277,9 +3220,6 @@ const docTemplate = `{
             "delete": {
                 "description": "Delete Product",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -3694,61 +3634,61 @@ const docTemplate = `{
         "models.ProductCreate": {
             "type": "object",
             "properties": {
-                "brand_id": {
+                "image": {
                     "type": "string"
                 },
-                "category_id": {
-                    "type": "string"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "count": {
-                    "type": "integer"
+                "is_favourite": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
+                "order_count": {
+                    "type": "integer"
+                },
                 "price": {
                     "type": "integer"
                 },
-                "product_articl": {
+                "price_with_discount": {
+                    "type": "integer"
+                },
+                "product_categoty": {
                     "type": "string"
                 },
-                "product_image": {
-                    "type": "string"
+                "rating": {
+                    "type": "integer"
                 }
             }
         },
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
-                "category_id": {
-                    "type": "string"
-                },
-                "comment": {
-                    "type": "string"
-                },
-                "count": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "is_favourite": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
                 },
+                "order_count": {
+                    "type": "integer"
+                },
                 "price": {
                     "type": "integer"
                 },
-                "product_articl": {
+                "price_with_discount": {
+                    "type": "integer"
+                },
+                "product_categoty": {
                     "type": "string"
                 },
-                "product_image": {
-                    "type": "string"
+                "rating": {
+                    "type": "integer"
                 }
             }
         }

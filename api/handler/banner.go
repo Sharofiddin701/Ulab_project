@@ -15,7 +15,7 @@ import (
 // @Description Create Banner
 // @Tags Banner
 // @Accept json
-// @Produce json
+// @Banner json
 // @Param Banner body models.BannerCreate true "CreateBannerRequest"
 // @Success 200 {object} models.Banner "Success Request"
 // @Failure 400 {object} Response{data=string} "Bad Request"

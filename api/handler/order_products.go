@@ -8,14 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create Product godoc
+// Create OrderProduct godoc
 // @ID create_order_product
 // @Router /e_commerce/api/v1/order_product [POST]
 // @Summary Create OrderProduct
 // @Description Create OrderProduct
 // @Tags OrderProduct
 // @Accept json
-// @Produce json
+// @OrderProduct json
 // @Param OrderProduct body models.OrderProductCreate true "CreateOrderProductRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -53,7 +53,7 @@ func (h *handler) CreateOrderProduct(c *gin.Context) {
 // @Description Get By ID OrderProduct
 // @Tags OrderProduct
 // @Accept json
-// @Produce json
+// @OrderProduct json
 // @Param id path string true "id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -99,7 +99,7 @@ func (h *handler) GetByIdOrderProduct(c *gin.Context) {
 // @Description Get List OrderProducts
 // @Tags OrderProduct
 // @Accept json
-// @Produce json
+// @OrderProduct json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Param category_id query string false "category_id"
@@ -157,7 +157,7 @@ func (h *handler) GetListOrderProducts(c *gin.Context) {
 // @Description Update OrderProduct
 // @Tags OrderProduct
 // @Accept json
-// @Produce json
+// @OrderProduct json
 // @Param id path string true "id"
 // @Param OrderProduct body models.OrderProductUpdate true "UpdateOrderProductRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
@@ -215,7 +215,7 @@ func (h *handler) UpdateOrderProduct(c *gin.Context) {
 // @Description Delete OrderProduct
 // @Tags OrderProduct
 // @Accept json
-// @Produce json
+// @OrderProduct json
 // @Param id path string true "id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"

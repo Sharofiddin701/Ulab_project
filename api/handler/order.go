@@ -15,7 +15,7 @@ import (
 // @Description Create Order
 // @Tags Order
 // @Accept json
-// @Produce json
+// @Order json
 // @Param Order body models.OrderCreate true "CreateOrderRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -47,7 +47,7 @@ func (h *handler) CreateOrder(c *gin.Context) {
 // @Description Get By ID Order
 // @Tags Order
 // @Accept json
-// @Produce json
+// @Order json
 // @Param id path string true "id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
@@ -79,7 +79,7 @@ func (h *handler) GetByIdOrder(c *gin.Context) {
 // @Description Get List Orders
 // @Tags Order
 // @Accept json
-// @Produce json
+// @Order json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Param customer_id query string false "customer_id"
@@ -126,7 +126,7 @@ func (h *handler) GetListOrders(c *gin.Context) {
 // @Description Update Order
 // @Tags Order
 // @Accept json
-// @Produce json
+// @Order json
 // @Param id path string true "id"
 // @Param Order body models.OrderUpdate true "UpdateOrderRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
@@ -174,7 +174,7 @@ func (h *handler) UpdateOrder(c *gin.Context) {
 // @Description Delete Order
 // @Tags Order
 // @Accept json
-// @Produce json
+// @Order json
 // @Param id path string true "id"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"

@@ -241,7 +241,7 @@ func (u *customerRepo) Update(ctx context.Context, req *models.CustomerUpdate) (
 		u.log.Error("Invalid email format")
 		return 0, fmt.Errorf("invalid email format")
 	}
-	
+
 	var (
 		query  string
 		params map[string]interface{}
