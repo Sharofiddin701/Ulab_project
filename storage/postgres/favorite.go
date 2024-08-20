@@ -37,7 +37,7 @@ func (u *favoriteRepo) GetList(ctx context.Context, req *models.FavoriteGetListR
         created_at,
         updated_at
     FROM "product"
-    WHERE is_favourite = true
+    WHERE is_favourite = false
 `
 
 	if req.Offset > 0 {
