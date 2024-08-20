@@ -15,6 +15,7 @@ type StorageI interface {
 	Product() ProductI
 	OrderProduct() OrderProductI
 	Banner() BannerI
+	Favorite() FavoriteI
 }
 
 type AdminI interface {
@@ -79,4 +80,8 @@ type BannerI interface {
 	GetList(ctx context.Context, req *models.BannerGetListRequest) (*models.BannerGetListResponse, error)
 	Update(ctx context.Context, req *models.BannerUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.BannerPrimaryKey) error
+}
+
+type FavoriteI interface {
+	GetList(ctx context.Context, req *models.FavoriteGetListRequest) (*models.FavoriteGetListResponse, error)
 }

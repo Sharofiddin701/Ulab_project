@@ -53,7 +53,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		product_categoty    sql.NullString
 		price               sql.NullFloat64
 		price_with_discount sql.NullFloat64
-		rating              sql.NullInt64
+		rating              sql.NullFloat64
 		order_count         sql.NullInt64
 		created_at          sql.NullString
 	)
@@ -94,7 +94,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		Product_categoty:    product_categoty.String,
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
-		Rating:              int(rating.Int64),
+		Rating:              int(rating.Float64),
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
 	}, nil
@@ -125,7 +125,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		product_categoty    sql.NullString
 		price               sql.NullFloat64
 		price_with_discount sql.NullFloat64
-		rating              sql.NullInt64
+		rating              sql.NullFloat64
 		order_count         sql.NullInt64
 		created_at          sql.NullString
 	)
@@ -160,7 +160,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Product_categoty:    product_categoty.String,
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
-		Rating:              int(rating.Int64),
+		Rating:              int(rating.Float64),
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
 	}, nil
@@ -216,7 +216,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			product_categoty    sql.NullString
 			price               sql.NullFloat64
 			price_with_discount sql.NullFloat64
-			rating              sql.NullInt64
+			rating              sql.NullFloat64
 			order_count         sql.NullInt64
 			created_at          sql.NullString
 		)
@@ -247,7 +247,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			Product_categoty:    product_categoty.String,
 			Price:               int(price.Float64),
 			Price_with_discount: int(price_with_discount.Float64),
-			Rating:              int(rating.Int64),
+			Rating:              int(rating.Float64),
 			Order_count:         int(order_count.Int64),
 			CreatedAt:           created_at.String,
 		})
@@ -270,7 +270,6 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 			updated_at = NOW()
 		WHERE id = :id
 	`
-
 
 	params := map[string]interface{}{
 		"id":                  req.Id,

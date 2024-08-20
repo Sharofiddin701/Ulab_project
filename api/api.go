@@ -24,6 +24,8 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 	v1.PUT("/admin/:id", h.UpdateAdmin)
 	v1.DELETE("/admin/:id", h.DeleteAdmin)
 
+	v1.GET("/favorite", h.GetListFavorite)
+
 	v1.POST("/banner", h.CreateBanner)
 	v1.GET("/banner/:id", h.GetByIdBanner)
 	v1.GET("/banner", h.GetListBanner)

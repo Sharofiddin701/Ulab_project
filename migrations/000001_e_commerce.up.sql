@@ -67,6 +67,14 @@ CREATE TABLE IF NOT EXISTS "product" (
     "updated_at" TIMESTAMP
 );
 
+-- Favorite table migration
+CREATE TABLE IF NOT EXISTS "favorite" (
+     "product_id" UUID REFERENCES "product"("id"),
+     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     "updated_at" TIMESTAMP
+);
+
+
 -- Order_products table migration
 CREATE TABLE IF NOT EXISTS "order_products" (
     "id" UUID PRIMARY KEY,

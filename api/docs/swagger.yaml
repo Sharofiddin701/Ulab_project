@@ -1349,6 +1349,52 @@ paths:
       summary: Delete File
       tags:
       - Upload File
+  /e_commerce/api/v1/favorite:
+    get:
+      consumes:
+      - application/json
+      description: Get List Favorite
+      operationId: get_list_favorite
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List Favorite
+      tags:
+      - Favorite
   /e_commerce/api/v1/order:
     get:
       consumes:
