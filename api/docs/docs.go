@@ -3662,7 +3662,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rating": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         },
@@ -3694,7 +3694,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rating": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         }

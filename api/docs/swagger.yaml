@@ -180,7 +180,7 @@ definitions:
       product_categoty:
         type: string
       rating:
-        type: integer
+        type: number
     type: object
   models.ProductUpdate:
     properties:
@@ -201,7 +201,7 @@ definitions:
       product_categoty:
         type: string
       rating:
-        type: integer
+        type: number
     type: object
 info:
   contact: {}

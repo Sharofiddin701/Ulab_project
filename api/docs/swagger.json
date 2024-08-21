@@ -3651,7 +3651,7 @@
                     "type": "string"
                 },
                 "rating": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         },
@@ -3683,7 +3683,7 @@
                     "type": "string"
                 },
                 "rating": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         }

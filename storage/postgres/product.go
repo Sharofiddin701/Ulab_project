@@ -94,7 +94,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		Product_categoty:    product_categoty.String,
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
-		Rating:              int(rating.Float64),
+		Rating:              rating.Float64,
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
 	}, nil
@@ -160,7 +160,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Product_categoty:    product_categoty.String,
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
-		Rating:              int(rating.Float64),
+		Rating:              rating.Float64,
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
 	}, nil
@@ -236,7 +236,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			Product_categoty:    product_categoty.String,
 			Price:               int(price.Float64),
 			Price_with_discount: int(price_with_discount.Float64),
-			Rating:              int(rating.Float64),
+			Rating:              rating.Float64,
 			Order_count:         int(order_count.Int64),
 			CreatedAt:           created_at.String,
 		})
