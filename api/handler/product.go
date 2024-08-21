@@ -4,6 +4,7 @@ import (
 	"e-commerce/models"
 	"e-commerce/pkg/helper"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -125,9 +126,24 @@ func (h *handler) GetListProduct(c *gin.Context) {
 		return
 	}
 
+	favoriteStr := c.Query("favorite")
+	var favorite *bool
+	if favoriteStr != "" {
+		fav, err := strconv.ParseBool(favoriteStr)
+		if err != nil {
+			h.logger.Error("Invalid favorite value: " + err.Error())
+			c.JSON(http.StatusBadRequest, Response{
+				Error: "Invalid favorite value",
+			})
+			return
+		}
+		favorite = &fav
+	}
+
 	resp, err := h.storage.Product().GetList(c.Request.Context(), &models.ProductGetListRequest{
-		Offset: offset,
-		Limit:  limit,
+		Offset:   offset,
+		Limit:    limit,
+		Favorite: favorite,
 	})
 
 	if err != nil && err.Error() != "no rows in result set" {

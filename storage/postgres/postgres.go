@@ -21,7 +21,6 @@ type store struct {
 	product       *productRepo
 	orderproducts *orderproductsRepo
 	banner        *bannerRepo
-	favorite      *favoriteRepo
 }
 
 func NewConnectionPostgres(cfg *config.Config) (storage.StorageI, error) {
@@ -139,14 +138,4 @@ func (s *store) Banner() storage.BannerI {
 		}
 	}
 	return s.banner
-}
-
-func (s *store) Favorite() storage.FavoriteI {
-	if s.favorite == nil {
-		s.favorite = &favoriteRepo{
-			db:  s.db,
-			log: s.log,
-		}
-	}
-	return s.favorite
 }

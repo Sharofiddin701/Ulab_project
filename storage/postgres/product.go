@@ -169,28 +169,11 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListRequest) (*models.ProductGetListResponse, error) {
 	var (
 		resp   = &models.ProductGetListResponse{}
-		query  string
+		query  = `SELECT COUNT(*) OVER(), id, favorite, image, name, product_categoty, price, price_with_discount, rating, order_count, TO_CHAR(created_at, 'dd/mm/yyyy') FROM "product" WHERE 1=1`
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
 		filter string
 	)
-
-	query = `
-		SELECT
-			COUNT(*) OVER(),
-			id,
-			favorite,
-			image,
-			name,
-			product_categoty,
-			price,
-			price_with_discount,
-			rating,
-			order_count,
-			TO_CHAR(created_at, 'dd/mm/yyyy')
-		FROM "product"
-		WHERE 1=1
-	`
 
 	if req.Favorite != nil {
 		filter += fmt.Sprintf(" AND favorite = %t", *req.Favorite)
