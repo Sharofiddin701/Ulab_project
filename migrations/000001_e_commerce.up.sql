@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "orders" (
 
 -- Product table migration
 CREATE TABLE IF NOT EXISTS "product" (
-     "id" UUID PRIMARY KEY,
+    "id" UUID PRIMARY KEY,
     "favorite" BOOLEAN NOT NULL,
     "image" VARCHAR(255),
     "name" VARCHAR(100) NOT NULL,
@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS "product" (
     "price" DECIMAL(10, 2) NOT NULL,
     "price_with_discount" DECIMAL(10, 2) NOT NULL,
     "rating" FLOAT NOT NULL,
+    "description"VARCHAR(255), 
     "order_count" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP

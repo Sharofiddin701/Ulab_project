@@ -3640,6 +3640,9 @@ const docTemplate = `{
         "models.ProductCreate": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "favorite": {
                     "type": "boolean"
                 },
@@ -3669,6 +3672,9 @@ const docTemplate = `{
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "favorite": {
                     "type": "boolean"
                 },

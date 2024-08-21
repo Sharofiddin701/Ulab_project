@@ -38,11 +38,12 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 			price,
 			price_with_discount,
 			rating,
+			description,
 			order_count,
 			created_at
 		)
-		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
-		RETURNING id, favorite, image, name, product_categoty, price, price_with_discount, rating, order_count, created_at
+		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
+		RETURNING id, favorite, image, name, product_categoty, price, price_with_discount, rating, description, order_count, created_at
 	`
 
 	var (
@@ -54,6 +55,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		price               sql.NullFloat64
 		price_with_discount sql.NullFloat64
 		rating              sql.NullFloat64
+		description         sql.NullString
 		order_count         sql.NullInt64
 		created_at          sql.NullString
 	)
@@ -67,6 +69,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		req.Price,
 		req.Price_with_discount,
 		req.Rating,
+		req.Description,
 		req.Order_count).Scan(
 
 		&idd,
@@ -77,6 +80,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		&price,
 		&price_with_discount,
 		&rating,
+		&description,
 		&order_count,
 		&created_at,
 	)
@@ -95,6 +99,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
 		Rating:              rating.Float64,
+		Description:         description.String,
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
 	}, nil
@@ -111,6 +116,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 			price,
 			price_with_discount,
 			rating,
+			description,
 			order_count,
 			TO_CHAR(created_at, 'dd/mm/yyyy')
 		FROM "product" 
@@ -126,6 +132,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		price               sql.NullFloat64
 		price_with_discount sql.NullFloat64
 		rating              sql.NullFloat64
+		description         sql.NullString
 		order_count         sql.NullInt64
 		created_at          sql.NullString
 	)
@@ -139,6 +146,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		&price,
 		&price_with_discount,
 		&rating,
+		&description,
 		&order_count,
 		&created_at,
 	)
@@ -161,6 +169,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
 		Rating:              rating.Float64,
+		Description:         description.String,
 		Order_count:         int(order_count.Int64),
 		CreatedAt:           created_at.String,
 	}, nil
@@ -169,7 +178,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListRequest) (*models.ProductGetListResponse, error) {
 	var (
 		resp   = &models.ProductGetListResponse{}
-		query  = `SELECT COUNT(*) OVER(), id, favorite, image, name, product_categoty, price, price_with_discount, rating, order_count, TO_CHAR(created_at, 'dd/mm/yyyy') FROM "product" WHERE 1=1`
+		query  = `SELECT COUNT(*) OVER(), id, favorite, image, name, product_categoty, price, price_with_discount, rating,description, order_count, TO_CHAR(created_at, 'dd/mm/yyyy') FROM "product" WHERE 1=1`
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
 		filter string
@@ -206,6 +215,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			price               sql.NullFloat64
 			price_with_discount sql.NullFloat64
 			rating              sql.NullFloat64
+			description         sql.NullString
 			order_count         sql.NullInt64
 			created_at          sql.NullString
 		)
@@ -220,6 +230,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&price,
 			&price_with_discount,
 			&rating,
+			&description,
 			&order_count,
 			&created_at,
 		)
@@ -237,6 +248,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			Price:               int(price.Float64),
 			Price_with_discount: int(price_with_discount.Float64),
 			Rating:              rating.Float64,
+			Description:         description.String,
 			Order_count:         int(order_count.Int64),
 			CreatedAt:           created_at.String,
 		})
@@ -255,6 +267,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 			price = :price,
 			price_with_discount = :price_with_discount,
 			rating = :rating,
+			description = :description,
 			order_count = :order_count,
 			updated_at = NOW()
 		WHERE id = :id
@@ -269,6 +282,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 		"price":               req.Price,
 		"price_with_discount": req.Price_with_discount,
 		"rating":              req.Rating,
+		"description":         req.Description,
 		"order_count":         req.Order_count,
 	}
 
