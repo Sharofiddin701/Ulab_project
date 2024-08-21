@@ -174,48 +174,47 @@ func (h *handler) GetListProduct(c *gin.Context) {
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) UpdateProduct(c *gin.Context) {
-	id := c.Param("id")
+	var (
+		id            = c.Param("id")
+		productUpdate models.ProductUpdate
+	)
 
 	if !helper.IsValidUUID(id) {
-		h.logger.Error("Invalid UUID format!")
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Invalid ID format",
-		})
+		h.logger.Error("is invalid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id")
 		return
 	}
 
-	var productUpdate models.ProductUpdate
-	if err := c.ShouldBindJSON(&productUpdate); err != nil {
-		h.logger.Error("error in ShouldBindJSON: " + err.Error())
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Invalid input data",
-		})
+	err := c.ShouldBindJSON(&productUpdate)
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "error Product Should Bind Json!")
+		c.JSON(http.StatusBadRequest, "Please, Enter Valid Data!")
 		return
 	}
 
 	productUpdate.Id = id
-
 	rowsAffected, err := h.storage.Product().Update(c.Request.Context(), &productUpdate)
 	if err != nil {
-		h.logger.Error("error in Product.Update: " + err.Error())
-		c.JSON(http.StatusInternalServerError, Response{
-			Error: "Server error",
-		})
+		h.logger.Error(err.Error() + "  :  " + "storage.Product.Update!")
+		c.JSON(http.StatusInternalServerError, "Server Error!")
 		return
 	}
 
 	if rowsAffected <= 0 {
-		h.logger.Error("No rows affected in Product.Update")
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Unable to update data. Please try again later!",
-		})
+		h.logger.Error("storage.product.Update!")
+		c.JSON(http.StatusBadRequest, "Unable to update data. Please try again later!")
 		return
 	}
 
-	h.logger.Info("Product Updated Successfully!")
-	c.JSON(http.StatusOK, Response{
-		Data: "Product updated successfully",
-	})
+	resp, err := h.storage.Product().GetByID(c.Request.Context(), &models.ProductPrimaryKey{Id: productUpdate.Id})
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "storage.Product.GetByID!")
+		c.JSON(http.StatusInternalServerError, "Server Error!")
+		return
+	}
+
+	h.logger.Info("Update Product Successfully!")
+	c.JSON(http.StatusAccepted, resp)
 }
 
 // Delete Product godoc

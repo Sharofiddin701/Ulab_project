@@ -5,7 +5,7 @@ type Product struct {
 	Favorite            bool    `json:"favorite"`
 	Image               string  `json:"image,omitempty"`
 	Name                string  `json:"name,omitempty"`
-	Product_categoty    string  `json:"product_categoty,omitempty"`
+	Product_category    string  `json:"product_category,omitempty"`
 	Price               int     `json:"price,omitempty"`
 	Price_with_discount int     `json:"price_with_discount,omitempty"`
 	Rating              float64 `json:"rating,omitempty"`
@@ -20,7 +20,7 @@ type ProductCreate struct {
 	Favorite            bool    `json:"favorite"`
 	Image               string  `json:"image"`
 	Name                string  `json:"name"`
-	Product_categoty    string  `json:"product_categoty"`
+	Product_category    string  `json:"product_category"`
 	Price               int     `json:"price"`
 	Price_with_discount int     `json:"price_with_discount"`
 	Rating              float64 `json:"rating"`
@@ -33,7 +33,7 @@ type ProductUpdate struct {
 	Favorite            bool    `json:"favorite"`
 	Image               string  `json:"image"`
 	Name                string  `json:"name"`
-	Product_categoty    string  `json:"product_categoty"`
+	Product_category    string  `json:"product_category"`
 	Price               int     `json:"price"`
 	Price_with_discount int     `json:"price_with_discount"`
 	Rating              float64 `json:"rating"`

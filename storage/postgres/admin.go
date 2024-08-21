@@ -50,7 +50,7 @@ func (u *adminRepo) Create(ctx context.Context, req *models.AdminCreate) (*model
 			created_at
 		)
 		VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
-		RETURNING id, name, phone_number, email, password, address, created_at, updated_at, deleted_at
+		RETURNING id, name, phone_number, email, password, address, created_at, updated_at
 	`
 
 	var (
@@ -62,7 +62,6 @@ func (u *adminRepo) Create(ctx context.Context, req *models.AdminCreate) (*model
 		address      sql.NullString
 		created_at   sql.NullString
 		updated_at   sql.NullString
-		delete_at    sql.NullString
 	)
 
 	err := u.db.QueryRow(ctx, query, id, req.Name, req.Phone_number, req.Email, req.Password, req.Address).Scan(
@@ -74,7 +73,6 @@ func (u *adminRepo) Create(ctx context.Context, req *models.AdminCreate) (*model
 		&address,
 		&created_at,
 		&updated_at,
-		&delete_at,
 	)
 	if err != nil {
 		u.log.Error("Error while creating admin: " + err.Error())
@@ -90,7 +88,6 @@ func (u *adminRepo) Create(ctx context.Context, req *models.AdminCreate) (*model
 		Address:      address.String,
 		CreatedAt:    created_at.String,
 		UpdatedAt:    updated_at.String,
-		DeletedAt:    delete_at.String,
 	}, nil
 }
 

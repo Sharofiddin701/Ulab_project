@@ -3670,7 +3670,7 @@ const docTemplate = `{
                 "price_with_discount": {
                     "type": "integer"
                 },
-                "product_categoty": {
+                "product_category": {
                     "type": "string"
                 },
                 "rating": {
@@ -3705,7 +3705,7 @@ const docTemplate = `{
                 "price_with_discount": {
                     "type": "integer"
                 },
-                "product_categoty": {
+                "product_category": {
                     "type": "string"
                 },
                 "rating": {
@@ -3754,7 +3754,7 @@ const docTemplate = `{
                 "price_with_discount": {
                     "type": "integer"
                 },
-                "product_categoty": {
+                "product_category": {
                     "type": "string"
                 },
                 "rating": {

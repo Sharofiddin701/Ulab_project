@@ -34,7 +34,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
         favorite,
         image,
         name,
-        product_categoty,
+        product_category,
         price,
         price_with_discount,
         rating,
@@ -43,7 +43,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
         created_at
     )
     VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
-    RETURNING id, favorite, image, name, product_categoty, price, price_with_discount, rating, description, order_count, created_at
+    RETURNING id, favorite, image, name, product_category, price, price_with_discount, rating, description, order_count, created_at
 `
 
 	var (
@@ -51,7 +51,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		favorite            sql.NullBool
 		image               sql.NullString
 		name                sql.NullString
-		product_categoty    sql.NullString
+		product_category    sql.NullString
 		price               sql.NullFloat64
 		price_with_discount sql.NullFloat64
 		rating              sql.NullFloat64
@@ -65,7 +65,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		req.Favorite,
 		req.Image,
 		req.Name,
-		req.Product_categoty,
+		req.Product_category,
 		req.Price,
 		req.Price_with_discount,
 		req.Rating,
@@ -76,7 +76,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		&favorite,
 		&image,
 		&name,
-		&product_categoty,
+		&product_category,
 		&price,
 		&price_with_discount,
 		&rating,
@@ -95,7 +95,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		Favorite:            favorite.Bool,
 		Image:               image.String,
 		Name:                name.String,
-		Product_categoty:    product_categoty.String,
+		Product_category:    product_category.String,
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
 		Rating:              rating.Float64,
@@ -106,13 +106,27 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 }
 
 func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey) (*models.Product, error) {
+	var (
+		id                  sql.NullString
+		favorite            sql.NullBool
+		image               sql.NullString
+		name                sql.NullString
+		product_category    sql.NullString
+		price               sql.NullFloat64
+		price_with_discount sql.NullFloat64
+		rating              sql.NullFloat64
+		description         sql.NullString
+		order_count         sql.NullInt64
+		created_at          sql.NullString
+	)
+
 	query := `
 		SELECT 
 			id,
 			favorite,
 			image,
 			name,
-			product_categoty,
+			product_category,
 			price,
 			price_with_discount,
 			rating,
@@ -123,26 +137,12 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		WHERE id = $1
 	`
 
-	var (
-		id                  sql.NullString
-		favorite            sql.NullBool
-		image               sql.NullString
-		name                sql.NullString
-		product_categoty    sql.NullString
-		price               sql.NullFloat64
-		price_with_discount sql.NullFloat64
-		rating              sql.NullFloat64
-		description         sql.NullString
-		order_count         sql.NullInt64
-		created_at          sql.NullString
-	)
-
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
 		&favorite,
 		&image,
 		&name,
-		&product_categoty,
+		&product_category,
 		&price,
 		&price_with_discount,
 		&rating,
@@ -151,12 +151,8 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		&created_at,
 	)
 
-	if err != nil {
-		if err == sql.ErrNoRows {
-			u.log.Warn("No product found with the given ID")
-			return nil, nil
-		}
-		u.log.Error("Error while scanning product data: " + err.Error())
+	if err != nil && err.Error() != "no rows in result set" {
+		u.log.Error("error while scanning data" + err.Error())
 		return nil, err
 	}
 
@@ -165,7 +161,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Favorite:            favorite.Bool,
 		Image:               image.String,
 		Name:                name.String,
-		Product_categoty:    product_categoty.String,
+		Product_category:    product_category.String,
 		Price:               int(price.Float64),
 		Price_with_discount: int(price_with_discount.Float64),
 		Rating:              rating.Float64,
@@ -177,24 +173,29 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 
 func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListRequest) (*models.ProductGetListResponse, error) {
 	var (
-		resp  = &models.ProductGetListResponse{}
-		query = `SELECT COUNT(*) OVER(), 
+		resp   = &models.ProductGetListResponse{}
+		query  string
+		offset = " OFFSET 0"
+		limit  = " LIMIT 10"
+		filter string
+	)
+
+	query = `
+			SELECT 
+			COUNT(*) OVER(), 
 			id, 
 			favorite, 
 			image, 
 			name, 
-			product_categoty, 
+			product_category, 
 			price, 
 			price_with_discount, 
 			rating, 
 			description, 
 			order_count, 
 			TO_CHAR(created_at, 'dd/mm/yyyy')
-		 FROM "product" WHERE 1=1`
-		offset = " OFFSET 0"
-		limit  = " LIMIT 10"
-		filter string
-	)
+		 FROM "product" WHERE 1=1
+		 `
 
 	if req.Favorite != nil {
 		if *req.Favorite {
@@ -216,10 +217,9 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 	rows, err := u.db.Query(ctx, query)
 	if err != nil {
-		u.log.Error("error while getting product list: " + err.Error())
+		u.log.Error("error is while getting product list" + err.Error())
 		return nil, err
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		var (
@@ -227,7 +227,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			id                  sql.NullString
 			image               sql.NullString
 			name                sql.NullString
-			product_categoty    sql.NullString
+			product_category    sql.NullString
 			price               sql.NullFloat64
 			price_with_discount sql.NullFloat64
 			rating              sql.NullFloat64
@@ -242,7 +242,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&product.Favorite,
 			&image,
 			&name,
-			&product_categoty,
+			&product_category,
 			&price,
 			&price_with_discount,
 			&rating,
@@ -260,7 +260,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			Favorite:            product.Favorite,
 			Image:               image.String,
 			Name:                name.String,
-			Product_categoty:    product_categoty.String,
+			Product_category:    product_category.String,
 			Price:               int(price.Float64),
 			Price_with_discount: int(price_with_discount.Float64),
 			Rating:              rating.Float64,
@@ -269,34 +269,38 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			CreatedAt:           created_at.String,
 		})
 	}
-
-	fmt.Println(resp.Product)
 	return resp, nil
 }
 
 func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (int64, error) {
-	query := `
-		UPDATE "product"
-		SET
-			favorite = :favorite,
-			image = :image,
-			name = :name,
-			product_categoty = :product_categoty,
-			price = :price,
-			price_with_discount = :price_with_discount,
-			rating = :rating,
-			description = :description,
-			order_count = :order_count,
-			updated_at = NOW()
-		WHERE id = :id
-	`
 
-	params := map[string]interface{}{
+	var (
+		query  string
+		params map[string]interface{}
+	)
+
+	query = `
+    UPDATE "product"
+    SET
+        favorite = :favorite,
+        image = :image,
+        name = :name,
+        product_category = :product_category,
+        price = :price,
+        price_with_discount = :price_with_discount,
+        rating = :rating,
+        description = :description,
+        order_count = :order_count,
+        updated_at = NOW()
+    WHERE id = :id
+`
+
+	params = map[string]interface{}{
 		"id":                  req.Id,
 		"favorite":            req.Favorite,
 		"image":               req.Image,
 		"name":                req.Name,
-		"product_categoty":    req.Product_categoty,
+		"product_category":    req.Product_category,
 		"price":               req.Price,
 		"price_with_discount": req.Price_with_discount,
 		"rating":              req.Rating,
@@ -307,7 +311,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 	query, args := helper.ReplaceQueryParams(query, params)
 	result, err := u.db.Exec(ctx, query, args...)
 	if err != nil {
-		u.log.Error("error while updating product data: " + err.Error())
+		u.log.Error("error while updating product data: ", logger.Error(err))
 		return 0, err
 	}
 

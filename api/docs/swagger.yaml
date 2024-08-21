@@ -185,7 +185,7 @@ definitions:
         type: integer
       price_with_discount:
         type: integer
-      product_categoty:
+      product_category:
         type: string
       rating:
         type: number
@@ -208,7 +208,7 @@ definitions:
         type: integer
       price_with_discount:
         type: integer
-      product_categoty:
+      product_category:
         type: string
       rating:
         type: number
@@ -240,7 +240,7 @@ definitions:
         type: integer
       price_with_discount:
         type: integer
-      product_categoty:
+      product_category:
         type: string
       rating:
         type: number
