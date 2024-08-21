@@ -165,10 +165,10 @@ definitions:
     type: object
   models.ProductCreate:
     properties:
+      favorite:
+        type: boolean
       image:
         type: string
-      is_favourite:
-        type: boolean
       name:
         type: string
       order_count:
@@ -184,12 +184,12 @@ definitions:
     type: object
   models.ProductUpdate:
     properties:
+      favorite:
+        type: boolean
       id:
         type: string
       image:
         type: string
-      is_favourite:
-        type: boolean
       name:
         type: string
       order_count:
@@ -1865,6 +1865,10 @@ paths:
       - description: limit
         in: query
         name: limit
+        type: string
+      - description: favorite
+        in: query
+        name: favorite
         type: string
       responses:
         "200":

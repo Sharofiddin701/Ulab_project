@@ -3000,6 +3000,12 @@ const docTemplate = `{
                         "description": "limit",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "favorite",
+                        "name": "favorite",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3717,11 +3723,11 @@ const docTemplate = `{
         "models.ProductCreate": {
             "type": "object",
             "properties": {
+                "favorite": {
+                    "type": "boolean"
+                },
                 "image": {
                     "type": "string"
-                },
-                "is_favourite": {
-                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -3746,14 +3752,14 @@ const docTemplate = `{
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
+                "favorite": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string"
                 },
                 "image": {
                     "type": "string"
-                },
-                "is_favourite": {
-                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"

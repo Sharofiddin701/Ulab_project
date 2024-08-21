@@ -2,7 +2,7 @@ package models
 
 type Product struct {
 	Id                  string `json:"id,omitempty"`
-	Is_favourite        bool   `json:"is_favourite,omitempty"`
+	Favorite            bool   `json:"favorite,omitempty"`
 	Image               string `json:"image,omitempty"`
 	Name                string `json:"name,omitempty"`
 	Product_categoty    string `json:"product_categoty,omitempty"`
@@ -16,7 +16,7 @@ type Product struct {
 }
 
 type ProductCreate struct {
-	Is_favourite        bool   `json:"is_favourite"`
+	Favorite            bool   `json:"favorite"`
 	Image               string `json:"image"`
 	Name                string `json:"name"`
 	Product_categoty    string `json:"product_categoty"`
@@ -28,7 +28,7 @@ type ProductCreate struct {
 
 type ProductUpdate struct {
 	Id                  string `json:"id"`
-	Is_favourite        bool   `json:"is_favourite"`
+	Favorite            bool   `json:"favorite"`
 	Image               string `json:"image"`
 	Name                string `json:"name"`
 	Product_categoty    string `json:"product_categoty"`
@@ -42,8 +42,9 @@ type ProductPrimaryKey struct {
 	Id string `json:"id"`
 }
 type ProductGetListRequest struct {
-	Offset int `json:"offset"`
-	Limit  int `json:"limit"`
+	Favorite *bool `json:"favorite"`
+	Offset   int   `json:"offset"`
+	Limit    int   `json:"limit"`
 }
 
 type ProductGetListResponse struct {

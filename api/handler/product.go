@@ -102,6 +102,7 @@ func (h *handler) GetByIdProduct(c *gin.Context) {
 // @Product json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
+// @Param favorite query string false "favorite"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"

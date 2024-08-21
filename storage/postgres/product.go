@@ -31,7 +31,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	query := `
 		INSERT INTO "product" (
 			id,
-			is_favourite,
+			favorite,
 			image,
 			name,
 			product_categoty,
@@ -42,12 +42,12 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 			created_at
 		)
 		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
-		RETURNING id, is_favourite, image, name, product_categoty, price, price_with_discount, rating, order_count, created_at
+		RETURNING id, favorite, image, name, product_categoty, price, price_with_discount, rating, order_count, created_at
 	`
 
 	var (
 		idd                 sql.NullString
-		is_favourite        sql.NullBool
+		favorite            sql.NullBool
 		image               sql.NullString
 		name                sql.NullString
 		product_categoty    sql.NullString
@@ -60,7 +60,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 
 	err := u.db.QueryRow(ctx, query,
 		id,
-		req.Is_favourite,
+		req.Favorite,
 		req.Image,
 		req.Name,
 		req.Product_categoty,
@@ -70,7 +70,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		req.Order_count).Scan(
 
 		&idd,
-		&is_favourite,
+		&favorite,
 		&image,
 		&name,
 		&product_categoty,
@@ -88,7 +88,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 
 	return &models.Product{
 		Id:                  idd.String,
-		Is_favourite:        is_favourite.Bool,
+		Favorite:            favorite.Bool,
 		Image:               image.String,
 		Name:                name.String,
 		Product_categoty:    product_categoty.String,
@@ -104,7 +104,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	query := `
 		SELECT 
 			id,
-			is_favourite,
+			favorite,
 			image,
 			name,
 			product_categoty,
@@ -119,7 +119,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 
 	var (
 		id                  sql.NullString
-		is_favourite        sql.NullBool
+		favorite            sql.NullBool
 		image               sql.NullString
 		name                sql.NullString
 		product_categoty    sql.NullString
@@ -132,7 +132,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
-		&is_favourite,
+		&favorite,
 		&image,
 		&name,
 		&product_categoty,
@@ -154,7 +154,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 
 	return &models.Product{
 		Id:                  id.String,
-		Is_favourite:        is_favourite.Bool,
+		Favorite:            favorite.Bool,
 		Image:               image.String,
 		Name:                name.String,
 		Product_categoty:    product_categoty.String,
@@ -172,13 +172,14 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		query  string
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
+		filter string
 	)
 
 	query = `
 		SELECT
 			COUNT(*) OVER(),
 			id,
-			is_favourite,
+			favorite,
 			image,
 			name,
 			product_categoty,
@@ -187,8 +188,13 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			rating,
 			order_count,
 			TO_CHAR(created_at, 'dd/mm/yyyy')
-		FROM "product" 
+		FROM "product"
+		WHERE 1=1
 	`
+
+	if req.Favorite != nil {
+		filter += fmt.Sprintf(" AND favorite = %t", *req.Favorite)
+	}
 
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
@@ -198,7 +204,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query += offset + limit
+	query += filter + offset + limit
 
 	rows, err := u.db.Query(ctx, query)
 	if err != nil {
@@ -210,7 +216,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	for rows.Next() {
 		var (
 			id                  sql.NullString
-			is_favourite        sql.NullBool
+			favorite            sql.NullBool
 			image               sql.NullString
 			name                sql.NullString
 			product_categoty    sql.NullString
@@ -224,7 +230,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		err = rows.Scan(
 			&resp.Count,
 			&id,
-			&is_favourite,
+			&favorite,
 			&image,
 			&name,
 			&product_categoty,
@@ -241,7 +247,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 		resp.Product = append(resp.Product, models.Product{
 			Id:                  id.String,
-			Is_favourite:        is_favourite.Bool,
+			Favorite:            favorite.Bool,
 			Image:               image.String,
 			Name:                name.String,
 			Product_categoty:    product_categoty.String,
@@ -259,7 +265,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 	query := `
 		UPDATE "product"
 		SET
-			is_favourite = :is_favourite,
+			favorite = :favorite,
 			image = :image,
 			name = :name,
 			product_categoty = :product_categoty,
@@ -273,7 +279,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 
 	params := map[string]interface{}{
 		"id":                  req.Id,
-		"is_favourite":        req.Is_favourite,
+		"favorite":            req.Favorite,
 		"image":               req.Image,
 		"name":                req.Name,
 		"product_categoty":    req.Product_categoty,
