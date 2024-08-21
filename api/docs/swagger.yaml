@@ -163,6 +163,35 @@ definitions:
       shipping:
         type: string
     type: object
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      delete_at:
+        type: string
+      description:
+        type: string
+      favorite:
+        type: boolean
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      order_count:
+        type: integer
+      price:
+        type: integer
+      price_with_discount:
+        type: integer
+      product_categoty:
+        type: string
+      rating:
+        type: number
+      updated_at:
+        type: string
+    type: object
   models.ProductCreate:
     properties:
       description:
@@ -183,6 +212,15 @@ definitions:
         type: string
       rating:
         type: number
+    type: object
+  models.ProductGetListResponse:
+    properties:
+      count:
+        type: integer
+      product:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
     type: object
   models.ProductUpdate:
     properties:
@@ -1836,7 +1874,7 @@ paths:
             - $ref: '#/definitions/handler.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.ProductGetListResponse'
               type: object
         "400":
           description: Bad Request

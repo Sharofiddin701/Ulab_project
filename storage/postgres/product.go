@@ -29,22 +29,22 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		id = uuid.New().String()
 	)
 	query := `
-		INSERT INTO "product" (
-			id,
-			favorite,
-			image,
-			name,
-			product_categoty,
-			price,
-			price_with_discount,
-			rating,
-			description,
-			order_count,
-			created_at
-		)
-		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
-		RETURNING id, favorite, image, name, product_categoty, price, price_with_discount, rating, description, order_count, created_at
-	`
+    INSERT INTO "product" (
+        id,
+        favorite,
+        image,
+        name,
+        product_categoty,
+        price,
+        price_with_discount,
+        rating,
+        description,
+        order_count,
+        created_at
+    )
+    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
+    RETURNING id, favorite, image, name, product_categoty, price, price_with_discount, rating, description, order_count, created_at
+`
 
 	var (
 		idd                 sql.NullString
@@ -177,15 +177,31 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 
 func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListRequest) (*models.ProductGetListResponse, error) {
 	var (
-		resp   = &models.ProductGetListResponse{}
-		query  = `SELECT COUNT(*) OVER(), id, favorite, image, name, product_categoty, price, price_with_discount, rating,description, order_count, TO_CHAR(created_at, 'dd/mm/yyyy') FROM "product" WHERE 1=1`
+		resp  = &models.ProductGetListResponse{}
+		query = `SELECT COUNT(*) OVER(), 
+			id, 
+			favorite, 
+			image, 
+			name, 
+			product_categoty, 
+			price, 
+			price_with_discount, 
+			rating, 
+			description, 
+			order_count, 
+			TO_CHAR(created_at, 'dd/mm/yyyy')
+		 FROM "product" WHERE 1=1`
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
 		filter string
 	)
 
 	if req.Favorite != nil {
-		filter += fmt.Sprintf(" AND favorite = %t", *req.Favorite)
+		if *req.Favorite {
+			filter = " AND favorite = true"
+		} else {
+			filter = " AND favorite = false"
+		}
 	}
 
 	if req.Offset > 0 {
@@ -196,7 +212,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query += filter + offset + limit
+	query = query + filter + offset + limit
 
 	rows, err := u.db.Query(ctx, query)
 	if err != nil {
@@ -207,8 +223,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 	for rows.Next() {
 		var (
+			product             models.Product
 			id                  sql.NullString
-			favorite            sql.NullBool
 			image               sql.NullString
 			name                sql.NullString
 			product_categoty    sql.NullString
@@ -223,7 +239,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		err = rows.Scan(
 			&resp.Count,
 			&id,
-			&favorite,
+			&product.Favorite,
 			&image,
 			&name,
 			&product_categoty,
@@ -241,7 +257,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 		resp.Product = append(resp.Product, models.Product{
 			Id:                  id.String,
-			Favorite:            favorite.Bool,
+			Favorite:            product.Favorite,
 			Image:               image.String,
 			Name:                name.String,
 			Product_categoty:    product_categoty.String,
@@ -253,6 +269,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			CreatedAt:           created_at.String,
 		})
 	}
+
+	fmt.Println(resp.Product)
 	return resp, nil
 }
 
