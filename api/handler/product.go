@@ -167,7 +167,7 @@ func (h *handler) GetListProduct(c *gin.Context) {
 // @Description Update Product
 // @Tags Product
 // @Accept json
-// @Product json
+// @Produce json
 // @Param id path string true "id"
 // @Param Product body models.ProductUpdate true "UpdateProductRequest"
 // @Success 200 {object} Response{data=string} "Success Request"
@@ -201,7 +201,7 @@ func (h *handler) UpdateProduct(c *gin.Context) {
 	}
 
 	if rowsAffected <= 0 {
-		h.logger.Error("storage.product.Update!")
+		h.logger.Error("storage.Product.Update!")
 		c.JSON(http.StatusBadRequest, "Unable to update data. Please try again later!")
 		return
 	}
@@ -248,6 +248,6 @@ func (h *handler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info("NewProduct Deleted Successfully!")
+	h.logger.Info("Product Deleted Successfully!")
 	c.JSON(http.StatusNoContent, nil)
 }

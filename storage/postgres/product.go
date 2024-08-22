@@ -273,14 +273,14 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 }
 
 func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (int64, error) {
-
 	var (
 		query  string
 		params map[string]interface{}
 	)
 
 	query = `
-    UPDATE "product"
+    UPDATE
+		 "product"
     SET
         favorite = :favorite,
         image = :image,
@@ -293,7 +293,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
         order_count = :order_count,
         updated_at = NOW()
     WHERE id = :id
-`
+    `
 
 	params = map[string]interface{}{
 		"id":                  req.Id,
@@ -311,7 +311,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 	query, args := helper.ReplaceQueryParams(query, params)
 	result, err := u.db.Exec(ctx, query, args...)
 	if err != nil {
-		u.log.Error("error while updating product data: ", logger.Error(err))
+		u.log.Error("error is while updating product data", logger.Error(err))
 		return 0, err
 	}
 

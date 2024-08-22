@@ -2042,6 +2042,8 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ProductUpdate'
+      produces:
+      - application/json
       responses:
         "200":
           description: Success Request
