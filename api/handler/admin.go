@@ -92,14 +92,14 @@ func (h *handler) GetListAdmin(c *gin.Context) {
 
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "GetListCategory INVALID OFFSET!")
+		h.logger.Error(err.Error() + "  :  " + "GetListAdmin INVALID OFFSET!")
 		c.JSON(http.StatusBadRequest, "INVALID OFFSET")
 		return
 	}
 
 	limit, err := h.getLimitQuery(c.Query("limit"))
 	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "GetListCategory INVALID LIMIT!")
+		h.logger.Error(err.Error() + "  :  " + "GetListAdmin INVALID LIMIT!")
 		c.JSON(http.StatusBadRequest, "INVALID LIMIT")
 		return
 	}

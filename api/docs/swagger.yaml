@@ -183,14 +183,14 @@ definitions:
         type: integer
       price:
         type: integer
-      price_with_discount:
-        type: integer
       product_category:
         type: string
       rating:
         type: number
       updated_at:
         type: string
+      with_discount:
+        type: integer
     type: object
   models.ProductCreate:
     properties:
@@ -206,12 +206,12 @@ definitions:
         type: integer
       price:
         type: integer
-      price_with_discount:
-        type: integer
       product_category:
         type: string
       rating:
         type: number
+      with_discount:
+        type: integer
     type: object
   models.ProductGetListResponse:
     properties:
@@ -228,8 +228,6 @@ definitions:
         type: string
       favorite:
         type: boolean
-      id:
-        type: string
       image:
         type: string
       name:
@@ -238,12 +236,12 @@ definitions:
         type: integer
       price:
         type: integer
-      price_with_discount:
-        type: integer
       product_category:
         type: string
       rating:
         type: number
+      with_discount:
+        type: integer
     type: object
 info:
   contact: {}

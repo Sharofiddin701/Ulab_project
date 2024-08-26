@@ -3659,9 +3659,6 @@
                 "price": {
                     "type": "integer"
                 },
-                "price_with_discount": {
-                    "type": "integer"
-                },
                 "product_category": {
                     "type": "string"
                 },
@@ -3670,6 +3667,9 @@
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "with_discount": {
+                    "type": "integer"
                 }
             }
         },
@@ -3694,14 +3694,14 @@
                 "price": {
                     "type": "integer"
                 },
-                "price_with_discount": {
-                    "type": "integer"
-                },
                 "product_category": {
                     "type": "string"
                 },
                 "rating": {
                     "type": "number"
+                },
+                "with_discount": {
+                    "type": "integer"
                 }
             }
         },
@@ -3728,9 +3728,6 @@
                 "favorite": {
                     "type": "boolean"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "image": {
                     "type": "string"
                 },
@@ -3743,14 +3740,14 @@
                 "price": {
                     "type": "integer"
                 },
-                "price_with_discount": {
-                    "type": "integer"
-                },
                 "product_category": {
                     "type": "string"
                 },
                 "rating": {
                     "type": "number"
+                },
+                "with_discount": {
+                    "type": "integer"
                 }
             }
         }

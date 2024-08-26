@@ -3670,9 +3670,6 @@ const docTemplate = `{
                 "price": {
                     "type": "integer"
                 },
-                "price_with_discount": {
-                    "type": "integer"
-                },
                 "product_category": {
                     "type": "string"
                 },
@@ -3681,6 +3678,9 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "with_discount": {
+                    "type": "integer"
                 }
             }
         },
@@ -3705,14 +3705,14 @@ const docTemplate = `{
                 "price": {
                     "type": "integer"
                 },
-                "price_with_discount": {
-                    "type": "integer"
-                },
                 "product_category": {
                     "type": "string"
                 },
                 "rating": {
                     "type": "number"
+                },
+                "with_discount": {
+                    "type": "integer"
                 }
             }
         },
@@ -3739,9 +3739,6 @@ const docTemplate = `{
                 "favorite": {
                     "type": "boolean"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "image": {
                     "type": "string"
                 },
@@ -3754,14 +3751,14 @@ const docTemplate = `{
                 "price": {
                     "type": "integer"
                 },
-                "price_with_discount": {
-                    "type": "integer"
-                },
                 "product_category": {
                     "type": "string"
                 },
                 "rating": {
                     "type": "number"
+                },
+                "with_discount": {
+                    "type": "integer"
                 }
             }
         }

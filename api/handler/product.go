@@ -22,29 +22,26 @@ import (
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) CreateProduct(c *gin.Context) {
-	var newProduct models.ProductCreate
+	var (
+		productCreate models.ProductCreate
+	)
 
-	if err := c.ShouldBindJSON(&newProduct); err != nil {
-		h.logger.Error("error in ShouldBindJSON: " + err.Error())
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Invalid input data",
-		})
-		return
-	}
-
-	resp, err := h.storage.Product().Create(c.Request.Context(), &newProduct)
+	err := c.ShouldBindJSON(&productCreate)
 	if err != nil {
-		h.logger.Error("error in Product.Create: " + err.Error())
-		c.JSON(http.StatusInternalServerError, Response{
-			Error: "Server error",
-		})
+		h.logger.Error(err.Error() + "  :  " + "error Product Should Bind Json!")
+		c.JSON(http.StatusBadRequest, "Please, Enter Valid Data!")
 		return
 	}
 
-	h.logger.Info("Product Created Successfully!")
-	c.JSON(http.StatusCreated, Response{
-		Data: resp,
-	})
+	resp, err := h.storage.Product().Create(c.Request.Context(), &productCreate)
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "error Product.Create")
+		c.JSON(http.StatusInternalServerError, "Server Error!")
+		return
+	}
+
+	h.logger.Info("Create Product Successfully!!")
+	c.JSON(http.StatusCreated, resp)
 }
 
 // GetByID Product godoc
@@ -63,34 +60,20 @@ func (h *handler) GetByIdProduct(c *gin.Context) {
 	id := c.Param("id")
 
 	if !helper.IsValidUUID(id) {
-		h.logger.Error("Invalid UUID format!")
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Invalid ID format",
-		})
+		h.logger.Error("is valid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id")
 		return
 	}
 
-	product, err := h.storage.Product().GetByID(c.Request.Context(), &models.ProductPrimaryKey{Id: id})
+	request, err := h.storage.Product().GetByID(c.Request.Context(), &models.ProductPrimaryKey{Id: id})
 	if err != nil {
-		h.logger.Error("error in Product.GetByID: " + err.Error())
-		c.JSON(http.StatusInternalServerError, Response{
-			Error: "Server error",
-		})
+		h.logger.Error(err.Error() + "  :  " + "storage.Product.GetByID!")
+		c.JSON(http.StatusInternalServerError, "Server Error!")
 		return
 	}
 
-	if product == nil {
-		h.logger.Warn("Product not found with ID: " + id)
-		c.JSON(http.StatusNotFound, Response{
-			Error: "Product not found",
-		})
-		return
-	}
-
-	h.logger.Info("Product Retrieved Successfully!")
-	c.JSON(http.StatusOK, Response{
-		Data: product,
-	})
+	h.logger.Info("GetByID Product Response!")
+	c.JSON(http.StatusOK, request)
 }
 
 // GetList Product godoc
@@ -110,31 +93,24 @@ func (h *handler) GetByIdProduct(c *gin.Context) {
 func (h *handler) GetListProduct(c *gin.Context) {
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
-		h.logger.Error("Invalid offset: " + err.Error())
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Invalid offset",
-		})
+		h.logger.Error(err.Error() + "  :  " + "GetListProduct INVALID OFFSET!")
+		c.JSON(http.StatusBadRequest, "INVALID OFFSET")
 		return
 	}
 
 	limit, err := h.getLimitQuery(c.Query("limit"))
 	if err != nil {
-		h.logger.Error("Invalid limit: " + err.Error())
-		c.JSON(http.StatusBadRequest, Response{
-			Error: "Invalid limit",
-		})
+		h.logger.Error(err.Error() + "  :  " + "GetListProduct INVALID LIMIT!")
+		c.JSON(http.StatusBadRequest, "INVALID LIMIT")
 		return
 	}
 
-	favoriteStr := c.Query("favorite")
 	var favorite *bool
-	if favoriteStr != "" {
-		fav, err := strconv.ParseBool(favoriteStr)
+	if favParam := c.Query("favorite"); favParam != "" {
+		fav, err := strconv.ParseBool(favParam)
 		if err != nil {
-			h.logger.Error("Invalid favorite value: " + err.Error())
-			c.JSON(http.StatusBadRequest, Response{
-				Error: "Invalid favorite value",
-			})
+			h.logger.Error(err.Error() + "  :  " + "GetListProduct INVALID FAVORITE PARAM!")
+			c.JSON(http.StatusBadRequest, "INVALID FAVORITE PARAM")
 			return
 		}
 		favorite = &fav
@@ -147,17 +123,13 @@ func (h *handler) GetListProduct(c *gin.Context) {
 	})
 
 	if err != nil && err.Error() != "no rows in result set" {
-		h.logger.Error("error in Product.GetList: " + err.Error())
-		c.JSON(http.StatusInternalServerError, Response{
-			Error: "Server error",
-		})
+		h.logger.Error(err.Error() + "  :  " + "storage.Product.GetList!")
+		c.JSON(http.StatusInternalServerError, "Server Error!")
 		return
 	}
 
-	h.logger.Info("Products Retrieved Successfully!")
-	c.JSON(http.StatusOK, Response{
-		Data: resp,
-	})
+	h.logger.Info("GetListProduct Response!")
+	c.JSON(http.StatusOK, resp)
 }
 
 // Update Product godoc

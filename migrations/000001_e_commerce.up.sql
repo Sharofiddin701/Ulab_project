@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "product" (
     "name" VARCHAR(100) NOT NULL,
     "product_categoty" VARCHAR(100) NOT NULL,
     "price" DECIMAL(10, 2) NOT NULL,
-    "price_with_discount" DECIMAL(10, 2);,
+    "with_discount" DECIMAL(10, 2),
     "rating" FLOAT NOT NULL,
     "description"VARCHAR(255), 
     "order_count" INT NOT NULL,
