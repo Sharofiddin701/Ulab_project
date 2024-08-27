@@ -79,7 +79,7 @@ definitions:
     properties:
       name:
         type: string
-      url:
+      parent_id:
         type: string
     type: object
   models.CategoryUpdate:
@@ -87,8 +87,6 @@ definitions:
       id:
         type: string
       name:
-        type: string
-      url:
         type: string
     type: object
   models.CustomerCreate:

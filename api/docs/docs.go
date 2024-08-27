@@ -3510,7 +3510,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "url": {
+                "parent_id": {
                     "type": "string"
                 }
             }
@@ -3522,9 +3522,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }

@@ -3499,7 +3499,7 @@
                 "name": {
                     "type": "string"
                 },
-                "url": {
+                "parent_id": {
                     "type": "string"
                 }
             }
@@ -3511,9 +3511,6 @@
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }

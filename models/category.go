@@ -1,23 +1,23 @@
 package models
 
 type Category struct {
-	Id        string `json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Url       string `json:"url,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
-	DeletedAt string `json:"delete_at,omitempty"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	ParentId  string `json:"parent_id"`
+	Url       string `json:"url"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	DeletedAt string `json:"delete_at"`
 }
 
 type CategoryCreate struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
+	Name     string `json:"name"`
+	ParentId string `json:"parent_id"`
 }
 
 type CategoryUpdate struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
-	Url  string `json:"url"`
 }
 
 type CategoryPrimaryKey struct {

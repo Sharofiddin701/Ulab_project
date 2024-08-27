@@ -1,4 +1,3 @@
--- Admin table migration
 CREATE TABLE IF NOT EXISTS "admin" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
@@ -10,7 +9,6 @@ CREATE TABLE IF NOT EXISTS "admin" (
     "updated_at" TIMESTAMP
 );
 
--- Customer table migration
 CREATE TABLE IF NOT EXISTS "customer" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
@@ -22,7 +20,6 @@ CREATE TABLE IF NOT EXISTS "customer" (
     "updated_at" TIMESTAMP
 );
 
--- Brand table migration
 CREATE TABLE IF NOT EXISTS "brand" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
@@ -32,7 +29,6 @@ CREATE TABLE IF NOT EXISTS "brand" (
     "deleted_at" TIMESTAMP
 );
 
--- Category table migration
 CREATE TABLE IF NOT EXISTS "category" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
@@ -42,7 +38,16 @@ CREATE TABLE IF NOT EXISTS "category" (
     "deleted_at" TIMESTAMP
 );
 
--- Orders table migration
+CREATE TABLE IF NOT EXISTS "category" (
+    "id" UUID PRIMARY KEY,
+    "name" VARCHAR(100) NOT NULL,
+    "parent_id" UUID REFERENCES "category" ("id")
+    "created_at" TIMESTAMP, 
+    "updated_at" TIMESTAMP,
+    "deleted_at" TIMESTAMP 
+
+);
+
 CREATE TABLE IF NOT EXISTS "orders" (
     "id" UUID PRIMARY KEY,
     "customer_id" UUID REFERENCES "customer"("id"),
@@ -52,7 +57,6 @@ CREATE TABLE IF NOT EXISTS "orders" (
     "updated_at" TIMESTAMP
 );
 
--- Product table migration
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "favorite" BOOLEAN NOT NULL,
@@ -68,15 +72,12 @@ CREATE TABLE IF NOT EXISTS "product" (
     "updated_at" TIMESTAMP
 );
 
--- Favorite table migration
 CREATE TABLE IF NOT EXISTS "favorite" (
      "product_id" UUID REFERENCES "product"("id"),
      "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      "updated_at" TIMESTAMP
 );
 
-
--- Order_products table migration
 CREATE TABLE IF NOT EXISTS "order_products" (
     "id" UUID PRIMARY KEY,
     "order_id" UUID REFERENCES "orders"("id"),
@@ -88,7 +89,6 @@ CREATE TABLE IF NOT EXISTS "order_products" (
     "deleted_at" TIMESTAMP
 );
 
--- Banner table migration
 CREATE TABLE IF NOT EXISTS "banner" (
     "id" UUID PRIMARY KEY,
     "banner_image" VARCHAR(255),
