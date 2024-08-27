@@ -3512,6 +3512,9 @@ const docTemplate = `{
                 },
                 "parent_id": {
                     "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

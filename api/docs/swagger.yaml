@@ -81,6 +81,8 @@ definitions:
         type: string
       parent_id:
         type: string
+      url:
+        type: string
     type: object
   models.CategoryUpdate:
     properties:

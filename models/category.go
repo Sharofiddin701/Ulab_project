@@ -12,6 +12,7 @@ type Category struct {
 
 type CategoryCreate struct {
 	Name     string `json:"name"`
+	Url      string `json:"url"`
 	ParentId string `json:"parent_id"`
 }
 

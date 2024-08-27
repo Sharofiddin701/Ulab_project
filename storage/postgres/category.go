@@ -29,7 +29,7 @@ func (u *categoryRepo) Create(ctx context.Context, req *models.CategoryCreate) (
 
 	var parentId sql.NullString
 	if req.ParentId != "" {
-	
+
 		parentUUID, err := uuid.Parse(req.ParentId)
 		if err != nil {
 			u.log.Error("Error parsing parent ID: " + err.Error())
@@ -44,29 +44,30 @@ func (u *categoryRepo) Create(ctx context.Context, req *models.CategoryCreate) (
 		INSERT INTO "category" (
 			id,
 			name,
+			url,
 			parent_id,
 			created_at
 		)
-		VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-		RETURNING id, name, parent_id, created_at, updated_at, deleted_at
+		VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+		RETURNING id, name, url, parent_id, created_at, updated_at
 	`
 
 	var (
 		idd        sql.NullString
 		name       sql.NullString
+		url        sql.NullString
 		parent     sql.NullString
 		created_at sql.NullString
 		updated_at sql.NullString
-		deleted_at sql.NullString
 	)
 
-	err := u.db.QueryRow(ctx, query, id, req.Name, parentId).Scan(
+	err := u.db.QueryRow(ctx, query, id, req.Name, req.Url, parentId).Scan(
 		&idd,
 		&name,
+		&url,
 		&parent,
 		&created_at,
 		&updated_at,
-		&deleted_at,
 	)
 	if err != nil {
 		u.log.Error("Error while creating category: " + err.Error())
@@ -76,10 +77,10 @@ func (u *categoryRepo) Create(ctx context.Context, req *models.CategoryCreate) (
 	return &models.Category{
 		Id:        idd.String,
 		Name:      name.String,
+		Url:       url.String,
 		ParentId:  parent.String,
 		CreatedAt: created_at.String,
 		UpdatedAt: updated_at.String,
-		DeletedAt: deleted_at.String,
 	}, nil
 }
 
@@ -88,16 +89,17 @@ func (u *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryK
 		query      string
 		id         sql.NullString
 		name       sql.NullString
+		url        sql.NullString
 		parent_id  sql.NullString
 		created_at sql.NullString
 		updated_at sql.NullString
-		deleted_at sql.NullString
 	)
 
 	query = `
 		SELECT 
 			id,
 			name,
+			url,
 			parent_id,
 			TO_CHAR(created_at,'dd/mm/yyyy')
 		FROM "category" 
@@ -107,10 +109,10 @@ func (u *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryK
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
 		&name,
+		&url,
 		&parent_id,
 		&created_at,
 		&updated_at,
-		&deleted_at,
 	)
 
 	if err != nil && err.Error() != "no rows in result set" {
@@ -121,10 +123,10 @@ func (u *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryK
 	return &models.Category{
 		Id:        id.String,
 		Name:      name.String,
+		Url:       url.String,
 		ParentId:  parent_id.String,
 		CreatedAt: created_at.String,
 		UpdatedAt: updated_at.String,
-		DeletedAt: deleted_at.String,
 	}, nil
 }
 
@@ -141,6 +143,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			COUNT(*) OVER(),
 			id,
 			name,
+			url,
 			parent_id,
 			TO_CHAR(created_at,'dd/mm/yyyy')
 		FROM "category" 
@@ -165,6 +168,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		var (
 			id         sql.NullString
 			name       sql.NullString
+			url        sql.NullString
 			parent_id  sql.NullString
 			created_at sql.NullString
 		)
@@ -173,6 +177,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			&resp.Count,
 			&id,
 			&name,
+			&url,
 			&parent_id,
 			&created_at,
 		)
@@ -184,6 +189,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		resp.Category = append(resp.Category, &models.Category{
 			Id:        id.String,
 			Name:      name.String,
+			Url:       url.String,
 			ParentId:  parent_id.String,
 			CreatedAt: created_at.String,
 		})
@@ -212,6 +218,8 @@ func (u *categoryRepo) Update(ctx context.Context, req *models.CategoryUpdate) (
 			"category"
 		SET
 			name = :name,
+			url = :url,
+			parent_id = :parent_id,
 			updated_at = NOW()
 		WHERE id = :id
 	`

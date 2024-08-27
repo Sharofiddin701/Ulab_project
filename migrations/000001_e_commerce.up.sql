@@ -33,14 +33,6 @@ CREATE TABLE IF NOT EXISTS "category" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
     "url" VARCHAR(255) NOT NULL,
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP,
-    "deleted_at" TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "category" (
-    "id" UUID PRIMARY KEY,
-    "name" VARCHAR(100) NOT NULL,
     "parent_id" UUID REFERENCES "category" ("id")
     "created_at" TIMESTAMP, 
     "updated_at" TIMESTAMP,
