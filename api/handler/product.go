@@ -87,10 +87,12 @@ func (h *handler) GetByIdProduct(c *gin.Context) {
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Param favorite query string false "favorite"
+// @Param category_id query string false "category_id"
 // @Success 200 {object} Response{data=models.ProductGetListResponse} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) GetListProduct(c *gin.Context) {
+	// Parse and validate offset
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
 		h.logger.Error(err.Error() + "  :  " + "GetListProduct INVALID OFFSET!")
@@ -98,6 +100,7 @@ func (h *handler) GetListProduct(c *gin.Context) {
 		return
 	}
 
+	// Parse and validate limit
 	limit, err := h.getLimitQuery(c.Query("limit"))
 	if err != nil {
 		h.logger.Error(err.Error() + "  :  " + "GetListProduct INVALID LIMIT!")
@@ -105,6 +108,7 @@ func (h *handler) GetListProduct(c *gin.Context) {
 		return
 	}
 
+	// Parse and validate favorite
 	var favorite *bool
 	if favParam := c.Query("favorite"); favParam != "" {
 		fav, err := strconv.ParseBool(favParam)
@@ -116,10 +120,15 @@ func (h *handler) GetListProduct(c *gin.Context) {
 		favorite = &fav
 	}
 
+	// Parse category_id
+	categoryId := c.Query("category_id")
+
+	// Fetch product list
 	resp, err := h.storage.Product().GetList(c.Request.Context(), &models.ProductGetListRequest{
-		Offset:   offset,
-		Limit:    limit,
-		Favorite: favorite,
+		Offset:     offset,
+		Limit:      limit,
+		Favorite:   favorite,
+		CategoryId: categoryId,
 	})
 
 	if err != nil && err.Error() != "no rows in result set" {

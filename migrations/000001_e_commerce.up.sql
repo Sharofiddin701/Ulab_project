@@ -51,10 +51,10 @@ CREATE TABLE IF NOT EXISTS "orders" (
 
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
+    "category_id" UUID REFERENCES "category"("id")
     "favorite" BOOLEAN NOT NULL,
     "image" VARCHAR(255),
     "name" VARCHAR(100) NOT NULL,
-    "product_categoty" VARCHAR(100) NOT NULL,
     "price" DECIMAL(10, 2) NOT NULL,
     "with_discount" DECIMAL(10, 2),
     "rating" FLOAT NOT NULL,
@@ -62,12 +62,6 @@ CREATE TABLE IF NOT EXISTS "product" (
     "order_count" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "favorite" (
-     "product_id" UUID REFERENCES "product"("id"),
-     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     "updated_at" TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "order_products" (

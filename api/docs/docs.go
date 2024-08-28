@@ -2923,6 +2923,12 @@ const docTemplate = `{
                         "description": "favorite",
                         "name": "favorite",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3643,6 +3649,9 @@ const docTemplate = `{
         "models.Product": {
             "type": "object",
             "properties": {
+                "category_id": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -3670,9 +3679,6 @@ const docTemplate = `{
                 "price": {
                     "type": "integer"
                 },
-                "product_category": {
-                    "type": "string"
-                },
                 "rating": {
                     "type": "number"
                 },
@@ -3687,6 +3693,9 @@ const docTemplate = `{
         "models.ProductCreate": {
             "type": "object",
             "properties": {
+                "category_id": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -3704,9 +3713,6 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "integer"
-                },
-                "product_category": {
-                    "type": "string"
                 },
                 "rating": {
                     "type": "number"
@@ -3733,11 +3739,17 @@ const docTemplate = `{
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
+                "category_id": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
                 "favorite": {
                     "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -3750,9 +3762,6 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "integer"
-                },
-                "product_category": {
-                    "type": "string"
                 },
                 "rating": {
                     "type": "number"
