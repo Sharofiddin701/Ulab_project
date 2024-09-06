@@ -392,7 +392,14 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 }
 
 func (u *productRepo) Delete(ctx context.Context, req *models.ProductPrimaryKey) error {
-	_, err := u.db.Exec(ctx, `DELETE from product WHERE id = $1`, req.Id)
+
+	_, err := u.db.Exec(ctx, `DELETE FROM color WHERE product_id = $1`, req.Id)
+	if err != nil {
+		u.log.Error("error while deleting product colors", logger.Error(err))
+		return err
+	}
+
+	_, err = u.db.Exec(ctx, `DELETE FROM product WHERE id = $1`, req.Id)
 	if err != nil {
 		u.log.Error("error is while deleting product", logger.Error(err))
 		return err
