@@ -3,7 +3,7 @@ package models
 type Product struct {
 	Id            string   `json:"id,omitempty"`
 	CategoryId    string   `json:"category_id,omitempty"`
-	Favorite      bool     `json:"favorite,omitempty"`
+	Favorite      bool     `json:"favorite"`
 	Image         []string `json:"image,omitempty"`
 	Name          string   `json:"name,omitempty"`
 	Price         int      `json:"price,omitempty"`

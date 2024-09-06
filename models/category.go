@@ -5,9 +5,9 @@ type Category struct {
 	Name      string `json:"name"`
 	ParentId  string `json:"parent_id"`
 	Url       string `json:"url"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	DeletedAt string `json:"delete_at"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
+	DeletedAt string `json:"delete_at,omitempty"`
 }
 
 type CategoryCreate struct {

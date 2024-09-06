@@ -5,9 +5,9 @@ type Color struct {
 	ProductId string `json:"product_id"`
 	Name      string `json:"color_name"`
 	Url       string `json:"color_url"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	DeletedAt string `json:"delete_at"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
+	DeletedAt string `json:"delete_at,omitempty"`
 }
 
 type ColorCreate struct {
