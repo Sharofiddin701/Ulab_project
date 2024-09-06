@@ -91,6 +91,32 @@ definitions:
       name:
         type: string
     type: object
+  models.Color:
+    properties:
+      color_name:
+        type: string
+      color_url:
+        type: string
+      created_at:
+        type: string
+      delete_at:
+        type: string
+      id:
+        type: string
+      product_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ColorCreate:
+    properties:
+      color_name:
+        type: string
+      color_url:
+        type: string
+      product_id:
+        type: string
+    type: object
   models.CustomerCreate:
     properties:
       address:
@@ -167,6 +193,10 @@ definitions:
     properties:
       category_id:
         type: string
+      color:
+        items:
+          $ref: '#/definitions/models.Color'
+        type: array
       created_at:
         type: string
       delete_at:
@@ -178,7 +208,9 @@ definitions:
       id:
         type: string
       image:
-        type: string
+        items:
+          type: string
+        type: array
       name:
         type: string
       order_count:
@@ -201,7 +233,9 @@ definitions:
       favorite:
         type: boolean
       image:
-        type: string
+        items:
+          type: string
+        type: array
       name:
         type: string
       order_count:
@@ -233,7 +267,9 @@ definitions:
       id:
         type: string
       image:
-        type: string
+        items:
+          type: string
+        type: array
       name:
         type: string
       order_count:
@@ -1127,6 +1163,133 @@ paths:
       summary: Update Category
       tags:
       - Category
+  /e_commerce/api/v1/color:
+    get:
+      consumes:
+      - application/json
+      description: Get List Color
+      operationId: get_list_color
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Get List Color
+      tags:
+      - Color
+    post:
+      consumes:
+      - application/json
+      description: Create Color
+      operationId: create_color
+      parameters:
+      - description: CreateColorRequest
+        in: body
+        name: Color
+        required: true
+        schema:
+          $ref: '#/definitions/models.ColorCreate'
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            $ref: '#/definitions/models.Color'
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Create Color
+      tags:
+      - Color
+  /e_commerce/api/v1/color/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Color
+      operationId: delete_color
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Success Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "500":
+          description: Server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: Delete Color
+      tags:
+      - Color
   /e_commerce/api/v1/customer:
     get:
       consumes:

@@ -7,10 +7,12 @@ import (
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
+	"time"
 
 	uuid "github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/lib/pq"
 )
 
 type productRepo struct {
@@ -26,13 +28,15 @@ func NewProductRepo(db *pgxpool.Pool, log logger.LoggerI) *productRepo {
 }
 
 func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*models.Product, error) {
+
 	var (
 		id = uuid.New().String()
 	)
+
 	query := `
     INSERT INTO "product" (
         id,
-		category_id,
+        category_id,
         favorite,
         image,
         name,
@@ -45,27 +49,25 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
     )
     VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
     RETURNING id, category_id, favorite, image, name, price, with_discount, rating, description, order_count, created_at
-`
-
+    `
 	var (
 		idd           sql.NullString
 		category_id   sql.NullString
 		favorite      sql.NullBool
-		image         sql.NullString
+		image         pq.StringArray
 		name          sql.NullString
 		price         sql.NullFloat64
 		with_discount sql.NullFloat64
 		rating        sql.NullFloat64
 		description   sql.NullString
 		order_count   sql.NullInt64
-		created_at    sql.NullString
+		created_at    sql.NullTime
 	)
 
-	err := u.db.QueryRow(ctx, query,
-		id,
+	err := u.db.QueryRow(ctx, query, id,
 		req.CategoryId,
 		req.Favorite,
-		req.Image,
+		pq.Array(req.Image),
 		req.Name,
 		req.Price,
 		req.With_discount,
@@ -87,7 +89,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	)
 
 	if err != nil {
-		u.log.Error("error while creating product data: " + err.Error())
+		u.log.Error("Error while creating brand: " + err.Error())
 		return nil, err
 	}
 
@@ -95,14 +97,14 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		Id:            idd.String,
 		CategoryId:    category_id.String,
 		Favorite:      favorite.Bool,
-		Image:         image.String,
+		Image:         image,
 		Name:          name.String,
 		Price:         int(price.Float64),
 		With_discount: int(with_discount.Float64),
 		Rating:        rating.Float64,
 		Description:   description.String,
 		Order_count:   int(order_count.Int64),
-		CreatedAt:     created_at.String,
+		CreatedAt:     created_at.Time.Format(time.RFC3339),
 	}, nil
 }
 
@@ -111,7 +113,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		id            sql.NullString
 		category_id   sql.NullString
 		favorite      sql.NullBool
-		image         sql.NullString
+		image         pq.StringArray
 		name          sql.NullString
 		price         sql.NullFloat64
 		with_discount sql.NullFloat64
@@ -161,7 +163,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Id:            id.String,
 		CategoryId:    category_id.String,
 		Favorite:      favorite.Bool,
-		Image:         image.String,
+		Image:         image,
 		Name:          name.String,
 		Price:         int(price.Float64),
 		With_discount: int(with_discount.Float64),
@@ -181,7 +183,6 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		filter string
 	)
 
-	// Recursive CTE for fetching subcategories only if category_id is provided
 	if req.CategoryId != "" {
 		query = `
 			WITH RECURSIVE category_hierarchy AS (
@@ -191,64 +192,67 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				INNER JOIN category_hierarchy ch ON c.parent_id = ch.id
 			)
 			SELECT 
-				COUNT(*) OVER(), 
-				id, 
-				category_id,
-				favorite, 
-				image, 
-				name, 
-				price, 
-				with_discount, 
-				rating, 
-				description, 
-				order_count, 
-				TO_CHAR(created_at, 'dd/mm/yyyy')
-			FROM "product" 
-			WHERE category_id IN (SELECT id FROM category_hierarchy)
+				COUNT(*) OVER(),
+				p.id, 
+				p.category_id,
+				p.favorite, 
+				p.image, 
+				p.name, 
+				p.price, 
+				p.with_discount, 
+				p.rating, 
+				p.description, 
+				p.order_count, 
+				TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
+				c.id AS color_id,
+				c.color_name,
+				c.color_url
+			FROM "product" p
+			LEFT JOIN "color" c ON p.id = c.product_id
+			WHERE p.category_id IN (SELECT id FROM category_hierarchy)
 		`
 	} else {
 		query = `
 			SELECT 
-				COUNT(*) OVER(), 
-				id, 
-				category_id,
-				favorite, 
-				image, 
-				name, 
-				price, 
-				with_discount, 
-				rating, 
-				description, 
-				order_count, 
-				TO_CHAR(created_at, 'dd/mm/yyyy')
-			FROM "product"
+				COUNT(*) OVER(),
+				p.id, 
+				p.category_id,
+				p.favorite, 
+				p.image, 
+				p.name, 
+				p.price, 
+				p.with_discount, 
+				p.rating, 
+				p.description, 
+				p.order_count, 
+				TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
+				c.id AS color_id,
+				c.color_name,
+				c.color_url
+			FROM "product" p
+			LEFT JOIN "color" c ON p.id = c.product_id
 			WHERE 1=1
 		`
 	}
 
-	// Apply favorite filter if provided
 	if req.Favorite != nil {
 		if *req.Favorite {
-			filter = " AND favorite = true"
+			filter = " AND p.favorite = true"
 		} else {
-			filter = " AND favorite = false"
+			filter = " AND p.favorite = false"
 		}
 	}
 
-	// Apply offset if provided
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
 
-	// Apply limit if provided
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	// Concatenate final query
 	query = query + filter + offset + limit
 
-	// Execute query with or without category_id
 	var rows pgx.Rows
 	var err error
 	if req.CategoryId != "" {
@@ -262,13 +266,15 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		return nil, err
 	}
 
-	// Iterate through result set
+	productsMap := make(map[string]*models.Product)
+
 	for rows.Next() {
 		var (
 			product       models.Product
+			count         int
 			id            sql.NullString
 			category_id   sql.NullString
-			image         sql.NullString
+			image         pq.StringArray
 			name          sql.NullString
 			price         sql.NullFloat64
 			with_discount sql.NullFloat64
@@ -276,10 +282,13 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			description   sql.NullString
 			order_count   sql.NullInt64
 			created_at    sql.NullString
+			color_id      sql.NullString
+			color_name    sql.NullString
+			color_url     sql.NullString
 		)
 
 		err = rows.Scan(
-			&resp.Count,
+			&count, // COUNT(*) OVER() natijasi
 			&id,
 			&category_id,
 			&product.Favorite,
@@ -291,31 +300,47 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&description,
 			&order_count,
 			&created_at,
+			&color_id,
+			&color_name,
+			&color_url,
 		)
 		if err != nil {
 			u.log.Error("Error while scanning product list data: " + err.Error())
 			return nil, err
 		}
 
-		// Append product to response
-		resp.Product = append(resp.Product, models.Product{
-			Id:            id.String,
-			CategoryId:    category_id.String,
-			Favorite:      product.Favorite,
-			Image:         image.String,
-			Name:          name.String,
-			Price:         int(price.Float64),
-			With_discount: int(with_discount.Float64),
-			Rating:        rating.Float64,
-			Description:   description.String,
-			Order_count:   int(order_count.Int64),
-			CreatedAt:     created_at.String,
-		})
+		// Mahsulotlarni xaritada saqlash
+		if _, ok := productsMap[id.String]; !ok {
+			productsMap[id.String] = &models.Product{
+				Id:            id.String,
+				CategoryId:    category_id.String,
+				Favorite:      product.Favorite,
+				Image:         image,
+				Name:          name.String,
+				Price:         int(price.Float64),
+				With_discount: int(with_discount.Float64),
+				Rating:        rating.Float64,
+				Description:   description.String,
+				Order_count:   int(order_count.Int64),
+				CreatedAt:     created_at.String,
+				Color:         []models.Color{},
+			}
+			resp.Count = count // Countni birinchi qatorda belgilash
+		}
+
+		// Ranglarni mahsulotga qo'shish
+		if color_id.Valid {
+			productsMap[id.String].Color = append(productsMap[id.String].Color, models.Color{
+				Id:   color_id.String,
+				Name: color_name.String,
+				Url:  color_url.String,
+			})
+		}
 	}
 
-	// Log if no products were found
-	if len(resp.Product) == 0 {
-		u.log.Warn("No products found for the given criteria")
+	// Xaritaning mahsulotlarini qayta ishlash
+	for _, product := range productsMap {
+		resp.Product = append(resp.Product, *product)
 	}
 
 	return resp, nil

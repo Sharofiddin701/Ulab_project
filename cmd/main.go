@@ -55,4 +55,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// rdb = redis.NewClient(&redis.Options{
+	// 	Addr: RedisAddr,
+	// })
+
+	// // Check Redis connection
+	// _, err := rdb.Ping(ctx).Result()
+	// if err != nil {
+	// 	log.Fatalf("Could not connect to Redis: %v", err)
+	// }
 }

@@ -34,7 +34,7 @@ func (u *orderRepo) Create(ctx context.Context, req *models.OrderCreate) (*model
 	)
 
 	query = `
-		INSERT INTO orders (
+		INSERT INTO "orders" (
 			id,
 			customer_id,
 			shipping,
@@ -85,8 +85,6 @@ func (u *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 		shipping    sql.NullString
 		payment     sql.NullString
 		created_at  sql.NullString
-		updated_at  sql.NullString
-		deleted_at  sql.NullString
 	)
 
 	query = `
@@ -96,9 +94,7 @@ func (u *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 			shipping,
 			payment,
 			TO_CHAR(created_at,'dd/mm/yyyy'),
-			TO_CHAR(updated_at,'dd/mm/yyyy'),
-			TO_CHAR(deleted_at,'dd/mm/yyyy')
-		FROM orders 
+		FROM "orders" 
 		WHERE id = $1
 	`
 
@@ -108,8 +104,6 @@ func (u *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 		&shipping,
 		&payment,
 		&created_at,
-		&updated_at,
-		&deleted_at,
 	)
 
 	if err != nil {
@@ -127,8 +121,6 @@ func (u *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*
 		Shipping:   shipping.String,
 		Payment:    payment.String,
 		CreatedAt:  created_at.String,
-		UpdatedAt:  updated_at.String,
-		DeletedAt:  deleted_at.String,
 	}, nil
 }
 
@@ -163,9 +155,7 @@ func (u *orderRepo) GetList(ctx context.Context, req *models.OrderGetListRequest
 			shipping,
 			payment,
 			TO_CHAR(created_at, 'dd/mm/yyyy'),
-			TO_CHAR(updated_at, 'dd/mm/yyyy'),
-			TO_CHAR(deleted_at, 'dd/mm/yyyy')
-		FROM orders
+		FROM "orders"
 	` + where + filter + offset + limit
 
 	rows, err := u.db.Query(ctx, query)
@@ -182,8 +172,6 @@ func (u *orderRepo) GetList(ctx context.Context, req *models.OrderGetListRequest
 			shipping    sql.NullString
 			payment     sql.NullString
 			created_at  sql.NullString
-			updated_at  sql.NullString
-			deleted_at  sql.NullString
 		)
 
 		err = rows.Scan(
@@ -193,8 +181,6 @@ func (u *orderRepo) GetList(ctx context.Context, req *models.OrderGetListRequest
 			&shipping,
 			&payment,
 			&created_at,
-			&updated_at,
-			&deleted_at,
 		)
 		if err != nil {
 			u.log.Error("error while scanning order list data: " + err.Error())
@@ -207,8 +193,6 @@ func (u *orderRepo) GetList(ctx context.Context, req *models.OrderGetListRequest
 			Shipping:   shipping.String,
 			Payment:    payment.String,
 			CreatedAt:  created_at.String,
-			UpdatedAt:  updated_at.String,
-			DeletedAt:  deleted_at.String,
 		})
 	}
 	return resp, nil
@@ -221,7 +205,7 @@ func (u *orderRepo) Update(ctx context.Context, req *models.OrderUpdate) (int64,
 	)
 
 	query = `
-		UPDATE orders
+		UPDATE "orders"
 		SET
 			shipping = :shipping,
 			payment = :payment,

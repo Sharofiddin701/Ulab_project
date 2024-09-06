@@ -18,11 +18,19 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 	r.Use(customCORSMiddleware())
 	v1 := r.Group("/e_commerce/api/v1")
 
+	// router.POST("/register", registerUserHandler)
+	// router.GET("/send-code", sendCodeHandler)
+	// router.GET("/verify-code", verifyCodeHandler)
+
 	v1.POST("/admin", h.CreateAdmin)
 	v1.GET("/admin/:id", h.GetByIdAdmin)
 	v1.GET("/admin", h.GetListAdmin)
 	v1.PUT("/admin/:id", h.UpdateAdmin)
 	v1.DELETE("/admin/:id", h.DeleteAdmin)
+
+	v1.POST("/color", h.CreateColor)
+	v1.GET("/color", h.GetListColor)
+	v1.DELETE("/color/:id", h.DeleteColor)
 
 	v1.POST("/banner", h.CreateBanner)
 	v1.GET("/banner/:id", h.GetByIdBanner)

@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id")
     "favorite" BOOLEAN NOT NULL,
-    "image" VARCHAR(255),
+    "image" TEXT[],
     "name" VARCHAR(100) NOT NULL,
     "price" DECIMAL(10, 2) NOT NULL,
     "with_discount" DECIMAL(10, 2),
@@ -82,3 +82,14 @@ CREATE TABLE IF NOT EXISTS "banner" (
     "updated_at" TIMESTAMP,
     "deleted_at" TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS "color" (
+    "id" UUID PRIMARY KEY,
+    "product_id" UUID REFERENCES "product"("id"),
+    "color_name" VARCHAR(100) NOT NULL,  
+    "color_url" VARCHAR(255) NOT NULL, 
+    "count" INT DEFAULT 0, 
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP
+);
+

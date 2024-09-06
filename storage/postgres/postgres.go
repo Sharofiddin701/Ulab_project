@@ -21,6 +21,7 @@ type store struct {
 	product       *productRepo
 	orderproducts *orderproductsRepo
 	banner        *bannerRepo
+	color         *colorRepo
 }
 
 func NewConnectionPostgres(cfg *config.Config) (storage.StorageI, error) {
@@ -138,4 +139,14 @@ func (s *store) Banner() storage.BannerI {
 		}
 	}
 	return s.banner
+}
+
+func (s *store) Color() storage.ColorI {
+	if s.color == nil {
+		s.color = &colorRepo{
+			db:  s.db,
+			log: s.log,
+		}
+	}
+	return s.color
 }

@@ -15,6 +15,7 @@ type StorageI interface {
 	Product() ProductI
 	OrderProduct() OrderProductI
 	Banner() BannerI
+	Color() ColorI
 }
 
 type AdminI interface {
@@ -79,4 +80,10 @@ type BannerI interface {
 	GetList(ctx context.Context, req *models.BannerGetListRequest) (*models.BannerGetListResponse, error)
 	Update(ctx context.Context, req *models.BannerUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.BannerPrimaryKey) error
+}
+
+type ColorI interface {
+	Create(ctx context.Context, req *models.ColorCreate) (*models.Color, error)
+	GetList(ctx context.Context, req *models.ColorGetListRequest) (*models.ColorGetListResponse, error)
+	Delete(ctx context.Context, req *models.ColorPrimaryKey) error
 }

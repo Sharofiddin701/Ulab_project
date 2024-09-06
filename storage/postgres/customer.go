@@ -162,7 +162,6 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			password,
 			TO_CHAR(created_at,'dd/mm/yyyy')
 		FROM "customer" 
-		s
 	`
 
 	if req.Offset > 0 {
