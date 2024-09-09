@@ -10,7 +10,6 @@ import (
 	"time"
 
 	uuid "github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
 )
@@ -38,7 +37,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
         id,
         category_id,
         favorite,
-        image,
         name,
         price,
         with_discount,
@@ -47,14 +45,13 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
         order_count,
         created_at
     )
-    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
-    RETURNING id, category_id, favorite, image, name, price, with_discount, rating, description, order_count, created_at
+    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,  CURRENT_TIMESTAMP)
+    RETURNING id, category_id, favorite, name, price, with_discount, rating, description, order_count, created_at
     `
 	var (
 		idd           sql.NullString
 		category_id   sql.NullString
 		favorite      sql.NullBool
-		image         pq.StringArray
 		name          sql.NullString
 		price         sql.NullFloat64
 		with_discount sql.NullFloat64
@@ -67,7 +64,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	err := u.db.QueryRow(ctx, query, id,
 		req.CategoryId,
 		req.Favorite,
-		pq.Array(req.Image),
 		req.Name,
 		req.Price,
 		req.With_discount,
@@ -78,7 +74,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		&idd,
 		&category_id,
 		&favorite,
-		&image,
 		&name,
 		&price,
 		&with_discount,
@@ -97,7 +92,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		Id:            idd.String,
 		CategoryId:    category_id.String,
 		Favorite:      favorite.Bool,
-		Image:         image,
 		Name:          name.String,
 		Price:         int(price.Float64),
 		With_discount: int(with_discount.Float64),
@@ -113,7 +107,6 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		id            sql.NullString
 		category_id   sql.NullString
 		favorite      sql.NullBool
-		image         pq.StringArray
 		name          sql.NullString
 		price         sql.NullFloat64
 		with_discount sql.NullFloat64
@@ -128,7 +121,6 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 			id,
 			category_id,
 			favorite,
-			image,
 			name,
 			price,
 			with_discount,
@@ -144,7 +136,6 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		&id,
 		&category_id,
 		&favorite,
-		&image,
 		&name,
 		&price,
 		&with_discount,
@@ -163,7 +154,6 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		Id:            id.String,
 		CategoryId:    category_id.String,
 		Favorite:      favorite.Bool,
-		Image:         image,
 		Name:          name.String,
 		Price:         int(price.Float64),
 		With_discount: int(with_discount.Float64),
@@ -181,58 +171,58 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
 		filter string
+		args   []interface{}
 	)
 
+	// Query yaratish
 	if req.CategoryId != "" {
 		query = `
-			WITH RECURSIVE category_hierarchy AS (
-				SELECT id FROM category WHERE id = $1
-				UNION ALL
-				SELECT c.id FROM category c
-				INNER JOIN category_hierarchy ch ON c.parent_id = ch.id
-			)
-			SELECT 
-				COUNT(*) OVER(),
-				p.id, 
-				p.category_id,
-				p.favorite, 
-				p.image, 
-				p.name, 
-				p.price, 
-				p.with_discount, 
-				p.rating, 
-				p.description, 
-				p.order_count, 
-				TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
-				c.id AS color_id,
-				c.color_name,
-				c.color_url
-			FROM "product" p
-			LEFT JOIN "color" c ON p.id = c.product_id
-			WHERE p.category_id IN (SELECT id FROM category_hierarchy)
-		`
+            WITH RECURSIVE category_hierarchy AS (
+                SELECT id FROM category WHERE id = $1
+                UNION ALL
+                SELECT c.id FROM category c
+                INNER JOIN category_hierarchy ch ON c.parent_id = ch.id
+            )
+            SELECT 
+                COUNT(*) OVER(),
+                p.id, 
+                p.category_id,
+                p.favorite, 
+                p.name, 
+                p.price, 
+                p.with_discount, 
+                p.rating, 
+                p.description, 
+                p.order_count, 
+                TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
+                c.id AS color_id,
+                c.color_name,
+                c.color_url AS color_url
+            FROM "product" p
+            LEFT JOIN "color" c ON p.id = c.product_id
+            WHERE p.category_id IN (SELECT id FROM category_hierarchy)
+        `
+		args = append(args, req.CategoryId)
 	} else {
 		query = `
-			SELECT 
-				COUNT(*) OVER(),
-				p.id, 
-				p.category_id,
-				p.favorite, 
-				p.image, 
-				p.name, 
-				p.price, 
-				p.with_discount, 
-				p.rating, 
-				p.description, 
-				p.order_count, 
-				TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
-				c.id AS color_id,
-				c.color_name,
-				c.color_url
-			FROM "product" p
-			LEFT JOIN "color" c ON p.id = c.product_id
-			WHERE 1=1
-		`
+            SELECT 
+                p.id, 
+                p.category_id,
+                p.favorite, 
+                p.name, 
+                p.price, 
+                p.with_discount, 
+                p.rating, 
+                p.description, 
+                p.order_count, 
+                TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
+                c.id AS color_id,
+                c.color_name,
+                c.color_url AS color_url
+            FROM "product" p
+            LEFT JOIN "color" c ON p.id = c.product_id
+            WHERE 1=1
+        `
 	}
 
 	if req.Favorite != nil {
@@ -253,28 +243,21 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 	query = query + filter + offset + limit
 
-	var rows pgx.Rows
-	var err error
-	if req.CategoryId != "" {
-		rows, err = u.db.Query(ctx, query, req.CategoryId)
-	} else {
-		rows, err = u.db.Query(ctx, query)
-	}
-
+	// Queryni bajarish
+	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {
 		u.log.Error("Error while getting product list: " + err.Error())
 		return nil, err
 	}
+	defer rows.Close()
 
 	productsMap := make(map[string]*models.Product)
 
 	for rows.Next() {
 		var (
 			product       models.Product
-			count         int
 			id            sql.NullString
 			category_id   sql.NullString
-			image         pq.StringArray
 			name          sql.NullString
 			price         sql.NullFloat64
 			with_discount sql.NullFloat64
@@ -284,15 +267,13 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			created_at    sql.NullString
 			color_id      sql.NullString
 			color_name    sql.NullString
-			color_url     sql.NullString
+			color_url     pq.StringArray
 		)
 
 		err = rows.Scan(
-			&count, // COUNT(*) OVER() natijasi
 			&id,
 			&category_id,
 			&product.Favorite,
-			&image,
 			&name,
 			&price,
 			&with_discount,
@@ -309,13 +290,11 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			return nil, err
 		}
 
-		// Mahsulotlarni xaritada saqlash
 		if _, ok := productsMap[id.String]; !ok {
 			productsMap[id.String] = &models.Product{
 				Id:            id.String,
 				CategoryId:    category_id.String,
 				Favorite:      product.Favorite,
-				Image:         image,
 				Name:          name.String,
 				Price:         int(price.Float64),
 				With_discount: int(with_discount.Float64),
@@ -325,20 +304,27 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				CreatedAt:     created_at.String,
 				Color:         []models.Color{},
 			}
-			resp.Count = count // Countni birinchi qatorda belgilash
 		}
 
-		// Ranglarni mahsulotga qo'shish
 		if color_id.Valid {
-			productsMap[id.String].Color = append(productsMap[id.String].Color, models.Color{
-				Id:   color_id.String,
-				Name: color_name.String,
-				Url:  color_url.String,
-			})
+			var found bool
+			for _, color := range productsMap[id.String].Color {
+				if color.Id == color_id.String {
+					color.Url = color_url // Update URLs if the color already exists
+					found = true
+					break
+				}
+			}
+			if !found {
+				productsMap[id.String].Color = append(productsMap[id.String].Color, models.Color{
+					Id:   color_id.String,
+					Name: color_name.String,
+					Url:  color_url,
+				})
+			}
 		}
 	}
 
-	// Xaritaning mahsulotlarini qayta ishlash
 	for _, product := range productsMap {
 		resp.Product = append(resp.Product, *product)
 	}
@@ -357,7 +343,6 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
     SET
 		category_id = :category_id,
         favorite = :favorite,
-        image = :image,
         name = :name,
         price = :price,
         with_discount = :with_discount,
@@ -372,7 +357,6 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 		"id":            req.Id,
 		"category_id":   req.CategoryId,
 		"favorite":      req.Favorite,
-		"image":         req.Image,
 		"name":          req.Name,
 		"price":         req.Price,
 		"with_discount": req.With_discount,
@@ -392,16 +376,17 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 }
 
 func (u *productRepo) Delete(ctx context.Context, req *models.ProductPrimaryKey) error {
-
+	// Avval color jadvalidan bog'liq ma'lumotlarni o'chirish
 	_, err := u.db.Exec(ctx, `DELETE FROM color WHERE product_id = $1`, req.Id)
 	if err != nil {
-		u.log.Error("error while deleting product colors", logger.Error(err))
+		u.log.Error("Error while deleting color records: " + err.Error())
 		return err
 	}
 
+	// Keyin product jadvalidan ma'lumotni o'chirish
 	_, err = u.db.Exec(ctx, `DELETE FROM product WHERE id = $1`, req.Id)
 	if err != nil {
-		u.log.Error("error is while deleting product", logger.Error(err))
+		u.log.Error("Error while deleting product: " + err.Error())
 		return err
 	}
 

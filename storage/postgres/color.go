@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/lib/pq"
 )
 
 type colorRepo struct {
@@ -25,28 +26,27 @@ func NewColorRepo(db *pgxpool.Pool, log logger.LoggerI) *colorRepo {
 }
 
 func (u *colorRepo) Create(ctx context.Context, req *models.ColorCreate) (*models.Color, error) {
-
 	var (
 		id = uuid.New().String()
 	)
 
 	query := `
-	INSERT INTO "color" (
-		id,
-		product_id,
-		color_name,
-		color_url,
-		created_at
-	)
-	VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
-	RETURNING id, product_id, color_name, color_url, created_at
-	`
+        INSERT INTO "color" (
+            id,
+            product_id,
+            color_name,
+            color_url,
+            created_at
+        )
+        VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
+        RETURNING id, product_id, color_name, color_url, created_at
+    `
 
 	var (
 		idd        sql.NullString
 		product_id sql.NullString
 		name       sql.NullString
-		url        sql.NullString
+		color_url  pq.StringArray
 		created_at sql.NullTime
 	)
 
@@ -54,10 +54,9 @@ func (u *colorRepo) Create(ctx context.Context, req *models.ColorCreate) (*model
 		&idd,
 		&product_id,
 		&name,
-		&url,
+		&color_url,
 		&created_at,
 	)
-
 	if err != nil {
 		u.log.Error("Error while inserting color: " + err.Error())
 		return nil, err
@@ -67,7 +66,7 @@ func (u *colorRepo) Create(ctx context.Context, req *models.ColorCreate) (*model
 		Id:        idd.String,
 		ProductId: req.ProductId,
 		Name:      name.String,
-		Url:       url.String,
+		Url:       req.Url,
 		CreatedAt: created_at.Time.Format(time.RFC3339),
 	}, nil
 }
@@ -85,7 +84,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			color_name,
 			color_url,
 			created_at
-		FROM "color" 
+		FROM "color"
 	`
 
 	if req.Offset > 0 {
@@ -108,7 +107,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			id         sql.NullString
 			product_id sql.NullString
 			color_name sql.NullString
-			color_url  sql.NullString
+			color_url  pq.StringArray
 			created_at sql.NullString
 		)
 
@@ -129,7 +128,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			Id:        id.String,
 			ProductId: product_id.String,
 			Name:      color_name.String,
-			Url:       color_url.String,
+			Url:       color_url,
 			CreatedAt: created_at.String,
 		})
 	}

@@ -1,26 +1,26 @@
 package models
 
 type Color struct {
-	Id        string `json:"id"`
-	ProductId string `json:"product_id"`
-	Name      string `json:"color_name"`
-	Url       string `json:"color_url"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
-	DeletedAt string `json:"delete_at,omitempty"`
+	Id        string   `json:"id"`
+	ProductId string   `json:"product_id"`
+	Name      string   `json:"color_name"`
+	Url       []string `json:"color_url"`
+	CreatedAt string   `json:"created_at,omitempty"`
+	UpdatedAt string   `json:"updated_at,omitempty"`
+	DeletedAt string   `json:"delete_at,omitempty"`
 }
 
 type ColorCreate struct {
-	ProductId string `json:"product_id"`
-	Name      string `json:"color_name"`
-	Url       string `json:"color_url"`
+	ProductId string   `json:"product_id"`
+	Name      string   `json:"color_name"`
+	Url       []string `json:"color_url"`
 }
 
 type ColorUpdate struct {
-	ProductId string `json:"product_id"`
-	Id        string `json:"id"`
-	Name      string `json:"color_name"`
-	Url       string `json:"color_url"`
+	ProductId string   `json:"product_id"`
+	Id        string   `json:"id"`
+	Name      string   `json:"color_name"`
+	Url       []string `json:"color_url"`
 }
 type ColorPrimaryKey struct {
 	Id string `json:"id"`

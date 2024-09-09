@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS "color" (
     "id" UUID PRIMARY KEY,
     "product_id" UUID REFERENCES "product"("id"),
     "color_name" VARCHAR(100) NOT NULL,  
-    "color_url" VARCHAR(255) NOT NULL, 
+    "color_url" TEXT[], 
     "count" INT DEFAULT 0, 
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP

@@ -96,7 +96,9 @@ definitions:
       color_name:
         type: string
       color_url:
-        type: string
+        items:
+          type: string
+        type: array
       created_at:
         type: string
       delete_at:
@@ -113,7 +115,9 @@ definitions:
       color_name:
         type: string
       color_url:
-        type: string
+        items:
+          type: string
+        type: array
       product_id:
         type: string
     type: object
@@ -207,10 +211,6 @@ definitions:
         type: boolean
       id:
         type: string
-      image:
-        items:
-          type: string
-        type: array
       name:
         type: string
       order_count:
@@ -232,10 +232,6 @@ definitions:
         type: string
       favorite:
         type: boolean
-      image:
-        items:
-          type: string
-        type: array
       name:
         type: string
       order_count:
@@ -266,10 +262,6 @@ definitions:
         type: boolean
       id:
         type: string
-      image:
-        items:
-          type: string
-        type: array
       name:
         type: string
       order_count:
