@@ -174,7 +174,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		args   []interface{}
 	)
 
-	// Query yaratish
+	// Query creation
 	if req.CategoryId != "" {
 		query = `
             WITH RECURSIVE category_hierarchy AS (
@@ -206,6 +206,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	} else {
 		query = `
             SELECT 
+                COUNT(*) OVER(),
                 p.id, 
                 p.category_id,
                 p.favorite, 
@@ -225,6 +226,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
         `
 	}
 
+	// Apply filter for favorite
 	if req.Favorite != nil {
 		if *req.Favorite {
 			filter = " AND p.favorite = true"
@@ -233,6 +235,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		}
 	}
 
+	// Apply pagination
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
@@ -243,7 +246,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 	query = query + filter + offset + limit
 
-	// Queryni bajarish
+	// Execute query
 	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {
 		u.log.Error("Error while getting product list: " + err.Error())
@@ -251,6 +254,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	}
 	defer rows.Close()
 
+	// Map to hold products by ID
 	productsMap := make(map[string]*models.Product)
 
 	for rows.Next() {
@@ -268,9 +272,12 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			color_id      sql.NullString
 			color_name    sql.NullString
 			color_url     pq.StringArray
+			totalCount    int // Added total count to match the COUNT(*) OVER() in the query
 		)
 
+		// Scan the row
 		err = rows.Scan(
+			&totalCount, // Matching the COUNT(*) OVER() from the query
 			&id,
 			&category_id,
 			&product.Favorite,
@@ -290,6 +297,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			return nil, err
 		}
 
+		// Add product to the map if it doesn't exist
 		if _, ok := productsMap[id.String]; !ok {
 			productsMap[id.String] = &models.Product{
 				Id:            id.String,
@@ -306,6 +314,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			}
 		}
 
+		// Add color information if available
 		if color_id.Valid {
 			var found bool
 			for _, color := range productsMap[id.String].Color {
@@ -325,6 +334,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		}
 	}
 
+	// Append the products to the response
 	for _, product := range productsMap {
 		resp.Product = append(resp.Product, *product)
 	}
