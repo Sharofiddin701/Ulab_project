@@ -26,8 +26,9 @@ type CategoryPrimaryKey struct {
 }
 
 type CategoryGetListRequest struct {
-	Offset int `json:"offset"`
-	Limit  int `json:"limit"`
+	Offset int    `json:"offset"`
+	Limit  int    `json:"limit"`
+	Name   string `json:"name"`
 }
 
 type CategoryGetListResponse struct {

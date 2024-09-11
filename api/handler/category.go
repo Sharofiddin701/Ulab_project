@@ -86,6 +86,7 @@ func (h *handler) GetByIdCategory(c *gin.Context) {
 // @Category json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
+// @Param name query string false "name"
 // @Success 200 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
@@ -105,9 +106,12 @@ func (h *handler) GetListCategory(c *gin.Context) {
 		return
 	}
 
+	name := c.Query("name")
+
 	resp, err := h.storage.Category().GetList(c.Request.Context(), &models.CategoryGetListRequest{
 		Offset: offset,
 		Limit:  limit,
+		Name:   name,
 	})
 
 	if err != nil && err.Error() != "no rows in result set" {

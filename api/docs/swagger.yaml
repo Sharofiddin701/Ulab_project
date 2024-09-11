@@ -949,6 +949,10 @@ paths:
         in: query
         name: limit
         type: string
+      - description: name
+        in: query
+        name: name
+        type: string
       responses:
         "200":
           description: Success Request

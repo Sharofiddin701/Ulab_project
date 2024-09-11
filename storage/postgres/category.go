@@ -7,6 +7,7 @@ import (
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -136,6 +137,8 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		query  string
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
+		filter = " WHERE TRUE"
+		args   = make([]interface{}, 0)
 	)
 
 	query = `
@@ -146,24 +149,42 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			url,
 			parent_id,
 			TO_CHAR(created_at,'dd/mm/yyyy')
-		FROM "category" 
+		FROM "category"
 	`
 
+	// Name qidiruvi uchun filter qo'shish
+	if req.Name != "" {
+		// Qidiruv so'rovini bo'shliqlar bo'yicha bo'lish
+		nameParts := strings.Fields(req.Name)
+
+		// Har bir nom qismiga mos ravishda filter sharti tuzish
+		for _, part := range nameParts {
+			filter += fmt.Sprintf(" AND name ILIKE '%%' || $%d || '%%'", len(args)+1)
+			args = append(args, part)
+		}
+	}
+
+	// OFFSET qo'llash
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
 
+	// LIMIT qo'llash
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query += offset + limit
-	rows, err := u.db.Query(ctx, query)
+	// To'g'ri tartibda so'rovni yig'ish (filter avval, offset va limit keyin)
+	query += filter + offset + limit
+
+	// So'rovni bajarish
+	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {
 		u.log.Error("Error while getting category list: " + err.Error())
 		return nil, err
 	}
 
+	// Natijalarni olish
 	for rows.Next() {
 		var (
 			id         sql.NullString
@@ -186,6 +207,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			return nil, err
 		}
 
+		// Natijalarni javob strukturasiga qo'shish
 		resp.Category = append(resp.Category, &models.Category{
 			Id:        id.String,
 			Name:      name.String,
@@ -194,6 +216,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			CreatedAt: created_at.String,
 		})
 	}
+
 	return resp, nil
 }
 
