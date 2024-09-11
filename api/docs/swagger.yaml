@@ -2025,6 +2025,10 @@ paths:
         in: query
         name: category_id
         type: string
+      - description: name
+        in: query
+        name: name
+        type: string
       responses:
         "200":
           description: Success Request

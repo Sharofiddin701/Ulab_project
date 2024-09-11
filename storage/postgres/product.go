@@ -7,6 +7,7 @@ import (
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
+	"strings"
 	"time"
 
 	uuid "github.com/google/uuid"
@@ -226,6 +227,17 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
         `
 	}
 
+	// Apply name filter with splitting and ILIKE query
+	if req.Name != "" {
+		// Split the search query by spaces to handle multiple words
+		nameParts := strings.Fields(req.Name)
+
+		// Construct the filter condition for each part of the name
+		for _, part := range nameParts {
+			filter += fmt.Sprintf(" AND p.name ILIKE '%%' || $%d || '%%'", len(args)+1)
+			args = append(args, part)
+		}
+	}
 	// Apply filter for favorite
 	if req.Favorite != nil {
 		if *req.Favorite {

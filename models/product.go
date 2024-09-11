@@ -47,6 +47,7 @@ type ProductGetListRequest struct {
 	Favorite   *bool  `json:"favorite"`
 	Offset     int    `json:"offset"`
 	Limit      int    `json:"limit"`
+	Name       string `json:"name"`
 }
 
 type ProductGetListResponse struct {

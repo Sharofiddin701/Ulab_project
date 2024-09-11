@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS "orders" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id")
@@ -58,6 +57,10 @@ CREATE TABLE IF NOT EXISTS "product" (
     "price" DECIMAL(10, 2) NOT NULL,
     "with_discount" DECIMAL(10, 2),
     "rating" FLOAT NOT NULL,
+    "cheapening_time" TIME,
+    "percentage" DECIMAL(5, 2);
+    "product_status" AS ENUM ('skidka', 'novinka'); 
+    "monthly_payment" DECIMAL(10, 2);
     "description"VARCHAR(1000), 
     "order_count" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

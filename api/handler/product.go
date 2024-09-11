@@ -88,6 +88,7 @@ func (h *handler) GetByIdProduct(c *gin.Context) {
 // @Param limit query string false "limit"
 // @Param favorite query string false "favorite"
 // @Param category_id query string false "category_id"
+// @Param name query string false "name"
 // @Success 200 {object} Response{data=models.ProductGetListResponse} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
@@ -123,12 +124,16 @@ func (h *handler) GetListProduct(c *gin.Context) {
 	// Parse category_id
 	categoryId := c.Query("category_id")
 
+	// Parse name
+	name := c.Query("name")
+
 	// Fetch product list
 	resp, err := h.storage.Product().GetList(c.Request.Context(), &models.ProductGetListRequest{
 		Offset:     offset,
 		Limit:      limit,
 		Favorite:   favorite,
 		CategoryId: categoryId,
+		Name:       name, // Pass the name filter
 	})
 
 	if err != nil && err.Error() != "no rows in result set" {
