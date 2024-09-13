@@ -120,38 +120,6 @@ func (h *handler) GetListBrand(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// Delete Brand godoc
-// @ID delete_brand
-// @Router /e_commerce/api/v1/brand/{id} [DELETE]
-// @Summary Delete Brand
-// @Description Delete Brand
-// @Tags Brand
-// @Accept json
-// @Brand json
-// @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) DeleteBrand(c *gin.Context) {
-	var id = c.Param("id")
-
-	if !helper.IsValidUUID(id) {
-		h.logger.Error("is not valid uuid!")
-		c.JSON(http.StatusBadRequest, "invalid id!")
-		return
-	}
-
-	err := h.storage.Brand().Delete(c.Request.Context(), &models.BrandPrimaryKey{Id: id})
-	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "storage.Brand.Delete!")
-		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
-		return
-	}
-
-	h.logger.Info("Brand Deleted Successfully!")
-	c.JSON(http.StatusNoContent, nil)
-}
-
 // Update Brand godoc
 // @ID update_brand
 // @Router /e_commerce/api/v1/brand/{id} [PUT]
@@ -207,4 +175,36 @@ func (h *handler) UpdateBrand(c *gin.Context) {
 
 	h.logger.Info("Update Brand Successfully!")
 	c.JSON(http.StatusAccepted, resp)
+}
+
+// Delete Brand godoc
+// @ID delete_brand
+// @Router /e_commerce/api/v1/brand/{id} [DELETE]
+// @Summary Delete Brand
+// @Description Delete Brand
+// @Tags Brand
+// @Accept json
+// @Brand json
+// @Param id path string true "id"
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server error"
+func (h *handler) DeleteBrand(c *gin.Context) {
+	var id = c.Param("id")
+
+	if !helper.IsValidUUID(id) {
+		h.logger.Error("is not valid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id!")
+		return
+	}
+
+	err := h.storage.Brand().Delete(c.Request.Context(), &models.BrandPrimaryKey{Id: id})
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "storage.Brand.Delete!")
+		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
+		return
+	}
+
+	h.logger.Info("Brand Deleted Successfully!")
+	c.JSON(http.StatusNoContent, nil)
 }

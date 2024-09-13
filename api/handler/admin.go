@@ -119,38 +119,6 @@ func (h *handler) GetListAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// Delete Admin godoc
-// @ID delete_admin
-// @Router /e_commerce/api/v1/admin/{id} [DELETE]
-// @Summary Delete Admin
-// @Description Delete Admin
-// @Tags Admin
-// @Accept json
-// @Admin json
-// @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) DeleteAdmin(c *gin.Context) {
-	var id = c.Param("id")
-
-	if !helper.IsValidUUID(id) {
-		h.logger.Error("is not valid uuid!")
-		c.JSON(http.StatusBadRequest, "invalid id!")
-		return
-	}
-
-	err := h.storage.Admin().Delete(c.Request.Context(), &models.AdminPrimaryKey{Id: id})
-	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "storage.Admin.Delete!")
-		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
-		return
-	}
-
-	h.logger.Info("Admin Deleted Successfully!")
-	c.JSON(http.StatusNoContent, nil)
-}
-
 // Update Admin godoc
 // @ID update_admin
 // @Router /e_commerce/api/v1/admin/{id} [PUT]
@@ -206,4 +174,36 @@ func (h *handler) UpdateAdmin(c *gin.Context) {
 
 	h.logger.Info("Update Admin Successfully!")
 	c.JSON(http.StatusAccepted, resp)
+}
+
+// Delete Admin godoc
+// @ID delete_admin
+// @Router /e_commerce/api/v1/admin/{id} [DELETE]
+// @Summary Delete Admin
+// @Description Delete Admin
+// @Tags Admin
+// @Accept json
+// @Admin json
+// @Param id path string true "id"
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server error"
+func (h *handler) DeleteAdmin(c *gin.Context) {
+	var id = c.Param("id")
+
+	if !helper.IsValidUUID(id) {
+		h.logger.Error("is not valid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id!")
+		return
+	}
+
+	err := h.storage.Admin().Delete(c.Request.Context(), &models.AdminPrimaryKey{Id: id})
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "storage.Admin.Delete!")
+		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
+		return
+	}
+
+	h.logger.Info("Admin Deleted Successfully!")
+	c.JSON(http.StatusNoContent, nil)
 }

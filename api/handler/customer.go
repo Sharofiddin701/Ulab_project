@@ -120,38 +120,6 @@ func (h *handler) GetListCustomer(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// Delete Customer godoc
-// @ID delete_customer
-// @Router /e_commerce/api/v1/customer/{id} [DELETE]
-// @Summary Delete Customer
-// @Description Delete Customer
-// @Tags Customer
-// @Accept json
-// @Customer json
-// @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) DeleteCustomer(c *gin.Context) {
-	var id = c.Param("id")
-
-	if !helper.IsValidUUID(id) {
-		h.logger.Error("is not valid uuid!")
-		c.JSON(http.StatusBadRequest, "invalid id!")
-		return
-	}
-
-	err := h.storage.Customer().Delete(c.Request.Context(), &models.CustomerPrimaryKey{Id: id})
-	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "storage.Customer.Delete!")
-		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
-		return
-	}
-
-	h.logger.Info("Customer Deleted Successfully!")
-	c.JSON(http.StatusNoContent, nil)
-}
-
 // Update Customer godoc
 // @ID update_customer
 // @Router /e_commerce/api/v1/customer/{id} [PUT]
@@ -207,4 +175,36 @@ func (h *handler) UpdateCustomer(c *gin.Context) {
 
 	h.logger.Info("Update Customer Successfully!")
 	c.JSON(http.StatusAccepted, resp)
+}
+
+// Delete Customer godoc
+// @ID delete_customer
+// @Router /e_commerce/api/v1/customer/{id} [DELETE]
+// @Summary Delete Customer
+// @Description Delete Customer
+// @Tags Customer
+// @Accept json
+// @Customer json
+// @Param id path string true "id"
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server error"
+func (h *handler) DeleteCustomer(c *gin.Context) {
+	var id = c.Param("id")
+
+	if !helper.IsValidUUID(id) {
+		h.logger.Error("is not valid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id!")
+		return
+	}
+
+	err := h.storage.Customer().Delete(c.Request.Context(), &models.CustomerPrimaryKey{Id: id})
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "storage.Customer.Delete!")
+		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
+		return
+	}
+
+	h.logger.Info("Customer Deleted Successfully!")
+	c.JSON(http.StatusNoContent, nil)
 }

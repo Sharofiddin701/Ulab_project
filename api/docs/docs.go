@@ -2352,7 +2352,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Order"
+                                            }
                                         }
                                     }
                                 }
@@ -2414,12 +2417,12 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.OrderCreate"
+                            "$ref": "#/definitions/models.SwaggerOrderCreateRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Success Request",
                         "schema": {
                             "allOf": [
@@ -2508,7 +2511,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.Order"
                                         }
                                     }
                                 }
@@ -2582,7 +2585,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "202": {
                         "description": "Success Request",
                         "schema": {
                             "allOf": [
@@ -2593,7 +2596,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "string"
+                                            "$ref": "#/definitions/models.OrderUpdate"
                                         }
                                     }
                                 }
@@ -2658,419 +2661,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Success Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/e_commerce/api/v1/order_product": {
-            "get": {
-                "description": "Get List OrderProducts",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OrderProduct"
-                ],
-                "summary": "Get List OrderProducts",
-                "operationId": "get_list_order_products",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "offset",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "limit",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "category_id",
-                        "name": "category_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "brand_id",
-                        "name": "brand_id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create OrderProduct",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OrderProduct"
-                ],
-                "summary": "Create OrderProduct",
-                "operationId": "create_order_product",
-                "parameters": [
-                    {
-                        "description": "CreateOrderProductRequest",
-                        "name": "OrderProduct",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.OrderProductCreate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/e_commerce/api/v1/order_product/{id}": {
-            "get": {
-                "description": "Get By ID OrderProduct",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OrderProduct"
-                ],
-                "summary": "Get By ID OrderProduct",
-                "operationId": "get_by_id_order_product",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update OrderProduct",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OrderProduct"
-                ],
-                "summary": "Update OrderProduct",
-                "operationId": "update_order_product",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "UpdateOrderProductRequest",
-                        "name": "OrderProduct",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.OrderProductUpdate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete OrderProduct",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OrderProduct"
-                ],
-                "summary": "Delete OrderProduct",
-                "operationId": "delete_order_product",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
+                    "204": {
                         "description": "Success Request",
                         "schema": {
                             "allOf": [
@@ -3863,40 +3454,55 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Order": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "string"
+                },
+                "delete_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OrderItems"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.OrderCreate": {
             "type": "object",
             "properties": {
                 "customer_id": {
                     "type": "string"
-                },
-                "payment": {
-                    "type": "string"
-                },
-                "shipping": {
-                    "type": "string"
                 }
             }
         },
-        "models.OrderProductCreate": {
+        "models.OrderItems": {
             "type": "object",
             "properties": {
-                "order_id": {
+                "created_at": {
                     "type": "string"
                 },
-                "price": {
+                "delete_at": {
                     "type": "string"
                 },
-                "product_id": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.OrderProductUpdate": {
-            "type": "object",
-            "properties": {
                 "id": {
                     "type": "string"
                 },
@@ -3904,12 +3510,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "product_id": {
                     "type": "string"
                 },
                 "quantity": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -3923,11 +3535,11 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "payment": {
+                "status": {
                     "type": "string"
                 },
-                "shipping": {
-                    "type": "string"
+                "total_price": {
+                    "type": "number"
                 }
             }
         },
@@ -3964,8 +3576,11 @@ const docTemplate = `{
                 "order_count": {
                     "type": "integer"
                 },
+                "order_id": {
+                    "type": "string"
+                },
                 "price": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "rating": {
                     "type": "number"
@@ -3974,7 +3589,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "with_discount": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         },
@@ -3996,14 +3611,17 @@ const docTemplate = `{
                 "order_count": {
                     "type": "integer"
                 },
+                "order_id": {
+                    "type": "string"
+                },
                 "price": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "rating": {
                     "type": "number"
                 },
                 "with_discount": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         },
@@ -4042,13 +3660,41 @@ const docTemplate = `{
                 "order_count": {
                     "type": "integer"
                 },
+                "order_id": {
+                    "type": "string"
+                },
                 "price": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "rating": {
                     "type": "number"
                 },
                 "with_discount": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.SwaggerOrderCreateRequest": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SwaggerOrderItems"
+                    }
+                },
+                "order": {
+                    "$ref": "#/definitions/models.OrderCreate"
+                }
+            }
+        },
+        "models.SwaggerOrderItems": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
                     "type": "integer"
                 }
             }

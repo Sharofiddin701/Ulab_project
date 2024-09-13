@@ -124,38 +124,6 @@ func (h *handler) GetListCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// Delete Category godoc
-// @ID delete_category
-// @Router /e_commerce/api/v1/category/{id} [DELETE]
-// @Summary Delete Category
-// @Description Delete Category
-// @Tags Category
-// @Accept json
-// @Category json
-// @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) DeleteCategory(c *gin.Context) {
-	var id = c.Param("id")
-
-	if !helper.IsValidUUID(id) {
-		h.logger.Error("is not valid uuid!")
-		c.JSON(http.StatusBadRequest, "invalid id!")
-		return
-	}
-
-	err := h.storage.Category().Delete(c.Request.Context(), &models.CategoryPrimaryKey{Id: id})
-	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "storage.Category.Delete!")
-		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
-		return
-	}
-
-	h.logger.Info("Category Deleted Successfully!")
-	c.JSON(http.StatusNoContent, nil)
-}
-
 // Update Category godoc
 // @ID update_category
 // @Router /e_commerce/api/v1/category/{id} [PUT]
@@ -211,4 +179,36 @@ func (h *handler) UpdateCategory(c *gin.Context) {
 
 	h.logger.Info("Update Category Successfully!")
 	c.JSON(http.StatusAccepted, resp)
+}
+
+// Delete Category godoc
+// @ID delete_category
+// @Router /e_commerce/api/v1/category/{id} [DELETE]
+// @Summary Delete Category
+// @Description Delete Category
+// @Tags Category
+// @Accept json
+// @Category json
+// @Param id path string true "id"
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server error"
+func (h *handler) DeleteCategory(c *gin.Context) {
+	var id = c.Param("id")
+
+	if !helper.IsValidUUID(id) {
+		h.logger.Error("is not valid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id!")
+		return
+	}
+
+	err := h.storage.Category().Delete(c.Request.Context(), &models.CategoryPrimaryKey{Id: id})
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "storage.Category.Delete!")
+		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
+		return
+	}
+
+	h.logger.Info("Category Deleted Successfully!")
+	c.JSON(http.StatusNoContent, nil)
 }

@@ -2,14 +2,11 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"e-commerce/models"
-	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
-	"time"
 
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -25,217 +22,153 @@ func NewOrderRepo(db *pgxpool.Pool, log logger.LoggerI) *orderRepo {
 	}
 }
 
-func (u *orderRepo) Create(ctx context.Context, req *models.OrderCreate) (*models.Order, error) {
-	var (
-		id          = uuid.New().String()
-		query       string
-		currentTime = time.Now()
-		err         error
-	)
-
-	query = `
-		INSERT INTO "orders" (
-			id,
-			customer_id,
-			shipping,
-			payment,
-			created_at
-		)
-		VALUES($1, $2, $3, $4, $5)
-	`
-
-	_, err = u.db.Exec(ctx, query,
-		id,
-		req.CustomerId,
-		req.Shipping,
-		req.Payment,
-		currentTime,
-	)
+func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.OrderCreateRequest, error) {
+	tx, err := o.db.Begin(context.Background())
 	if err != nil {
-		u.log.Error("error while creating order data: " + err.Error())
-		return nil, err
+		return &models.OrderCreateRequest{}, err
 	}
-
-	resp, err := u.GetByID(ctx, &models.OrderPrimaryKey{Id: id})
-	if err != nil {
-		u.log.Error("error getting order by ID: " + err.Error())
-		return nil, err
-	}
-
-	// Consultation status update logic if needed
-	// query1 := `
-	// 		UPDATE consultations
-	// 		SET status = 'finished'
-	// 		WHERE patient_id = $1 AND employee_id = $2
-	// `
-	// _, err = u.db.Exec(ctx, query1, req.PatientId, req.EmployeeID)
-	// if err != nil {
-	// 	u.log.Error("error while updating consultation data: " + err.Error())
-	// 	return nil, err
-	// }
-
-	return resp, nil
-}
-
-func (u *orderRepo) GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*models.Order, error) {
-	var (
-		query       string
-		id          sql.NullString
-		customer_id sql.NullString
-		shipping    sql.NullString
-		payment     sql.NullString
-		created_at  sql.NullString
-	)
-
-	query = `
-		SELECT 
-			id,
-			customer_id,
-			shipping,
-			payment,
-			TO_CHAR(created_at,'dd/mm/yyyy'),
-		FROM "orders" 
-		WHERE id = $1
-	`
-
-	err := u.db.QueryRow(ctx, query, req.Id).Scan(
-		&id,
-		&customer_id,
-		&shipping,
-		&payment,
-		&created_at,
-	)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			u.log.Warn("no rows found for order ID: " + req.Id)
-			return nil, nil
+	defer func() {
+		if err != nil {
+			tx.Rollback(context.Background())
 		}
-		u.log.Error("error while scanning data: " + err.Error())
+	}()
+
+	// Generate a new UUID for the order
+	orderId := uuid.New().String()
+
+	// Total price calculation - use float64 for prices
+	var totalSum float64
+	for i, item := range order.Items {
+		if item.Quantity <= 0 {
+			return &models.OrderCreateRequest{}, fmt.Errorf("quantity must be greater than 0 for product %s", item.ProductId)
+		}
+
+		// Get price from product table
+		var productPrice float64
+		productQuery := `SELECT price FROM "product" WHERE id = $1`
+		err = o.db.QueryRow(context.Background(), productQuery, item.ProductId).Scan(&productPrice)
+		if err != nil {
+			return &models.OrderCreateRequest{}, fmt.Errorf("failed to retrieve price for product %s: %w", item.ProductId, err)
+		}
+
+		// Calculate the total price for this item
+		order.Items[i].Price = productPrice
+		order.Items[i].TotalPrice = productPrice * float64(item.Quantity)
+		totalSum += order.Items[i].TotalPrice
+	}
+
+	// Insert the order
+	orderQuery := `INSERT INTO "orders" (id, customer_id, total_price, created_at, updated_at) 
+		  VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
+
+	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, totalSum)
+	if err != nil {
+		return &models.OrderCreateRequest{}, err
+	}
+
+	// Insert the order items
+	itemQuery := `INSERT INTO "order_items" (id, quantity, order_id, product_id, price, total, created_at, updated_at) 
+		 VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+
+	for _, item := range order.Items {
+		itemId := uuid.New().String()
+		_, err = tx.Exec(context.Background(), itemQuery, itemId, item.Quantity, orderId, item.ProductId, item.Price, item.TotalPrice)
+		if err != nil {
+			return &models.OrderCreateRequest{}, err
+		}
+	}
+
+	order.Order.Id = orderId
+	order.Order.TotalPrice = totalSum
+
+	return order, tx.Commit(context.Background())
+}
+
+func (o *orderRepo) GetOrder(orderId string) (*models.Order, error) {
+	query := `SELECT id, customer_id, total_price, status, created_at, updated_at FROM "orders" WHERE id = $1`
+	row := o.db.QueryRow(context.Background(), query, orderId)
+
+	var order models.Order
+	err := row.Scan(&order.Id, &order.CustomerId, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt)
+	if err != nil {
 		return nil, err
 	}
 
-	return &models.Order{
-		Id:         id.String,
-		CustomerId: customer_id.String,
-		Shipping:   shipping.String,
-		Payment:    payment.String,
-		CreatedAt:  created_at.String,
-	}, nil
+	return &order, nil
 }
 
-func (u *orderRepo) GetList(ctx context.Context, req *models.OrderGetListRequest) (*models.OrderGetListResponse, error) {
+func (o *orderRepo) GetList(req *models.OrderGetListRequest) ([]models.OrderItems, error) {
 	var (
-		resp   = &models.OrderGetListResponse{}
-		query  string
-		where  = " WHERE TRUE "
-		offset = " OFFSET 0"
-		limit  = " LIMIT 10"
-		filter = " ORDER BY created_at DESC"
+		items   []models.OrderItems
+		orderId models.OrderPrimaryKey
 	)
+	// Default values for OFFSET and LIMIT
+	offset := " OFFSET 0"
+	limit := " LIMIT 10"
 
-	if len(req.CustomerId) > 0 {
-		where += fmt.Sprintf(" AND customer_id = '%s' ", req.CustomerId)
-		limit = " LIMIT 100"
-	}
-
+	// Apply OFFSET if specified
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
 
+	// Apply LIMIT if specified
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query = `
-		SELECT
-			COUNT(*) OVER(),
-			id,
-			customer_id,
-			shipping,
-			payment,
-			TO_CHAR(created_at, 'dd/mm/yyyy'),
-		FROM "orders"
-	` + where + filter + offset + limit
+	// Main query with OFFSET and LIMIT
+	query := `
+		SELECT id, order_id, product_id, quantity, price, total, created_at, updated_at 
+		FROM "order_items" 
+		WHERE order_id = $1` + offset + limit
 
-	rows, err := u.db.Query(ctx, query)
+	// Execute the query
+	rows, err := o.db.Query(context.Background(), query, orderId.Id)
 	if err != nil {
-		u.log.Error("error while getting order list: " + err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
+	// Scan the results
 	for rows.Next() {
-		var (
-			id          sql.NullString
-			customer_id sql.NullString
-			shipping    sql.NullString
-			payment     sql.NullString
-			created_at  sql.NullString
-		)
-
-		err = rows.Scan(
-			&resp.Count,
-			&id,
-			&customer_id,
-			&shipping,
-			&payment,
-			&created_at,
-		)
+		var item models.OrderItems
+		err := rows.Scan(&item.Id, &item.OrderId, &item.ProductId, &item.Quantity, &item.Price, &item.TotalPrice, &item.CreatedAt, &item.UpdatedAt)
 		if err != nil {
-			u.log.Error("error while scanning order list data: " + err.Error())
 			return nil, err
 		}
-
-		resp.Order = append(resp.Order, &models.Order{
-			Id:         id.String,
-			CustomerId: customer_id.String,
-			Shipping:   shipping.String,
-			Payment:    payment.String,
-			CreatedAt:  created_at.String,
-		})
+		items = append(items, item)
 	}
-	return resp, nil
+
+	return items, nil
 }
 
-func (u *orderRepo) Update(ctx context.Context, req *models.OrderUpdate) (int64, error) {
-	var (
-		query  string
-		params map[string]interface{}
-	)
-
-	query = `
-		UPDATE "orders"
-		SET
-			shipping = :shipping,
-			payment = :payment,
-			updated_at = :updated_at
-		WHERE id = :id
-	`
-
-	params = map[string]interface{}{
-		"id":         req.Id,
-		"shipping":   req.Shipping,
-		"payment":    req.Payment,
-		"updated_at": time.Now(),
-	}
-
-	query, args := helper.ReplaceQueryParams(query, params)
-	result, err := u.db.Exec(ctx, query, args...)
-	if err != nil {
-		u.log.Error("error while updating order data: " + err.Error())
-		return 0, err
-	}
-
-	return result.RowsAffected(), nil
+func (o *orderRepo) UpdateOrder(order models.Order) error {
+	query := `UPDATE "orders" SET customer_id = $1, total_price = $2, status = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4`
+	_, err := o.db.Exec(context.Background(), query, order.CustomerId, order.TotalPrice, order.Status, order.Id)
+	return err
 }
 
-func (u *orderRepo) Delete(ctx context.Context, req *models.OrderPrimaryKey) error {
-	_, err := u.db.Exec(ctx, `UPDATE orders SET deleted_at = $1 WHERE id = $2`, time.Now(), req.Id)
+func (o *orderRepo) DeleteOrder(orderId string) error {
+	tx, err := o.db.Begin(context.Background())
 	if err != nil {
-		u.log.Error("error while deleting order: " + err.Error())
 		return err
 	}
 
-	return nil
+	// Delete order items
+	itemQuery := `DELETE FROM "order_items" WHERE order_id = $1`
+	_, err = tx.Exec(context.Background(), itemQuery, orderId)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+
+	// Delete the order
+	orderQuery := `DELETE FROM "orders" WHERE id = $1`
+	_, err = tx.Exec(context.Background(), orderQuery, orderId)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+
+	return tx.Commit(context.Background())
 }

@@ -13,7 +13,6 @@ type StorageI interface {
 	Category() CategoryI
 	Order() OrderI
 	Product() ProductI
-	OrderProduct() OrderProductI
 	Banner() BannerI
 	Color() ColorI
 }
@@ -50,12 +49,20 @@ type CategoryI interface {
 	Delete(ctx context.Context, req *models.CategoryPrimaryKey) error
 }
 
+// type OrderI interface {
+// 	Create(ctx context.Context, req *models.OrderCreate) (*models.Order, error)
+// 	GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*models.Order, error)
+// 	GetList(ctx context.Context, req *models.OrderGetListRequest) (*models.OrderGetListResponse, error)
+// 	Update(ctx context.Context, req *models.OrderUpdate) (int64, error)
+// 	Delete(ctx context.Context, req *models.OrderPrimaryKey) error
+// }
+
 type OrderI interface {
-	Create(ctx context.Context, req *models.OrderCreate) (*models.Order, error)
-	GetByID(ctx context.Context, req *models.OrderPrimaryKey) (*models.Order, error)
-	GetList(ctx context.Context, req *models.OrderGetListRequest) (*models.OrderGetListResponse, error)
-	Update(ctx context.Context, req *models.OrderUpdate) (int64, error)
-	Delete(ctx context.Context, req *models.OrderPrimaryKey) error
+	CreateOrder(request *models.OrderCreateRequest) (*models.OrderCreateRequest, error)
+	GetOrder(orderId string) (*models.Order, error)
+	GetList(req *models.OrderGetListRequest) ([]models.OrderItems, error)
+	UpdateOrder(order models.Order) error
+	DeleteOrder(orderId string) error
 }
 
 type ProductI interface {
@@ -64,14 +71,6 @@ type ProductI interface {
 	GetList(ctx context.Context, req *models.ProductGetListRequest) (*models.ProductGetListResponse, error)
 	Update(ctx context.Context, req *models.ProductUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.ProductPrimaryKey) error
-}
-
-type OrderProductI interface {
-	Create(ctx context.Context, req *models.OrderProductCreate) (*models.OrderProduct, error)
-	GetByID(ctx context.Context, req *models.OrderProductPrimaryKey) (*models.OrderProduct, error)
-	GetList(ctx context.Context, req *models.OrderProductGetListRequest) (*models.OrderProductGetListResponse, error)
-	Update(ctx context.Context, req *models.OrderProductUpdate) (int64, error)
-	Delete(ctx context.Context, req *models.OrderProductPrimaryKey) error
 }
 
 type BannerI interface {
@@ -87,5 +86,3 @@ type ColorI interface {
 	GetList(ctx context.Context, req *models.ColorGetListRequest) (*models.ColorGetListResponse, error)
 	Delete(ctx context.Context, req *models.ColorPrimaryKey) error
 }
-
-

@@ -149,37 +149,51 @@ definitions:
       phone_number:
         type: string
     type: object
+  models.Order:
+    properties:
+      created_at:
+        type: string
+      customer_id:
+        type: string
+      delete_at:
+        type: string
+      id:
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/models.OrderItems'
+        type: array
+      status:
+        type: string
+      total_price:
+        type: number
+      updated_at:
+        type: string
+    type: object
   models.OrderCreate:
     properties:
       customer_id:
         type: string
-      payment:
-        type: string
-      shipping:
-        type: string
     type: object
-  models.OrderProductCreate:
+  models.OrderItems:
     properties:
-      order_id:
+      created_at:
         type: string
-      price:
+      delete_at:
         type: string
-      product_id:
-        type: string
-      quantity:
-        type: string
-    type: object
-  models.OrderProductUpdate:
-    properties:
       id:
         type: string
       order_id:
         type: string
       price:
-        type: string
+        type: number
       product_id:
         type: string
       quantity:
+        type: integer
+      total:
+        type: number
+      updated_at:
         type: string
     type: object
   models.OrderUpdate:
@@ -188,10 +202,10 @@ definitions:
         type: string
       id:
         type: string
-      payment:
+      status:
         type: string
-      shipping:
-        type: string
+      total_price:
+        type: number
     type: object
   models.Product:
     properties:
@@ -215,14 +229,16 @@ definitions:
         type: string
       order_count:
         type: integer
+      order_id:
+        type: string
       price:
-        type: integer
+        type: number
       rating:
         type: number
       updated_at:
         type: string
       with_discount:
-        type: integer
+        type: number
     type: object
   models.ProductCreate:
     properties:
@@ -236,12 +252,14 @@ definitions:
         type: string
       order_count:
         type: integer
+      order_id:
+        type: string
       price:
-        type: integer
+        type: number
       rating:
         type: number
       with_discount:
-        type: integer
+        type: number
     type: object
   models.ProductGetListResponse:
     properties:
@@ -266,11 +284,29 @@ definitions:
         type: string
       order_count:
         type: integer
+      order_id:
+        type: string
       price:
-        type: integer
+        type: number
       rating:
         type: number
       with_discount:
+        type: number
+    type: object
+  models.SwaggerOrderCreateRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.SwaggerOrderItems'
+        type: array
+      order:
+        $ref: '#/definitions/models.OrderCreate'
+    type: object
+  models.SwaggerOrderItems:
+    properties:
+      product_id:
+        type: string
+      quantity:
         type: integer
     type: object
 info:
@@ -1577,7 +1613,9 @@ paths:
             - $ref: '#/definitions/handler.Response'
             - properties:
                 data:
-                  type: string
+                  items:
+                    $ref: '#/definitions/models.Order'
+                  type: array
               type: object
         "400":
           description: Bad Request
@@ -1611,9 +1649,9 @@ paths:
         name: Order
         required: true
         schema:
-          $ref: '#/definitions/models.OrderCreate'
+          $ref: '#/definitions/models.SwaggerOrderCreateRequest'
       responses:
-        "200":
+        "201":
           description: Success Request
           schema:
             allOf:
@@ -1656,7 +1694,7 @@ paths:
         required: true
         type: string
       responses:
-        "200":
+        "204":
           description: Success Request
           schema:
             allOf:
@@ -1705,7 +1743,7 @@ paths:
             - $ref: '#/definitions/handler.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.Order'
               type: object
         "400":
           description: Bad Request
@@ -1746,14 +1784,14 @@ paths:
         schema:
           $ref: '#/definitions/models.OrderUpdate'
       responses:
-        "200":
+        "202":
           description: Success Request
           schema:
             allOf:
             - $ref: '#/definitions/handler.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/models.OrderUpdate'
               type: object
         "400":
           description: Bad Request
@@ -1776,236 +1814,6 @@ paths:
       summary: Update Order
       tags:
       - Order
-  /e_commerce/api/v1/order_product:
-    get:
-      consumes:
-      - application/json
-      description: Get List OrderProducts
-      operationId: get_list_order_products
-      parameters:
-      - description: offset
-        in: query
-        name: offset
-        type: string
-      - description: limit
-        in: query
-        name: limit
-        type: string
-      - description: category_id
-        in: query
-        name: category_id
-        type: string
-      - description: brand_id
-        in: query
-        name: brand_id
-        type: string
-      responses:
-        "200":
-          description: Success Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server error
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get List OrderProducts
-      tags:
-      - OrderProduct
-    post:
-      consumes:
-      - application/json
-      description: Create OrderProduct
-      operationId: create_order_product
-      parameters:
-      - description: CreateOrderProductRequest
-        in: body
-        name: OrderProduct
-        required: true
-        schema:
-          $ref: '#/definitions/models.OrderProductCreate'
-      responses:
-        "200":
-          description: Success Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server error
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Create OrderProduct
-      tags:
-      - OrderProduct
-  /e_commerce/api/v1/order_product/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete OrderProduct
-      operationId: delete_order_product
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: Success Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server error
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Delete OrderProduct
-      tags:
-      - OrderProduct
-    get:
-      consumes:
-      - application/json
-      description: Get By ID OrderProduct
-      operationId: get_by_id_order_product
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: Success Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server error
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Get By ID OrderProduct
-      tags:
-      - OrderProduct
-    put:
-      consumes:
-      - application/json
-      description: Update OrderProduct
-      operationId: update_order_product
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: UpdateOrderProductRequest
-        in: body
-        name: OrderProduct
-        required: true
-        schema:
-          $ref: '#/definitions/models.OrderProductUpdate'
-      responses:
-        "200":
-          description: Success Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "500":
-          description: Server error
-          schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: Update OrderProduct
-      tags:
-      - OrderProduct
   /e_commerce/api/v1/product:
     get:
       consumes:

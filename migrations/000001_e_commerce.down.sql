@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS "order_products";
+DROP TABLE IF EXISTS "order_items";
 DROP TABLE IF EXISTS "product";
 DROP TABLE IF EXISTS "orders";
 DROP TABLE IF EXISTS "customer";

@@ -3,41 +3,71 @@ package handler
 import (
 	"e-commerce/models"
 	"e-commerce/pkg/helper"
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 // Create Order godoc
-// @ID create_order
-// @Router /e_commerce/api/v1/order [POST]
-// @Summary Create Order
+// @ID          create_order
+// @Router      /e_commerce/api/v1/order [POST]
+// @Summary     Create Order
 // @Description Create Order
-// @Tags Order
-// @Accept json
-// @Order json
-// @Param Order body models.OrderCreate true "CreateOrderRequest"
-// @Success 200 {object} Response{data=string} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
+// @Tags        Order
+// @Accept      json
+// @Order       json
+// @Param       Order body models.SwaggerOrderCreateRequest true "CreateOrderRequest"
+// @Success     201 {object} Response{data=string} "Success Request"
+// @Response    400 {object} Response{data=string} "Bad Request"
+// @Failure     500 {object} Response{data=string} "Server error"
 func (h *handler) CreateOrder(c *gin.Context) {
-	var orderCreate models.OrderCreate
+	var (
+		request models.OrderCreateRequest
+	)
 
-	if err := c.ShouldBindJSON(&orderCreate); err != nil {
-		h.logger.Error("error in ShouldBindJSON: " + err.Error())
-		c.JSON(http.StatusBadRequest, "Please, Enter Valid Data!")
+	// Debug incoming data
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		h.logger.Error("error reading body: " + err.Error())
+		c.JSON(http.StatusInternalServerError, Response{Data: "Server Error!"})
+		return
+	}
+	h.logger.Info("Incoming JSON: " + string(body))
+
+	// JSONni request modelga unmarshall qilish
+	err = json.Unmarshal(body, &request)
+	if err != nil {
+		h.logger.Error("error unmarshalling JSON: " + err.Error())
+		c.JSON(http.StatusBadRequest, Response{Data: "Invalid JSON!"})
 		return
 	}
 
-	resp, err := h.storage.Order().Create(c.Request.Context(), &orderCreate)
+	// UUID qiymatlarni tekshirish
+	if request.Order.CustomerId == "" {
+		h.logger.Error("Customer ID is empty!")
+		c.JSON(http.StatusBadRequest, Response{Data: "Customer ID is required!"})
+		return
+	}
+	for _, item := range request.Items {
+		if item.ProductId == "" {
+			h.logger.Error("Product ID is empty for one of the items!")
+			c.JSON(http.StatusBadRequest, Response{Data: "Product ID is required for each item!"})
+			return
+		}
+	}
+
+	// Orderni yaratish
+	order, err := h.storage.Order().CreateOrder(&request)
 	if err != nil {
-		h.logger.Error("error in Order.Create: " + err.Error())
-		c.JSON(http.StatusInternalServerError, "Server Error!")
+		h.logger.Error("error in Order.CreateOrder: " + err.Error())
+		c.JSON(http.StatusInternalServerError, Response{Data: "Server Error!"})
 		return
 	}
 
 	h.logger.Info("Order Created Successfully!")
-	c.JSON(http.StatusCreated, resp)
+	c.JSON(http.StatusCreated, Response{Data: order})
 }
 
 // GetByID Order godoc
@@ -49,7 +79,7 @@ func (h *handler) CreateOrder(c *gin.Context) {
 // @Accept json
 // @Order json
 // @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
+// @Success 200 {object} Response{data=models.Order} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) GetByIdOrder(c *gin.Context) {
@@ -57,19 +87,19 @@ func (h *handler) GetByIdOrder(c *gin.Context) {
 
 	if !helper.IsValidUUID(id) {
 		h.logger.Error("invalid UUID format!")
-		c.JSON(http.StatusBadRequest, "Invalid ID!")
+		c.JSON(http.StatusBadRequest, Response{Data: "Invalid ID!"})
 		return
 	}
 
-	order, err := h.storage.Order().GetByID(c.Request.Context(), &models.OrderPrimaryKey{Id: id})
+	order, err := h.storage.Order().GetOrder(id)
 	if err != nil {
-		h.logger.Error("error in Order.GetByID: " + err.Error())
-		c.JSON(http.StatusInternalServerError, "Server Error!")
+		h.logger.Error("error in Order.GetOrder: " + err.Error())
+		c.JSON(http.StatusInternalServerError, Response{Data: "Server Error!"})
 		return
 	}
 
 	h.logger.Info("Order Retrieved Successfully!")
-	c.JSON(http.StatusOK, order)
+	c.JSON(http.StatusOK, Response{Data: order})
 }
 
 // GetList Orders godoc
@@ -83,40 +113,40 @@ func (h *handler) GetByIdOrder(c *gin.Context) {
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Param customer_id query string false "customer_id"
-// @Success 200 {object} Response{data=string} "Success Request"
+// @Success 200 {object} Response{data=[]models.Order} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) GetListOrders(c *gin.Context) {
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
 		h.logger.Error("Invalid offset: " + err.Error())
-		c.JSON(http.StatusBadRequest, "Invalid offset")
+		c.JSON(http.StatusBadRequest, Response{Data: "Invalid offset"})
 		return
 	}
 
 	limit, err := h.getLimitQuery(c.Query("limit"))
 	if err != nil {
 		h.logger.Error("Invalid limit: " + err.Error())
-		c.JSON(http.StatusBadRequest, "Invalid limit")
+		c.JSON(http.StatusBadRequest, Response{Data: "Invalid limit"})
 		return
 	}
 
 	customerID := c.Query("customer_id")
 
-	resp, err := h.storage.Order().GetList(c.Request.Context(), &models.OrderGetListRequest{
+	resp, err := h.storage.Order().GetList(&models.OrderGetListRequest{
 		Offset:     offset,
 		Limit:      limit,
 		CustomerId: customerID,
 	})
 
-	if err != nil && err.Error() != "no rows in result set" {
+	if err != nil {
 		h.logger.Error("error in Order.GetList: " + err.Error())
-		c.JSON(http.StatusInternalServerError, "Server Error!")
+		c.JSON(http.StatusInternalServerError, Response{Data: "Server Error!"})
 		return
 	}
 
 	h.logger.Info("Orders Retrieved Successfully!")
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, Response{Data: resp})
 }
 
 // Update Order godoc
@@ -129,7 +159,7 @@ func (h *handler) GetListOrders(c *gin.Context) {
 // @Order json
 // @Param id path string true "id"
 // @Param Order body models.OrderUpdate true "UpdateOrderRequest"
-// @Success 200 {object} Response{data=string} "Success Request"
+// @Success 202 {object} Response{data=models.OrderUpdate} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) UpdateOrder(c *gin.Context) {
@@ -137,34 +167,34 @@ func (h *handler) UpdateOrder(c *gin.Context) {
 
 	if !helper.IsValidUUID(id) {
 		h.logger.Error("Invalid UUID format!")
-		c.JSON(http.StatusBadRequest, "Invalid ID!")
+		c.JSON(http.StatusBadRequest, Response{Data: "Invalid ID!"})
 		return
 	}
 
-	var orderUpdate models.OrderUpdate
+	var orderUpdate models.Order
 	if err := c.ShouldBindJSON(&orderUpdate); err != nil {
 		h.logger.Error("error in ShouldBindJSON: " + err.Error())
-		c.JSON(http.StatusBadRequest, "Please, Enter Valid Data!")
+		c.JSON(http.StatusBadRequest, Response{Data: "Please, Enter Valid Data!"})
 		return
 	}
 
 	orderUpdate.Id = id
 
-	rowsAffected, err := h.storage.Order().Update(c.Request.Context(), &orderUpdate)
+	err := h.storage.Order().UpdateOrder(orderUpdate)
 	if err != nil {
-		h.logger.Error("error in Order.Update: " + err.Error())
-		c.JSON(http.StatusInternalServerError, "Server Error!")
+		h.logger.Error("error in Order.UpdateOrder: " + err.Error())
+		c.JSON(http.StatusInternalServerError, Response{Data: "Server Error!"})
 		return
 	}
 
-	if rowsAffected <= 0 {
-		h.logger.Error("No rows affected in Order.Update")
-		c.JSON(http.StatusBadRequest, "Unable to update data. Please try again later!")
-		return
-	}
+	// if rowsAffected <= 0 {
+	// 	h.logger.Error("No rows affected in Order.UpdateOrder")
+	// 	c.JSON(http.StatusBadRequest, Response{Data: "Unable to update data. Please try again later!"})
+	// 	return
+	// }
 
 	h.logger.Info("Order Updated Successfully!")
-	c.JSON(http.StatusAccepted, orderUpdate)
+	c.JSON(http.StatusAccepted, Response{Data: orderUpdate})
 }
 
 // Delete Order godoc
@@ -176,7 +206,7 @@ func (h *handler) UpdateOrder(c *gin.Context) {
 // @Accept json
 // @Order json
 // @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
+// @Success 204 {object} Response{data=string} "Success Request"
 // @Response 400 {object} Response{data=string} "Bad Request"
 // @Failure 500 {object} Response{data=string} "Server error"
 func (h *handler) DeleteOrder(c *gin.Context) {
@@ -184,13 +214,13 @@ func (h *handler) DeleteOrder(c *gin.Context) {
 
 	if !helper.IsValidUUID(id) {
 		h.logger.Error("Invalid UUID format!")
-		c.JSON(http.StatusBadRequest, "Invalid ID!")
+		c.JSON(http.StatusBadRequest, Response{Data: "Invalid ID!"})
 		return
 	}
 
-	if err := h.storage.Order().Delete(c.Request.Context(), &models.OrderPrimaryKey{Id: id}); err != nil {
-		h.logger.Error("error in Order.Delete: " + err.Error())
-		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
+	if err := h.storage.Order().DeleteOrder(id); err != nil {
+		h.logger.Error("error in Order.DeleteOrder: " + err.Error())
+		c.JSON(http.StatusInternalServerError, Response{Data: "Unable to delete data, please try again later!"})
 		return
 	}
 

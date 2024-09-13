@@ -94,8 +94,8 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		CategoryId:    category_id.String,
 		Favorite:      favorite.Bool,
 		Name:          name.String,
-		Price:         int(price.Float64),
-		With_discount: int(with_discount.Float64),
+		Price:         price.Float64,
+		With_discount: with_discount.Float64,
 		Rating:        rating.Float64,
 		Description:   description.String,
 		Order_count:   int(order_count.Int64),
@@ -156,8 +156,8 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		CategoryId:    category_id.String,
 		Favorite:      favorite.Bool,
 		Name:          name.String,
-		Price:         int(price.Float64),
-		With_discount: int(with_discount.Float64),
+		Price:         price.Float64,
+		With_discount: with_discount.Float64,
 		Rating:        rating.Float64,
 		Description:   description.String,
 		Order_count:   int(order_count.Int64),
@@ -171,7 +171,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		query  string
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
-		filter string
+		filter = " ORDER BY p.created_at DESC" // Ensure ORDER BY is correctly prefixed with p.
 		args   []interface{}
 	)
 
@@ -227,23 +227,12 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
         `
 	}
 
-	// Apply name filter with splitting and ILIKE query
-	if req.Name != "" {
-		// Split the search query by spaces to handle multiple words
-		nameParts := strings.Fields(req.Name)
-
-		// Construct the filter condition for each part of the name
-		for _, part := range nameParts {
-			filter += fmt.Sprintf(" AND p.name ILIKE '%%' || $%d || '%%'", len(args)+1)
-			args = append(args, part)
-		}
-	}
 	// Apply filter for favorite
 	if req.Favorite != nil {
 		if *req.Favorite {
-			filter = " AND p.favorite = true"
+			filter += " AND p.favorite = true"
 		} else {
-			filter = " AND p.favorite = false"
+			filter += " AND p.favorite = false"
 		}
 	}
 
@@ -256,6 +245,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
+	// Combine query parts
 	query = query + filter + offset + limit
 
 	// Execute query
@@ -316,8 +306,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				CategoryId:    category_id.String,
 				Favorite:      product.Favorite,
 				Name:          name.String,
-				Price:         int(price.Float64),
-				With_discount: int(with_discount.Float64),
+				Price:         price.Float64,
+				With_discount: with_discount.Float64,
 				Rating:        rating.Float64,
 				Description:   description.String,
 				Order_count:   int(order_count.Int64),
@@ -346,12 +336,55 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		}
 	}
 
+	// Filter products based on name query if necessary
+	if req.Name != "" {
+		productNames := make([]string, 0, len(productsMap))
+		for _, product := range productsMap {
+			productNames = append(productNames, product.Name)
+		}
+
+		filteredNames := filterStrings(productNames, req.Name)
+		filteredProductsMap := make(map[string]*models.Product)
+		for _, product := range productsMap {
+			if contains(filteredNames, product.Name) {
+				filteredProductsMap[product.Id] = product
+			}
+		}
+		productsMap = filteredProductsMap
+	}
+
 	// Append the products to the response
 	for _, product := range productsMap {
 		resp.Product = append(resp.Product, *product)
 	}
 
 	return resp, nil
+}
+
+func filterStrings(stringsList []string, query string) []string {
+	var results []string
+	query = strings.ToLower(query) // Convert query to lowercase for case-insensitive search
+
+	for _, str := range stringsList {
+		words := strings.Fields(str) // Split the string into words
+		for _, word := range words {
+			if strings.HasPrefix(strings.ToLower(word), query) {
+				results = append(results, str)
+				break
+			}
+		}
+	}
+
+	return results
+}
+
+func contains(slice []string, str string) bool {
+	for _, item := range slice {
+		if item == str {
+			return true
+		}
+	}
+	return false
 }
 
 func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (int64, error) {

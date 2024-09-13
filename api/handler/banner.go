@@ -117,38 +117,6 @@ func (h *handler) GetListBanner(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// Delete Banner godoc
-// @ID delete_banner
-// @Router /e_commerce/api/v1/banner/{id} [DELETE]
-// @Summary Delete Banner
-// @Description Delete Banner
-// @Tags Banner
-// @Accept json
-// @Banner json
-// @Param id path string true "id"
-// @Success 200 {object} Response{data=string} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) DeleteBanner(c *gin.Context) {
-	var id = c.Param("id")
-
-	if !helper.IsValidUUID(id) {
-		h.logger.Error("is not valid uuid!")
-		c.JSON(http.StatusBadRequest, "invalid id!")
-		return
-	}
-
-	err := h.storage.Banner().Delete(c.Request.Context(), &models.BannerPrimaryKey{Id: id})
-	if err != nil {
-		h.logger.Error(err.Error() + "  :  " + "storage.Banner.Delete!")
-		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
-		return
-	}
-
-	h.logger.Info("Banner Deleted Successfully!")
-	c.JSON(http.StatusNoContent, nil)
-}
-
 // Update Banner godoc
 // @ID update_banner
 // @Router /e_commerce/api/v1/banner/{id} [PUT]
@@ -204,4 +172,36 @@ func (h *handler) UpdateBanner(c *gin.Context) {
 
 	h.logger.Info("Update Banner Successfully!")
 	c.JSON(http.StatusAccepted, resp)
+}
+
+// Delete Banner godoc
+// @ID delete_banner
+// @Router /e_commerce/api/v1/banner/{id} [DELETE]
+// @Summary Delete Banner
+// @Description Delete Banner
+// @Tags Banner
+// @Accept json
+// @Banner json
+// @Param id path string true "id"
+// @Success 200 {object} Response{data=string} "Success Request"
+// @Response 400 {object} Response{data=string} "Bad Request"
+// @Failure 500 {object} Response{data=string} "Server error"
+func (h *handler) DeleteBanner(c *gin.Context) {
+	var id = c.Param("id")
+
+	if !helper.IsValidUUID(id) {
+		h.logger.Error("is not valid uuid!")
+		c.JSON(http.StatusBadRequest, "invalid id!")
+		return
+	}
+
+	err := h.storage.Banner().Delete(c.Request.Context(), &models.BannerPrimaryKey{Id: id})
+	if err != nil {
+		h.logger.Error(err.Error() + "  :  " + "storage.Banner.Delete!")
+		c.JSON(http.StatusInternalServerError, "Unable to delete data, please try again later!")
+		return
+	}
+
+	h.logger.Info("Banner Deleted Successfully!")
+	c.JSON(http.StatusNoContent, nil)
 }

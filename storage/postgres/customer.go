@@ -48,7 +48,7 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		created_at
 )
 	VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
-	RETURNING id, name, phone_number, address, email, password, created_at, updated_at, deleted_at 
+	RETURNING id, name, phone_number, address, email, password, created_at, updated_at
 	`
 	var (
 		idd          sql.NullString
@@ -59,7 +59,6 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		password     sql.NullString
 		created_at   sql.NullString
 		updated_at   sql.NullString
-		delete_at    sql.NullString
 	)
 
 	err := u.db.QueryRow(ctx, query, id, req.Name, req.Phone_number, req.Address, req.Email, req.Password).Scan(
@@ -71,7 +70,6 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		&password,
 		&created_at,
 		&updated_at,
-		&delete_at,
 	)
 
 	if err != nil {
@@ -87,7 +85,6 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		Password:     password.String,
 		CreatedAt:    created_at.String,
 		UpdatedAt:    updated_at.String,
-		DeletedAt:    delete_at.String,
 	}, nil
 }
 

@@ -68,12 +68,6 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 	v1.PUT("/product/:id", h.UpdateProduct)
 	v1.DELETE("/product/:id", h.DeleteProduct)
 
-	v1.POST("/order_product", h.CreateOrderProduct)
-	v1.GET("/order_product/:id", h.GetByIdOrderProduct)
-	v1.GET("/order_product", h.GetListOrderProducts)
-	v1.PUT("/order_product/:id", h.UpdateOrderProduct)
-	v1.DELETE("/order_product/:id", h.DeleteOrderProduct)
-
 	v1.POST("upload-files", h.UploadFiles)
 	v1.DELETE("delete-file", h.DeleteFile)
 

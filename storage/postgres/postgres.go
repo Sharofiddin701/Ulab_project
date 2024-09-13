@@ -19,7 +19,6 @@ type store struct {
 	category      *categoryRepo
 	order         *orderRepo
 	product       *productRepo
-	orderproducts *orderproductsRepo
 	banner        *bannerRepo
 	color         *colorRepo
 }
@@ -119,16 +118,6 @@ func (s *store) Product() storage.ProductI {
 		}
 	}
 	return s.product
-}
-
-func (s *store) OrderProduct() storage.OrderProductI {
-	if s.orderproducts == nil {
-		s.orderproducts = &orderproductsRepo{
-			db:  s.db,
-			log: s.log,
-		}
-	}
-	return s.orderproducts
 }
 
 func (s *store) Banner() storage.BannerI {
