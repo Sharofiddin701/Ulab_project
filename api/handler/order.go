@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"e-commerce/models"
 	"e-commerce/pkg/helper"
 	"encoding/json"
@@ -27,7 +28,6 @@ func (h *handler) CreateOrder(c *gin.Context) {
 		request models.OrderCreateRequest
 	)
 
-	// Debug incoming data
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.logger.Error("error reading body: " + err.Error())
@@ -36,7 +36,6 @@ func (h *handler) CreateOrder(c *gin.Context) {
 	}
 	h.logger.Info("Incoming JSON: " + string(body))
 
-	// JSONni request modelga unmarshall qilish
 	err = json.Unmarshal(body, &request)
 	if err != nil {
 		h.logger.Error("error unmarshalling JSON: " + err.Error())
@@ -44,7 +43,6 @@ func (h *handler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// UUID qiymatlarni tekshirish
 	if request.Order.CustomerId == "" {
 		h.logger.Error("Customer ID is empty!")
 		c.JSON(http.StatusBadRequest, Response{Data: "Customer ID is required!"})
@@ -58,7 +56,6 @@ func (h *handler) CreateOrder(c *gin.Context) {
 		}
 	}
 
-	// Orderni yaratish
 	order, err := h.storage.Order().CreateOrder(&request)
 	if err != nil {
 		h.logger.Error("error in Order.CreateOrder: " + err.Error())
@@ -102,51 +99,48 @@ func (h *handler) GetByIdOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{Data: order})
 }
 
-// GetList Orders godoc
-// @ID get_list_orders
-// @Router /e_commerce/api/v1/order [GET]
-// @Summary Get List Orders
-// @Description Get List Orders
-// @Tags Order
-// @Accept json
-// @Order json
+// GetList 		Order godoc
+// @ID   		get_all_orders
+// @Router      /e_commerce/api/v1/order [GET]
+// @Summary     Get All Products
+// @Description Retrieve all products
+// @Tags     Order
+// @Accept   json
+// @Produce  json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
-// @Param customer_id query string false "customer_id"
-// @Success 200 {object} Response{data=[]models.Order} "Success Request"
-// @Response 400 {object} Response{data=string} "Bad Request"
-// @Failure 500 {object} Response{data=string} "Server error"
-func (h *handler) GetListOrders(c *gin.Context) {
+// @Success  200 {object} []models.OrderCreateRequest
+// @Response  400 {object} Response{data=string} "Bad Request"
+// @Failure  500 {object} Response{data=string} "Server error"
+func (h *handler) GetAllOrders(c *gin.Context) {
+
+	var req models.OrderGetListRequest
+
 	offset, err := h.getOffsetQuery(c.Query("offset"))
 	if err != nil {
-		h.logger.Error("Invalid offset: " + err.Error())
-		c.JSON(http.StatusBadRequest, Response{Data: "Invalid offset"})
+		h.logger.Error(err.Error() + "  :  " + "GetAllOrders INVALID OFFSET!")
+		c.JSON(http.StatusBadRequest, Response{Data: "INVALID OFFSET"})
 		return
 	}
+	req.Offset = offset
 
 	limit, err := h.getLimitQuery(c.Query("limit"))
 	if err != nil {
-		h.logger.Error("Invalid limit: " + err.Error())
-		c.JSON(http.StatusBadRequest, Response{Data: "Invalid limit"})
+		h.logger.Error(err.Error() + "  :  " + "GetAllOrders INVALID LIMIT!")
+		c.JSON(http.StatusBadRequest, Response{Data: "INVALID LIMIT"})
 		return
 	}
+	req.Limit = limit
 
-	customerID := c.Query("customer_id")
-
-	resp, err := h.storage.Order().GetList(&models.OrderGetListRequest{
-		Offset:     offset,
-		Limit:      limit,
-		CustomerId: customerID,
-	})
-
+	orders, err := h.storage.Order().GetAll(context.Background(), &req)
 	if err != nil {
-		h.logger.Error("error in Order.GetList: " + err.Error())
-		c.JSON(http.StatusInternalServerError, Response{Data: "Server Error!"})
+		h.logger.Error(err.Error() + " : Error while getting all orders")
+		c.JSON(http.StatusInternalServerError, Response{Data: "Error while getting all orders"})
 		return
 	}
 
-	h.logger.Info("Orders Retrieved Successfully!")
-	c.JSON(http.StatusOK, Response{Data: resp})
+	h.logger.Info("Orders retrieved successfully")
+	c.JSON(http.StatusOK, orders)
 }
 
 // Update Order godoc

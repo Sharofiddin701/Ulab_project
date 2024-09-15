@@ -21,7 +21,6 @@ import (
 func UploadFiles(file *multipart.Form) (*models.MultipleFileUploadResponse, error) {
 	var resp models.MultipleFileUploadResponse
 
-
 	filePath := filepath.Join("../", "serviceAccountKey.json")
 
 	// Initialize Firebase App with service account key

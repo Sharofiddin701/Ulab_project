@@ -139,7 +139,7 @@ func (u *brandRepo) GetList(ctx context.Context, req *models.BrandGetListRequest
 	}
 
 	query += offset + limit
-	
+
 	rows, err := u.db.Query(ctx, query)
 	if err != nil {
 		u.log.Error("error is while getting brand list" + err.Error())

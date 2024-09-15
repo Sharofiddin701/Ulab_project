@@ -60,7 +60,7 @@ type CategoryI interface {
 type OrderI interface {
 	CreateOrder(request *models.OrderCreateRequest) (*models.OrderCreateRequest, error)
 	GetOrder(orderId string) (*models.Order, error)
-	GetList(req *models.OrderGetListRequest) ([]models.OrderItems, error)
+	GetAll(ctx context.Context, request *models.OrderGetListRequest) (*[]models.OrderCreateRequest, error)
 	UpdateOrder(order models.Order) error
 	DeleteOrder(orderId string) error
 }

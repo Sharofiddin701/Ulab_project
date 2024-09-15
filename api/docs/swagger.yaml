@@ -175,6 +175,15 @@ definitions:
       customer_id:
         type: string
     type: object
+  models.OrderCreateRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.OrderItems'
+        type: array
+      order:
+        $ref: '#/definitions/models.Order'
+    type: object
   models.OrderItems:
     properties:
       created_at:
@@ -1590,8 +1599,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get List Orders
-      operationId: get_list_orders
+      description: Retrieve all products
+      operationId: get_all_orders
       parameters:
       - description: offset
         in: query
@@ -1601,22 +1610,15 @@ paths:
         in: query
         name: limit
         type: string
-      - description: customer_id
-        in: query
-        name: customer_id
-        type: string
+      produces:
+      - application/json
       responses:
         "200":
-          description: Success Request
+          description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/handler.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/models.Order'
-                  type: array
-              type: object
+            items:
+              $ref: '#/definitions/models.OrderCreateRequest'
+            type: array
         "400":
           description: Bad Request
           schema:
@@ -1635,7 +1637,7 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Get List Orders
+      summary: Get All Products
       tags:
       - Order
     post:

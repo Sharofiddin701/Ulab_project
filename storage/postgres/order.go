@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"e-commerce/models"
 	"e-commerce/pkg/logger"
 	"fmt"
@@ -33,17 +34,14 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 		}
 	}()
 
-	// Generate a new UUID for the order
 	orderId := uuid.New().String()
 
-	// Total price calculation - use float64 for prices
 	var totalSum float64
 	for i, item := range order.Items {
 		if item.Quantity <= 0 {
 			return &models.OrderCreateRequest{}, fmt.Errorf("quantity must be greater than 0 for product %s", item.ProductId)
 		}
 
-		// Get price from product table
 		var productPrice float64
 		productQuery := `SELECT price FROM "product" WHERE id = $1`
 		err = o.db.QueryRow(context.Background(), productQuery, item.ProductId).Scan(&productPrice)
@@ -51,13 +49,11 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 			return &models.OrderCreateRequest{}, fmt.Errorf("failed to retrieve price for product %s: %w", item.ProductId, err)
 		}
 
-		// Calculate the total price for this item
 		order.Items[i].Price = productPrice
 		order.Items[i].TotalPrice = productPrice * float64(item.Quantity)
 		totalSum += order.Items[i].TotalPrice
 	}
 
-	// Insert the order
 	orderQuery := `INSERT INTO "orders" (id, customer_id, total_price, created_at, updated_at) 
 		  VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
 
@@ -66,7 +62,6 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 		return &models.OrderCreateRequest{}, err
 	}
 
-	// Insert the order items
 	itemQuery := `INSERT INTO "order_items" (id, quantity, order_id, product_id, price, total, created_at, updated_at) 
 		 VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
 
@@ -97,49 +92,82 @@ func (o *orderRepo) GetOrder(orderId string) (*models.Order, error) {
 	return &order, nil
 }
 
-func (o *orderRepo) GetList(req *models.OrderGetListRequest) ([]models.OrderItems, error) {
+func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequest) (*[]models.OrderCreateRequest, error) {
 	var (
-		items   []models.OrderItems
-		orderId models.OrderPrimaryKey
+		orders     []models.OrderCreateRequest
+		created_at sql.NullString
 	)
-	// Default values for OFFSET and LIMIT
-	offset := " OFFSET 0"
-	limit := " LIMIT 10"
 
-	// Apply OFFSET if specified
-	if req.Offset > 0 {
-		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
-	}
-
-	// Apply LIMIT if specified
-	if req.Limit > 0 {
-		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
-	}
-
-	// Main query with OFFSET and LIMIT
-	query := `
-		SELECT id, order_id, product_id, quantity, price, total, created_at, updated_at 
-		FROM "order_items" 
-		WHERE order_id = $1` + offset + limit
-
-	// Execute the query
-	rows, err := o.db.Query(context.Background(), query, orderId.Id)
+	// Query to retrieve all orders
+	orderQuery := `
+	 SELECT id, customer_id, total_price, status, created_at
+	 FROM "orders"
+	`
+	rows, err := o.db.Query(ctx, orderQuery)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to retrieve orders: %w", err)
 	}
 	defer rows.Close()
 
-	// Scan the results
+	// Iterate over the retrieved orders
 	for rows.Next() {
-		var item models.OrderItems
-		err := rows.Scan(&item.Id, &item.OrderId, &item.ProductId, &item.Quantity, &item.Price, &item.TotalPrice, &item.CreatedAt, &item.UpdatedAt)
+		var order models.Order
+		err = rows.Scan(&order.Id, &order.CustomerId, &order.TotalPrice, &order.Status, &created_at)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan order: %w", err)
 		}
-		items = append(items, item)
+
+		// Query to retrieve order items for the current order
+		orderItemQuery := `
+	  SELECT id, product_id, order_id, quantity, price, total, created_at
+	  FROM "order_items"
+	  WHERE order_id = $1
+	 `
+		itemRows, err := o.db.Query(ctx, orderItemQuery, order.Id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve items for order %s: %w", order.Id, err)
+		}
+		defer itemRows.Close()
+
+		var orderItems []models.OrderItems
+		for itemRows.Next() {
+			var item models.OrderItems
+			err = itemRows.Scan(&item.Id, &item.ProductId, &item.OrderId, &item.Quantity, &item.Price, &item.TotalPrice, &created_at)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan order item: %w", err)
+			}
+			orderItems = append(orderItems, models.OrderItems{
+				Id:         item.Id,
+				ProductId:  item.ProductId,
+				OrderId:    item.OrderId,
+				Quantity:   item.Quantity,
+				Price:      item.Price,
+				TotalPrice: item.TotalPrice,
+				CreatedAt:  created_at.String,
+			})
+		}
+
+		// Add order items to the order struct
+		// order.OrderItems = orderItems
+
+		// Append the order to the result set
+		orders = append(orders, models.OrderCreateRequest{
+			Order: models.Order{
+				Id:         order.Id,
+				CustomerId: order.CustomerId,
+				TotalPrice: order.TotalPrice,
+				Status:     order.Status,
+				CreatedAt:  created_at.String,
+			},
+			Items: orderItems,
+		})
 	}
 
-	return items, nil
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &orders, nil
 }
 
 func (o *orderRepo) UpdateOrder(order models.Order) error {

@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS "category" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
     "url" VARCHAR(255) NOT NULL,
-    "parent_id" UUID REFERENCES "category" ("id")
-    "created_at" TIMESTAMP, 
+    "parent_id" UUID REFERENCES "category" ("id"),
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     "updated_at" TIMESTAMP,
     "deleted_at" TIMESTAMP 
 );
@@ -43,7 +43,7 @@ CREATE TYPE order_status AS ENUM ('yangi', 'tasdiqlandi', 'yetkazib berildi');
 
 CREATE TABLE IF NOT EXISTS "orders" (
     "id" UUID PRIMARY KEY,
-    "total_price" DECIMAL(10, 2) NOT NULL,  -- Buyurtmaning umumiy narxi
+    "total_price" DECIMAL(10, 2) NOT NULL,  
     "status" order_status DEFAULT 'yangi',  -- Buyurtma holati uchun enum
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Buyurtma yaratilgan vaqt
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Buyurtma yangilangan vaqt
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "orders" (
 
 CREATE TABLE IF NOT EXISTS "order_items" (
     "id" UUID PRIMARY KEY,
-    "quantity" INT NOT NULL,  -- Mahsulot miqdori
+    "quantity" INT NOT NULL,  
     "price" DECIMAL(10, 2) NOT NULL,  -- Mahsulotning bitta narxi
     "total" DECIMAL(10, 2),  -- Jami narx
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Mahsulot qo'shilgan vaqt
@@ -64,10 +64,11 @@ CREATE TABLE IF NOT EXISTS "order_items" (
 );
 
 
+CREATE TYPE product_status AS ENUM ('skidka', 'novinka');
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
-    "category_id" UUID REFERENCES "category"("id")
-    "brand_id" UUID REFERENCES "brand"("id")
+    "category_id" UUID REFERENCES "category"("id"),
+    "brand_id" UUID REFERENCES "brand"("id"),
     "favorite" BOOLEAN NOT NULL,
     "image" TEXT[],
     "name" VARCHAR(100) NOT NULL,
@@ -75,14 +76,15 @@ CREATE TABLE IF NOT EXISTS "product" (
     "with_discount" DECIMAL(10, 2),
     "rating" FLOAT NOT NULL,
     "cheapening_time" TIME,
-    "percentage" DECIMAL(5, 2);
-    "product_status" AS ENUM ('skidka', 'novinka'); 
-    "monthly_payment" DECIMAL(10, 2);
-    "description"VARCHAR(1000), 
+    "percentage" DECIMAL(5, 2),
+    "product_status" product_status,  -- ENUM turini ishlatamiz
+    "monthly_payment" DECIMAL(10, 2),
+    "description" VARCHAR(1000),  -- Probel qo'shildi
     "order_count" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
 );
+
 
 CREATE TABLE IF NOT EXISTS "banner" (
     "id" UUID PRIMARY KEY,

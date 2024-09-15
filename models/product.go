@@ -6,8 +6,8 @@ type Product struct {
 	OrderId       string  `json:"order_id,omitempty"`
 	Favorite      bool    `json:"favorite"`
 	Name          string  `json:"name,omitempty"`
-	Price         float64     `json:"price,omitempty"`
-	With_discount float64     `json:"with_discount,omitempty"`
+	Price         float64 `json:"price,omitempty"`
+	With_discount float64 `json:"with_discount,omitempty"`
 	Rating        float64 `json:"rating,omitempty"`
 	Description   string  `json:"description,omitempty"`
 	Order_count   int     `json:"order_count,omitempty"`
@@ -22,8 +22,8 @@ type ProductCreate struct {
 	OrderId       string  `json:"order_id"`
 	Favorite      bool    `json:"favorite"`
 	Name          string  `json:"name"`
-	Price         float64     `json:"price"`
-	With_discount float64     `json:"with_discount"`
+	Price         float64 `json:"price"`
+	With_discount float64 `json:"with_discount"`
 	Rating        float64 `json:"rating"`
 	Description   string  `json:"description"`
 	Order_count   int     `json:"order_count"`
@@ -35,8 +35,8 @@ type ProductUpdate struct {
 	OrderId       string  `json:"order_id"`
 	Favorite      bool    `json:"favorite"`
 	Name          string  `json:"name"`
-	Price         float64     `json:"price"`
-	With_discount float64     `json:"with_discount"`
+	Price         float64 `json:"price"`
+	With_discount float64 `json:"with_discount"`
 	Rating        float64 `json:"rating"`
 	Description   string  `json:"description"`
 	Order_count   int     `json:"order_count"`

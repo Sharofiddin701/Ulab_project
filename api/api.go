@@ -58,7 +58,7 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 
 	v1.POST("/order", h.CreateOrder)
 	v1.GET("/order/:id", h.GetByIdOrder)
-	v1.GET("/order", h.GetListOrders)
+	v1.GET("/order", h.GetAllOrders)
 	v1.PUT("/order/:id", h.UpdateOrder)
 	v1.DELETE("/order/:id", h.DeleteOrder)
 

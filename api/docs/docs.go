@@ -2311,15 +2311,18 @@ const docTemplate = `{
         },
         "/e_commerce/api/v1/order": {
             "get": {
-                "description": "Get List Orders",
+                "description": "Retrieve all products",
                 "consumes": [
+                    "application/json"
+                ],
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Order"
                 ],
-                "summary": "Get List Orders",
-                "operationId": "get_list_orders",
+                "summary": "Get All Products",
+                "operationId": "get_all_orders",
                 "parameters": [
                     {
                         "type": "string",
@@ -2332,34 +2335,16 @@ const docTemplate = `{
                         "description": "limit",
                         "name": "limit",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "customer_id",
-                        "name": "customer_id",
-                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success Request",
+                        "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handler.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/models.Order"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.OrderCreateRequest"
+                            }
                         }
                     },
                     "400": {
@@ -3491,6 +3476,20 @@ const docTemplate = `{
             "properties": {
                 "customer_id": {
                     "type": "string"
+                }
+            }
+        },
+        "models.OrderCreateRequest": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OrderItems"
+                    }
+                },
+                "order": {
+                    "$ref": "#/definitions/models.Order"
                 }
             }
         },

@@ -38,7 +38,7 @@ type OrderGetListResponse struct {
 }
 
 type OrderCreateRequest struct {
-	Order Order  `json:"order"`
+	Order Order        `json:"order"`
 	Items []OrderItems `json:"items"`
 }
 
