@@ -11,16 +11,16 @@ import (
 )
 
 type store struct {
-	db            *pgxpool.Pool
-	log           logger.LoggerI
-	admin         *adminRepo
-	customer      *customerRepo
-	brand         *brandRepo
-	category      *categoryRepo
-	order         *orderRepo
-	product       *productRepo
-	banner        *bannerRepo
-	color         *colorRepo
+	db       *pgxpool.Pool
+	log      logger.LoggerI
+	admin    *adminRepo
+	customer *customerRepo
+	brand    *brandRepo
+	category *categoryRepo
+	order    *orderRepo
+	product  *productRepo
+	banner   *bannerRepo
+	color    *colorRepo
 }
 
 func NewConnectionPostgres(cfg *config.Config) (storage.StorageI, error) {

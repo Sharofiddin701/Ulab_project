@@ -228,11 +228,12 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	}
 
 	// Apply filter for favorite
+	// Apply filter for favorite
 	if req.Favorite != nil {
 		if *req.Favorite {
-			filter += " AND p.favorite = true"
+			filter = " AND p.favorite = true" + filter // AND'ni to'g'ri joylash
 		} else {
-			filter += " AND p.favorite = false"
+			filter = " AND p.favorite = false" + filter
 		}
 	}
 
@@ -245,10 +246,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	// Combine query parts
 	query = query + filter + offset + limit
 
-	// Execute query
 	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {
 		u.log.Error("Error while getting product list: " + err.Error())

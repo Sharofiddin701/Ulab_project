@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id"),
     "brand_id" UUID REFERENCES "brand"("id"),
-    "favorite" BOOLEAN NOT NULL,
+    "favorite" BOOLEAN,
     "image" TEXT[],
     "name" VARCHAR(100) NOT NULL,
     "price" DECIMAL(10, 2) NOT NULL,
@@ -84,7 +84,6 @@ CREATE TABLE IF NOT EXISTS "product" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
 );
-
 
 CREATE TABLE IF NOT EXISTS "banner" (
     "id" UUID PRIMARY KEY,
@@ -104,21 +103,20 @@ CREATE TABLE IF NOT EXISTS "color" (
     "updated_at" TIMESTAMP
 );
 
+CREATE TYPE delivery_status AS ENUM ('kuryer', 'pochta');
 
-
--- CREATE TABLE IF NOT EXISTS shipping_details (
---     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
---     order_id UUID NOT NULL,  -- Buyurtma ID'si
---     address TEXT NOT NULL,  -- Yetkazib berish manzili
---     city VARCHAR(255) NOT NULL,  -- Shahar
---     postal_code VARCHAR(10),  -- Pochta indeksi
---     phone_number VARCHAR(20) NOT NULL,  -- Telefon raqami
---     delivery_method VARCHAR(50) NOT NULL,  -- Yetkazib berish turi (masalan, 'kuryer', 'pochta')
---     delivery_cost DECIMAL(10, 2) DEFAULT 0,  -- Yetkazib berish narxi
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (order_id) REFERENCES orders(id)  -- Buyurtma bilan bog'lanadi
--- );
+CREATE TABLE IF NOT EXISTS "shipping_details" (
+    "id" UUID PRIMARY KEY,
+    "order_id" UUID REFERENCES "orders"("id"),  -- Buyurtma ID'si
+    "address" TEXT NOT NULL,  -- Yetkazib berish manzili
+    "city" VARCHAR(255) NOT NULL,  -- Shahar
+    "postal_code" VARCHAR(10),  -- Pochta indeksi
+    "phone_number" VARCHAR(20) NOT NULL,  -- Telefon raqami
+    "delivery_status" VARCHAR(50) NOT NULL,  -- Yetkazib berish turi (masalan, 'kuryer', 'pochta')
+    "delivery_cost" DECIMAL(10, 2) DEFAULT 0,  -- Yetkazib berish narxi
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP
+);
 
 
 -- CREATE TABLE IF NOT EXISTS payment_details (
