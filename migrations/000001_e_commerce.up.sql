@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS "order_items" (
 );
 
 
-CREATE TYPE product_status AS ENUM ('skidka', 'novinka');
+CREATE TYPE product_status AS ENUM ('novinka', 'rasprodaja', 'vremennaya_skidka');
+
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id"),
@@ -75,15 +76,16 @@ CREATE TABLE IF NOT EXISTS "product" (
     "price" DECIMAL(10, 2) NOT NULL,
     "with_discount" DECIMAL(10, 2),
     "rating" FLOAT NOT NULL,
-    "cheapening_time" TIME,
-    "percentage" DECIMAL(5, 2),
-    "product_status" product_status,  -- ENUM turini ishlatamiz
+    "cheapening_time" TIME,   -- vaqtinchalik chegirma uchun
+    "percentage" DECIMAL(5, 2),   -- chegirma foizi
+    "product_status" product_status, -- ENUM turi
     "monthly_payment" DECIMAL(10, 2),
-    "description" VARCHAR(1000),  -- Probel qo'shildi
+    "description" VARCHAR(1000),
     "order_count" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
 );
+
 
 CREATE TABLE IF NOT EXISTS "banner" (
     "id" UUID PRIMARY KEY,
@@ -137,4 +139,7 @@ CREATE TABLE IF NOT EXISTS "shipping_details" (
 --     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Holat o'zgargan vaqt
 --     FOREIGN KEY (order_id) REFERENCES orders(id)  -- Buyurtma bilan bog'lanadi
 -- );
+
+
+
 

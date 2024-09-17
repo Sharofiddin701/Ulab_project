@@ -3,7 +3,6 @@ package models
 type Product struct {
 	Id            string  `json:"id,omitempty"`
 	CategoryId    string  `json:"category_id,omitempty"`
-	BrandId       string  `json:"brand_id,omitempty"`
 	Favorite      bool    `json:"favorite"`
 	Name          string  `json:"name,omitempty"`
 	Price         float64 `json:"price,omitempty"`
@@ -19,7 +18,6 @@ type Product struct {
 
 type ProductCreate struct {
 	CategoryId    string  `json:"category_id"`
-	BrandId       string  `json:"brand_id,omitempty"`
 	Favorite      bool    `json:"favorite"`
 	Name          string  `json:"name"`
 	Price         float64 `json:"price"`
@@ -32,7 +30,6 @@ type ProductCreate struct {
 type ProductUpdate struct {
 	Id            string  `json:"id"`
 	CategoryId    string  `json:"category_id"`
-	BrandId       string  `json:"brand_id,omitempty"`
 	Favorite      bool    `json:"favorite"`
 	Name          string  `json:"name"`
 	Price         float64 `json:"price"`
@@ -47,7 +44,6 @@ type ProductPrimaryKey struct {
 }
 type ProductGetListRequest struct {
 	CategoryId string `json:"category_id"`
-	BrandId    string `json:"brand_id,omitempty"`
 	Favorite   *bool  `json:"favorite"`
 	Offset     int    `json:"offset"`
 	Limit      int    `json:"limit"`

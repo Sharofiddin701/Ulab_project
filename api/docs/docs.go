@@ -3545,9 +3545,6 @@ const docTemplate = `{
         "models.Product": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3595,9 +3592,6 @@ const docTemplate = `{
         "models.ProductCreate": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3641,9 +3635,6 @@ const docTemplate = `{
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
                 "category_id": {
                     "type": "string"
                 },

@@ -3534,9 +3534,6 @@
         "models.Product": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3584,9 +3581,6 @@
         "models.ProductCreate": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3630,9 +3624,6 @@
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
-                "brand_id": {
-                    "type": "string"
-                },
                 "category_id": {
                     "type": "string"
                 },

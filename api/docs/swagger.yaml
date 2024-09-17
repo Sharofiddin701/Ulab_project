@@ -218,8 +218,6 @@ definitions:
     type: object
   models.Product:
     properties:
-      brand_id:
-        type: string
       category_id:
         type: string
       color:
@@ -251,8 +249,6 @@ definitions:
     type: object
   models.ProductCreate:
     properties:
-      brand_id:
-        type: string
       category_id:
         type: string
       description:
@@ -281,8 +277,6 @@ definitions:
     type: object
   models.ProductUpdate:
     properties:
-      brand_id:
-        type: string
       category_id:
         type: string
       description:
