@@ -37,6 +37,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
     INSERT INTO "product" (
         id,
         category_id,
+		brand_id,
         favorite,
         name,
         price,
@@ -46,12 +47,13 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
         order_count,
         created_at
     )
-    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,  CURRENT_TIMESTAMP)
-    RETURNING id, category_id, favorite, name, price, with_discount, rating, description, order_count, created_at
+    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,  CURRENT_TIMESTAMP)
+    RETURNING id, category_id, brand_id, favorite, name, price, with_discount, rating, description, order_count, created_at
     `
 	var (
 		idd           sql.NullString
 		category_id   sql.NullString
+		brand_id      sql.NullString
 		favorite      sql.NullBool
 		name          sql.NullString
 		price         sql.NullFloat64
@@ -64,6 +66,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 
 	err := u.db.QueryRow(ctx, query, id,
 		req.CategoryId,
+		req.BrandId,
 		req.Favorite,
 		req.Name,
 		req.Price,
@@ -74,6 +77,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 
 		&idd,
 		&category_id,
+		&brand_id,
 		&favorite,
 		&name,
 		&price,
@@ -92,6 +96,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	return &models.Product{
 		Id:            idd.String,
 		CategoryId:    category_id.String,
+		BrandId:       brand_id.String,
 		Favorite:      favorite.Bool,
 		Name:          name.String,
 		Price:         price.Float64,
@@ -107,6 +112,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	var (
 		id            sql.NullString
 		category_id   sql.NullString
+		brand_id      sql.NullString
 		favorite      sql.NullBool
 		name          sql.NullString
 		price         sql.NullFloat64
@@ -121,6 +127,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		SELECT 
 			id,
 			category_id,
+			brand_id,
 			favorite,
 			name,
 			price,
@@ -136,6 +143,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
 		&category_id,
+		&brand_id,
 		&favorite,
 		&name,
 		&price,
@@ -154,6 +162,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	return &models.Product{
 		Id:            id.String,
 		CategoryId:    category_id.String,
+		BrandId:       brand_id.String,
 		Favorite:      favorite.Bool,
 		Name:          name.String,
 		Price:         price.Float64,
@@ -171,11 +180,10 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		query  string
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
-		filter = " ORDER BY p.created_at DESC" // Ensure ORDER BY is correctly prefixed with p.
+		filter = " ORDER BY p.created_at DESC"
 		args   []interface{}
 	)
 
-	// Query creation
 	if req.CategoryId != "" {
 		query = `
             WITH RECURSIVE category_hierarchy AS (
@@ -188,6 +196,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
                 COUNT(*) OVER(),
                 p.id, 
                 p.category_id,
+				p.brand_id,
                 p.favorite, 
                 p.name, 
                 p.price, 
@@ -210,6 +219,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
                 COUNT(*) OVER(),
                 p.id, 
                 p.category_id,
+				p.brand_id,
                 p.favorite, 
                 p.name, 
                 p.price, 
@@ -227,17 +237,14 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
         `
 	}
 
-	// Apply filter for favorite
-	// Apply filter for favorite
 	if req.Favorite != nil {
 		if *req.Favorite {
-			filter = " AND p.favorite = true" + filter // AND'ni to'g'ri joylash
+			filter = " AND p.favorite = true" + filter
 		} else {
 			filter = " AND p.favorite = false" + filter
 		}
 	}
 
-	// Apply pagination
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
@@ -255,7 +262,6 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	}
 	defer rows.Close()
 
-	// Map to hold products by ID
 	productsMap := make(map[string]*models.Product)
 
 	for rows.Next() {
@@ -263,6 +269,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			product       models.Product
 			id            sql.NullString
 			category_id   sql.NullString
+			brand_id      sql.NullString
 			name          sql.NullString
 			price         sql.NullFloat64
 			with_discount sql.NullFloat64
@@ -273,14 +280,14 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			color_id      sql.NullString
 			color_name    sql.NullString
 			color_url     pq.StringArray
-			totalCount    int // Added total count to match the COUNT(*) OVER() in the query
+			totalCount    int
 		)
 
-		// Scan the row
 		err = rows.Scan(
-			&totalCount, // Matching the COUNT(*) OVER() from the query
+			&totalCount,
 			&id,
 			&category_id,
+			&brand_id,
 			&product.Favorite,
 			&name,
 			&price,
@@ -298,11 +305,11 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			return nil, err
 		}
 
-		// Add product to the map if it doesn't exist
 		if _, ok := productsMap[id.String]; !ok {
 			productsMap[id.String] = &models.Product{
 				Id:            id.String,
 				CategoryId:    category_id.String,
+				BrandId:       brand_id.String,
 				Favorite:      product.Favorite,
 				Name:          name.String,
 				Price:         price.Float64,
@@ -315,12 +322,11 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			}
 		}
 
-		// Add color information if available
 		if color_id.Valid {
 			var found bool
 			for _, color := range productsMap[id.String].Color {
 				if color.Id == color_id.String {
-					color.Url = color_url // Update URLs if the color already exists
+					color.Url = color_url
 					found = true
 					break
 				}
@@ -335,7 +341,6 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		}
 	}
 
-	// Filter products based on name query if necessary
 	if req.Name != "" {
 		productNames := make([]string, 0, len(productsMap))
 		for _, product := range productsMap {
@@ -352,7 +357,6 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		productsMap = filteredProductsMap
 	}
 
-	// Append the products to the response
 	for _, product := range productsMap {
 		resp.Product = append(resp.Product, *product)
 	}
@@ -362,10 +366,10 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 
 func filterStrings(stringsList []string, query string) []string {
 	var results []string
-	query = strings.ToLower(query) // Convert query to lowercase for case-insensitive search
+	query = strings.ToLower(query)
 
 	for _, str := range stringsList {
-		words := strings.Fields(str) // Split the string into words
+		words := strings.Fields(str)
 		for _, word := range words {
 			if strings.HasPrefix(strings.ToLower(word), query) {
 				results = append(results, str)
@@ -396,6 +400,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
     UPDATE "product"
     SET
 		category_id = :category_id,
+		brand_id = :brand_id,
         favorite = :favorite,
         name = :name,
         price = :price,
@@ -410,6 +415,7 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 	params = map[string]interface{}{
 		"id":            req.Id,
 		"category_id":   req.CategoryId,
+		"brand_id":      req.BrandId,
 		"favorite":      req.Favorite,
 		"name":          req.Name,
 		"price":         req.Price,

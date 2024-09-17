@@ -7,7 +7,6 @@ import (
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -152,39 +151,25 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		FROM "category"
 	`
 
-	// Name qidiruvi uchun filter qo'shish
-	if req.Name != "" {
-		// Qidiruv so'rovini bo'shliqlar bo'yicha bo'lish
-		nameParts := strings.Fields(req.Name)
-
-		// Har bir nom qismiga mos ravishda filter sharti tuzish
-		for _, part := range nameParts {
-			filter += fmt.Sprintf(" AND name ILIKE '%%' || $%d || '%%'", len(args)+1)
-			args = append(args, part)
-		}
-	}
-
-	// OFFSET qo'llash
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
 
-	// LIMIT qo'llash
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	// To'g'ri tartibda so'rovni yig'ish (filter avval, offset va limit keyin)
 	query += filter + offset + limit
 
-	// So'rovni bajarish
 	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {
 		u.log.Error("Error while getting category list: " + err.Error())
 		return nil, err
 	}
+	defer rows.Close()
 
-	// Natijalarni olish
+	categoryMap := make(map[string]*models.Category)
+
 	for rows.Next() {
 		var (
 			id         sql.NullString
@@ -207,14 +192,39 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			return nil, err
 		}
 
-		// Natijalarni javob strukturasiga qo'shish
-		resp.Category = append(resp.Category, &models.Category{
+		categoryMap[id.String] = &models.Category{
 			Id:        id.String,
 			Name:      name.String,
 			Url:       url.String,
 			ParentId:  parent_id.String,
 			CreatedAt: created_at.String,
-		})
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		u.log.Error("Error while iterating over category rows: " + err.Error())
+		return nil, err
+	}
+
+	if req.Name != "" {
+		categoryNames := make([]string, 0, len(categoryMap))
+		for _, category := range categoryMap {
+			categoryNames = append(categoryNames, category.Name)
+		}
+
+		filteredNames := filterStrings(categoryNames, req.Name)
+
+		filteredCategoryMap := make(map[string]*models.Category)
+		for _, category := range categoryMap {
+			if contains(filteredNames, category.Name) {
+				filteredCategoryMap[category.Id] = category
+			}
+		}
+		categoryMap = filteredCategoryMap
+	}
+
+	for _, category := range categoryMap {
+		resp.Category = append(resp.Category, category)
 	}
 
 	return resp, nil

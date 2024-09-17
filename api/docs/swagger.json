@@ -3534,6 +3534,9 @@
         "models.Product": {
             "type": "object",
             "properties": {
+                "brand_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3564,9 +3567,6 @@
                 "order_count": {
                     "type": "integer"
                 },
-                "order_id": {
-                    "type": "string"
-                },
                 "price": {
                     "type": "number"
                 },
@@ -3584,6 +3584,9 @@
         "models.ProductCreate": {
             "type": "object",
             "properties": {
+                "brand_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3598,9 +3601,6 @@
                 },
                 "order_count": {
                     "type": "integer"
-                },
-                "order_id": {
-                    "type": "string"
                 },
                 "price": {
                     "type": "number"
@@ -3630,6 +3630,9 @@
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
+                "brand_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -3647,9 +3650,6 @@
                 },
                 "order_count": {
                     "type": "integer"
-                },
-                "order_id": {
-                    "type": "string"
                 },
                 "price": {
                     "type": "number"
