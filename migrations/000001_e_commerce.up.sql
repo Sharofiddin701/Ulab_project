@@ -64,22 +64,18 @@ CREATE TABLE IF NOT EXISTS "order_items" (
 );
 
 
-CREATE TYPE product_status AS ENUM ('novinka', 'rasprodaja', 'vremennaya_skidka');
+CREATE TYPE product_status AS ENUM ('novinka', 'rasprodaja', 'vremennaya_skidka', '');
+    "status" product_status,
 
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id"),
-    "brand_id" UUID REFERENCES "brand"("id"),
     "favorite" BOOLEAN,
-    "image" TEXT[],
-    "name" VARCHAR(100) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,s
     "price" DECIMAL(10, 2) NOT NULL,
     "with_discount" DECIMAL(10, 2),
     "rating" FLOAT NOT NULL,
-    "cheapening_time" TIME,   -- vaqtinchalik chegirma uchun
-    "percentage" DECIMAL(5, 2),   -- chegirma foizi
-    "product_status" product_status, -- ENUM turi
-    "monthly_payment" DECIMAL(10, 2),
+    "status" product_status,
     "description" VARCHAR(1000),
     "order_count" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

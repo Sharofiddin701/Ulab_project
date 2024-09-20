@@ -28,78 +28,114 @@ func NewProductRepo(db *pgxpool.Pool, log logger.LoggerI) *productRepo {
 }
 
 func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*models.Product, error) {
+	id := uuid.New().String()
 
-	var (
-		id = uuid.New().String()
-	)
+	loc, _ := time.LoadLocation("Asia/Tashkent")
+	currentTime := time.Now().In(loc)
+
+	// Calculate the final price based on the status
+	var finalPrice float64
+	var discountEndTime interface{} // Use interface{} to allow NULL values
+	switch req.Status {
+	case "vremennaya_skidka":
+		if req.DiscountPercent > 0 {
+			finalPrice = req.Price - (req.Price * req.DiscountPercent / 100)
+			// Parse the discount end time
+			if req.DiscountEndTime != "" {
+				parsedTime, err := time.Parse(time.RFC3339, req.DiscountEndTime)
+				if err != nil {
+					u.log.Error("Error parsing discount end time: " + err.Error())
+					return nil, fmt.Errorf("invalid discount end time format")
+				}
+				discountEndTime = parsedTime
+			} else {
+				discountEndTime = nil // Set to NULL if empty string
+			}
+		} else {
+			finalPrice = req.Price
+			discountEndTime = nil
+			req.DiscountPercent = 0
+		}
+	default:
+		finalPrice = req.Price
+		req.DiscountPercent = 0
+		discountEndTime = nil
+	}
 
 	query := `
-    INSERT INTO "product" (
-        id,
-        category_id,
-        favorite,
-        name,
-        price,
-        with_discount,
-        rating,
-        description,
-        order_count,
-        created_at
-    )
-    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,  CURRENT_TIMESTAMP)
-    RETURNING id, category_id, brand_id, favorite, name, price, with_discount, rating, description, order_count, created_at
-    `
+	INSERT INTO "product"(
+		id, category_id, favorite, name, price, with_discount, rating,
+		description, order_count, status, discount_percent, discount_end_time, created_at
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+	RETURNING id, category_id, favorite, name, price, with_discount, rating,
+		description, order_count, status, discount_percent, discount_end_time, created_at
+	`
+
 	var (
-		idd           sql.NullString
-		category_id   sql.NullString
-		favorite      sql.NullBool
-		name          sql.NullString
-		price         sql.NullFloat64
-		with_discount sql.NullFloat64
-		rating        sql.NullFloat64
-		description   sql.NullString
-		order_count   sql.NullInt64
-		created_at    sql.NullTime
+		idd               sql.NullString
+		categoryId        sql.NullString
+		favorite          sql.NullBool
+		name              sql.NullString
+		price             sql.NullFloat64
+		withDiscount      sql.NullFloat64
+		rating            sql.NullFloat64
+		description       sql.NullString
+		orderCount        sql.NullInt64
+		status            sql.NullString
+		discountPercent   sql.NullFloat64
+		discountEndTimeDB sql.NullTime
+		createdAt         sql.NullTime
 	)
 
-	err := u.db.QueryRow(ctx, query, id,
+	err := u.db.QueryRow(ctx, query,
+		id,
 		req.CategoryId,
 		req.Favorite,
 		req.Name,
-		req.Price,
-		req.With_discount,
+		req.Price,  // Original price
+		finalPrice, // Final price with discount applied
 		req.Rating,
 		req.Description,
-		req.Order_count).Scan(
-
+		req.Order_count,
+		req.Status,
+		req.DiscountPercent,
+		discountEndTime, // Corrected parameter for discount end time
+		currentTime,
+	).Scan(
 		&idd,
-		&category_id,
+		&categoryId,
 		&favorite,
 		&name,
 		&price,
-		&with_discount,
+		&withDiscount,
 		&rating,
 		&description,
-		&order_count,
-		&created_at,
+		&orderCount,
+		&status,
+		&discountPercent,
+		&discountEndTimeDB,
+		&createdAt,
 	)
 
 	if err != nil {
-		u.log.Error("Error while creating brand: " + err.Error())
+		u.log.Error("Error while creating product: " + err.Error())
 		return nil, err
 	}
 
 	return &models.Product{
-		Id:            idd.String,
-		CategoryId:    category_id.String,
-		Favorite:      favorite.Bool,
-		Name:          name.String,
-		Price:         price.Float64,
-		With_discount: with_discount.Float64,
-		Rating:        rating.Float64,
-		Description:   description.String,
-		Order_count:   int(order_count.Int64),
-		CreatedAt:     created_at.Time.Format(time.RFC3339),
+		Id:              idd.String,
+		CategoryId:      categoryId.String,
+		Favorite:        favorite.Bool,
+		Name:            name.String,
+		Price:           price.Float64,
+		WithDiscount:    withDiscount.Float64,
+		Rating:          rating.Float64,
+		Description:     description.String,
+		OrderCount:      int(orderCount.Int64),
+		Status:          status.String,
+		DiscountPercent: discountPercent.Float64,
+		DiscountEndTime: discountEndTimeDB.Time.Format(time.RFC3339),
+		CreatedAt:       createdAt.Time.Format(time.RFC3339),
 	}, nil
 }
 
@@ -114,6 +150,9 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		rating        sql.NullFloat64
 		description   sql.NullString
 		order_count   sql.NullInt64
+		status        sql.NullString
+		discount      sql.NullFloat64
+		discount_end  sql.NullString
 		created_at    sql.NullString
 	)
 
@@ -128,7 +167,10 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 			rating,
 			description,
 			order_count,
-			TO_CHAR(created_at, 'dd/mm/yyyy')
+			status,
+			discount_percent,
+			discount_end_time,
+			created_at
 		FROM "product" 
 		WHERE id = $1
 	`
@@ -143,6 +185,9 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		&rating,
 		&description,
 		&order_count,
+		&status,
+		&discount,
+		&discount_end,
 		&created_at,
 	)
 
@@ -152,16 +197,19 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	}
 
 	return &models.Product{
-		Id:            id.String,
-		CategoryId:    category_id.String,
-		Favorite:      favorite.Bool,
-		Name:          name.String,
-		Price:         price.Float64,
-		With_discount: with_discount.Float64,
-		Rating:        rating.Float64,
-		Description:   description.String,
-		Order_count:   int(order_count.Int64),
-		CreatedAt:     created_at.String,
+		Id:              id.String,
+		CategoryId:      category_id.String,
+		Favorite:        favorite.Bool,
+		Name:            name.String,
+		Price:           price.Float64,
+		WithDiscount:    with_discount.Float64,
+		Rating:          rating.Float64,
+		Description:     description.String,
+		OrderCount:      int(order_count.Int64),
+		Status:          status.String,
+		DiscountPercent: discount.Float64,
+		DiscountEndTime: discount_end.String,
+		CreatedAt:       created_at.String,
 	}, nil
 }
 
@@ -171,78 +219,94 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		query  string
 		offset = " OFFSET 0"
 		limit  = " LIMIT 10"
-		filter = " ORDER BY p.created_at DESC"
+		filter string // Start as empty, we'll build it up
 		args   []interface{}
 	)
 
+	// Build base query
 	if req.CategoryId != "" {
 		query = `
-            WITH RECURSIVE category_hierarchy AS (
-                SELECT id FROM category WHERE id = $1
-                UNION ALL
-                SELECT c.id FROM category c
-                INNER JOIN category_hierarchy ch ON c.parent_id = ch.id
-            )
-            SELECT 
-                COUNT(*) OVER(),
-                p.id, 
-                p.category_id,
-                p.favorite, 
-                p.name, 
-                p.price, 
-                p.with_discount, 
-                p.rating, 
-                p.description, 
-                p.order_count, 
-                TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
-                c.id AS color_id,
-                c.color_name,
-                c.color_url AS color_url
-            FROM "product" p
-            LEFT JOIN "color" c ON p.id = c.product_id
-            WHERE p.category_id IN (SELECT id FROM category_hierarchy)
-        `
+			WITH RECURSIVE category_hierarchy AS (
+				SELECT id FROM category WHERE id = $1
+				UNION ALL
+				SELECT c.id FROM category c
+				INNER JOIN category_hierarchy ch ON c.parent_id = ch.id
+			)
+			SELECT 
+				COUNT(*) OVER() AS total_count,
+				p.id, 
+				p.category_id,
+				p.favorite, 
+				p.name, 
+				p.price, 
+				p.with_discount, 
+				p.rating, 
+				p.description, 
+				p.order_count, 
+				p.status,
+				p.discount_percent,
+				p.discount_end_time,
+				p.created_at,
+				c.id AS color_id,
+				c.color_name,
+				c.color_url AS color_url
+			FROM "product" p
+			LEFT JOIN "color" c ON p.id = c.product_id
+			WHERE p.category_id IN (SELECT id FROM category_hierarchy)
+		`
 		args = append(args, req.CategoryId)
 	} else {
 		query = `
-            SELECT 
-                COUNT(*) OVER(),
-                p.id, 
-                p.category_id,
-                p.favorite, 
-                p.name, 
-                p.price, 
-                p.with_discount, 
-                p.rating, 
-                p.description, 
-                p.order_count, 
-                TO_CHAR(p.created_at, 'dd/mm/yyyy') AS created_at,
-                c.id AS color_id,
-                c.color_name,
-                c.color_url AS color_url
-            FROM "product" p
-            LEFT JOIN "color" c ON p.id = c.product_id
-            WHERE 1=1
-        `
+			SELECT 
+				COUNT(*) OVER() AS total_count,
+				p.id, 
+				p.category_id,
+				p.favorite, 
+				p.name, 
+				p.price, 
+				p.with_discount, 
+				p.rating, 
+				p.description, 
+				p.order_count, 
+				p.status,
+				p.discount_percent,
+				p.discount_end_time,
+				p.created_at,
+				c.id AS color_id,
+				c.color_name,
+				c.color_url AS color_url
+			FROM "product" p
+			LEFT JOIN "color" c ON p.id = c.product_id
+			WHERE 1=1
+		`
 	}
 
+	// Add favorite filtering
 	if req.Favorite != nil {
 		if *req.Favorite {
-			filter = " AND p.favorite = true" + filter
+			filter += " AND p.favorite = true"
 		} else {
-			filter = " AND p.favorite = false" + filter
+			filter += " AND p.favorite = false"
 		}
 	}
 
+	// Add filter if not empty
+	if filter != "" {
+		query += filter
+	}
+
+	// Add ordering
+	query += " ORDER BY p.created_at DESC"
+
+	// Set offset and limit
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
-
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query = query + filter + offset + limit
+	query += offset + limit
 
 	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {
@@ -252,23 +316,27 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	defer rows.Close()
 
 	productsMap := make(map[string]*models.Product)
+	var totalCount int
+	currentTimeUTC := time.Now().UTC()
 
 	for rows.Next() {
 		var (
-			product       models.Product
-			id            sql.NullString
-			category_id   sql.NullString
-			name          sql.NullString
-			price         sql.NullFloat64
-			with_discount sql.NullFloat64
-			rating        sql.NullFloat64
-			description   sql.NullString
-			order_count   sql.NullInt64
-			created_at    sql.NullString
-			color_id      sql.NullString
-			color_name    sql.NullString
-			color_url     pq.StringArray
-			totalCount    int
+			product           models.Product
+			id                sql.NullString
+			category_id       sql.NullString
+			name              sql.NullString
+			price             sql.NullFloat64
+			with_discount     sql.NullFloat64
+			rating            sql.NullFloat64
+			description       sql.NullString
+			order_count       sql.NullInt64
+			status            sql.NullString
+			discount_percent  sql.NullFloat64
+			discount_end_time sql.NullString
+			created_at        sql.NullString
+			color_id          sql.NullString
+			color_name        sql.NullString
+			color_url         pq.StringArray
 		)
 
 		err = rows.Scan(
@@ -282,6 +350,9 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&rating,
 			&description,
 			&order_count,
+			&status,
+			&discount_percent,
+			&discount_end_time,
 			&created_at,
 			&color_id,
 			&color_name,
@@ -292,19 +363,40 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			return nil, err
 		}
 
+		// Check discount end time
+		if discount_end_time.Valid {
+			discountEndTime, err := time.Parse(time.RFC3339, discount_end_time.String)
+			if err != nil {
+				u.log.Error("Error parsing discount end time: " + err.Error())
+				continue
+			}
+
+			discountEndTimeUTC := discountEndTime.UTC()
+			if currentTimeUTC.After(discountEndTimeUTC) {
+				// Update product status if discount has ended
+				status.String = ""
+				with_discount.Float64 = 0
+				discount_percent.Float64 = 0
+				discount_end_time.String = ""
+			}
+		}
+
 		if _, ok := productsMap[id.String]; !ok {
 			productsMap[id.String] = &models.Product{
-				Id:            id.String,
-				CategoryId:    category_id.String,
-				Favorite:      product.Favorite,
-				Name:          name.String,
-				Price:         price.Float64,
-				With_discount: with_discount.Float64,
-				Rating:        rating.Float64,
-				Description:   description.String,
-				Order_count:   int(order_count.Int64),
-				CreatedAt:     created_at.String,
-				Color:         []models.Color{},
+				Id:              id.String,
+				CategoryId:      category_id.String,
+				Favorite:        product.Favorite,
+				Name:            name.String,
+				Price:           price.Float64,
+				WithDiscount:    with_discount.Float64,
+				Rating:          rating.Float64,
+				Description:     description.String,
+				OrderCount:      int(order_count.Int64),
+				Status:          status.String,
+				DiscountPercent: discount_percent.Float64,
+				DiscountEndTime: discount_end_time.String,
+				CreatedAt:       created_at.String,
+				Color:           []models.Color{},
 			}
 		}
 
@@ -346,6 +438,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 	for _, product := range productsMap {
 		resp.Product = append(resp.Product, *product)
 	}
+
+	resp.Count = totalCount
 
 	return resp, nil
 }
@@ -393,20 +487,26 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
         rating = :rating,
         description = :description,
         order_count = :order_count,
+		status = :status,
+		discount_percent = :discount_percent,
+		discount_end_time = :discount_end_time,
         updated_at = NOW()
     WHERE id = :id
     `
 
 	params = map[string]interface{}{
-		"id":            req.Id,
-		"category_id":   req.CategoryId,
-		"favorite":      req.Favorite,
-		"name":          req.Name,
-		"price":         req.Price,
-		"with_discount": req.With_discount,
-		"rating":        req.Rating,
-		"description":   req.Description,
-		"order_count":   req.Order_count,
+		"id":                req.Id,
+		"category_id":       req.CategoryId,
+		"favorite":          req.Favorite,
+		"name":              req.Name,
+		"price":             req.Price,
+		"with_discount":     req.With_discount,
+		"rating":            req.Rating,
+		"description":       req.Description,
+		"order_count":       req.Order_count,
+		"status":            req.Status,
+		"discount_percent":  req.DiscountPercent,
+		"discount_end_time": req.DiscountEndTime,
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)

@@ -226,10 +226,14 @@ definitions:
         type: array
       created_at:
         type: string
-      delete_at:
+      deleted_at:
         type: string
       description:
         type: string
+      discount_end_time:
+        type: string
+      discount_percent:
+        type: number
       favorite:
         type: boolean
       id:
@@ -242,6 +246,8 @@ definitions:
         type: number
       rating:
         type: number
+      status:
+        type: string
       updated_at:
         type: string
       with_discount:
@@ -253,6 +259,10 @@ definitions:
         type: string
       description:
         type: string
+      discount_end_time:
+        type: string
+      discount_percent:
+        type: number
       favorite:
         type: boolean
       name:
@@ -263,6 +273,8 @@ definitions:
         type: number
       rating:
         type: number
+      status:
+        type: string
       with_discount:
         type: number
     type: object
@@ -281,6 +293,10 @@ definitions:
         type: string
       description:
         type: string
+      discount_end_time:
+        type: string
+      discount_percent:
+        type: number
       favorite:
         type: boolean
       id:
@@ -293,6 +309,8 @@ definitions:
         type: number
       rating:
         type: number
+      status:
+        type: string
       with_discount:
         type: number
     type: object

@@ -3557,11 +3557,17 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "delete_at": {
+                "deleted_at": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
+                },
+                "discount_end_time": {
+                    "type": "string"
+                },
+                "discount_percent": {
+                    "type": "number"
                 },
                 "favorite": {
                     "type": "boolean"
@@ -3581,6 +3587,9 @@ const docTemplate = `{
                 "rating": {
                     "type": "number"
                 },
+                "status": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 },
@@ -3598,6 +3607,12 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "discount_end_time": {
+                    "type": "string"
+                },
+                "discount_percent": {
+                    "type": "number"
+                },
                 "favorite": {
                     "type": "boolean"
                 },
@@ -3612,6 +3627,9 @@ const docTemplate = `{
                 },
                 "rating": {
                     "type": "number"
+                },
+                "status": {
+                    "type": "string"
                 },
                 "with_discount": {
                     "type": "number"
@@ -3641,6 +3659,12 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "discount_end_time": {
+                    "type": "string"
+                },
+                "discount_percent": {
+                    "type": "number"
+                },
                 "favorite": {
                     "type": "boolean"
                 },
@@ -3658,6 +3682,9 @@ const docTemplate = `{
                 },
                 "rating": {
                     "type": "number"
+                },
+                "status": {
+                    "type": "string"
                 },
                 "with_discount": {
                     "type": "number"
