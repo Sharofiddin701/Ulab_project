@@ -101,6 +101,19 @@ CREATE TABLE IF NOT EXISTS "color" (
     "updated_at" TIMESTAMP
 );
 
+
+CREATE TABLE IF NOT EXISTS "location" (
+    "id" UUID PRIMARY KEY,
+    "name" VARCHAR(255) NOT NULL,
+    "info" TEXT,
+    "latitude" DECIMAL(9, 6) NOT NULL,
+    "longitude" DECIMAL(9, 6) NOT NULL,
+    "image" TEXT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP
+);
+
+
 CREATE TYPE delivery_status AS ENUM ('kuryer', 'pochta');
 
 CREATE TABLE IF NOT EXISTS "shipping_details" (

@@ -71,6 +71,12 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 	v1.POST("upload-files", h.UploadFiles)
 	v1.DELETE("delete-file", h.DeleteFile)
 
+	v1.POST("/location", h.CreateLocation)
+	v1.GET("/location/:id", h.GetByIdLocation)
+	v1.GET("/location", h.GetListLocation)
+	v1.PUT("/location/:id", h.UpdateLocation)
+	v1.DELETE("/location/:id", h.DeleteLocation)
+
 	url := ginSwagger.URL("swagger/doc.json")
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }
