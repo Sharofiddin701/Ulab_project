@@ -9,7 +9,7 @@ type Product struct {
 	WithDiscount    float64 `json:"with_discount"`
 	Rating          float64 `json:"rating,omitempty"`
 	Description     string  `json:"description,omitempty"`
-	OrderCount      int     `json:"order_count,omitempty"`
+	ItemCount       int     `json:"item_count"`
 	Color           []Color `json:"color,omitempty"`
 	CreatedAt       string  `json:"created_at"`
 	UpdatedAt       string  `json:"updated_at,omitempty"`
@@ -27,7 +27,7 @@ type ProductCreate struct {
 	With_discount   float64 `json:"with_discount"`
 	Rating          float64 `json:"rating"`
 	Description     string  `json:"description"`
-	Order_count     int     `json:"order_count"`
+	ItemCount       int     `json:"item_count,omitempty"`
 	Status          string  `json:"status"`
 	DiscountPercent float64 `json:"discount_percent"`
 	DiscountEndTime string  `json:"discount_end_time"`
@@ -42,7 +42,7 @@ type ProductUpdate struct {
 	With_discount   float64 `json:"with_discount"`
 	Rating          float64 `json:"rating"`
 	Description     string  `json:"description"`
-	Order_count     int     `json:"order_count"`
+	ItemCount       int     `json:"item_count,omitempty"`
 	Status          string  `json:"status"`
 	DiscountPercent float64 `json:"discount_percent"`
 	DiscountEndTime string  `json:"discount_end_time"`

@@ -36,10 +36,11 @@ func (u *colorRepo) Create(ctx context.Context, req *models.ColorCreate) (*model
             product_id,
             color_name,
             color_url,
+			count,
             created_at
         )
-        VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
-        RETURNING id, product_id, color_name, color_url, created_at
+        VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+        RETURNING id, product_id, color_name, color_url, count, created_at
     `
 
 	var (
@@ -47,14 +48,16 @@ func (u *colorRepo) Create(ctx context.Context, req *models.ColorCreate) (*model
 		product_id sql.NullString
 		name       sql.NullString
 		color_url  pq.StringArray
+		count      sql.NullInt32
 		created_at sql.NullTime
 	)
 
-	err := u.db.QueryRow(ctx, query, id, req.ProductId, req.Name, req.Url).Scan(
+	err := u.db.QueryRow(ctx, query, id, req.ProductId, req.Name, req.Url, req.Count).Scan(
 		&idd,
 		&product_id,
 		&name,
 		&color_url,
+		&count,
 		&created_at,
 	)
 	if err != nil {
@@ -67,6 +70,7 @@ func (u *colorRepo) Create(ctx context.Context, req *models.ColorCreate) (*model
 		ProductId: req.ProductId,
 		Name:      name.String,
 		Url:       req.Url,
+		Count:     int(count.Int32),
 		CreatedAt: created_at.Time.Format(time.RFC3339),
 	}, nil
 }
@@ -83,6 +87,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			product_id,
 			color_name,
 			color_url,
+			count,
 			created_at
 		FROM "color"
 	`
@@ -108,6 +113,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			product_id sql.NullString
 			color_name sql.NullString
 			color_url  pq.StringArray
+			count      sql.NullInt32
 			created_at sql.NullString
 		)
 
@@ -117,6 +123,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			&product_id,
 			&color_name,
 			&color_url,
+			&count,
 			&created_at,
 		)
 		if err != nil {
@@ -129,6 +136,7 @@ func (u *colorRepo) GetList(ctx context.Context, req *models.ColorGetListRequest
 			ProductId: product_id.String,
 			Name:      color_name.String,
 			Url:       color_url,
+			Count:     int(count.Int32),
 			CreatedAt: created_at.String,
 		})
 	}

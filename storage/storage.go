@@ -86,3 +86,9 @@ type ColorI interface {
 	GetList(ctx context.Context, req *models.ColorGetListRequest) (*models.ColorGetListResponse, error)
 	Delete(ctx context.Context, req *models.ColorPrimaryKey) error
 }
+
+
+
+
+
+

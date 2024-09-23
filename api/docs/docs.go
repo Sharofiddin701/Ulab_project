@@ -3362,6 +3362,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "count": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -3390,6 +3393,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "count": {
+                    "type": "integer"
                 },
                 "product_id": {
                     "type": "string"
@@ -3575,11 +3581,11 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "item_count": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
-                },
-                "order_count": {
-                    "type": "integer"
                 },
                 "price": {
                     "type": "number"
@@ -3616,11 +3622,11 @@ const docTemplate = `{
                 "favorite": {
                     "type": "boolean"
                 },
+                "item_count": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
-                },
-                "order_count": {
-                    "type": "integer"
                 },
                 "price": {
                     "type": "number"
@@ -3671,11 +3677,11 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "item_count": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
-                },
-                "order_count": {
-                    "type": "integer"
                 },
                 "price": {
                     "type": "number"

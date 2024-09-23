@@ -99,6 +99,8 @@ definitions:
         items:
           type: string
         type: array
+      count:
+        type: integer
       created_at:
         type: string
       delete_at:
@@ -118,6 +120,8 @@ definitions:
         items:
           type: string
         type: array
+      count:
+        type: integer
       product_id:
         type: string
     type: object
@@ -238,10 +242,10 @@ definitions:
         type: boolean
       id:
         type: string
+      item_count:
+        type: integer
       name:
         type: string
-      order_count:
-        type: integer
       price:
         type: number
       rating:
@@ -265,10 +269,10 @@ definitions:
         type: number
       favorite:
         type: boolean
+      item_count:
+        type: integer
       name:
         type: string
-      order_count:
-        type: integer
       price:
         type: number
       rating:
@@ -301,10 +305,10 @@ definitions:
         type: boolean
       id:
         type: string
+      item_count:
+        type: integer
       name:
         type: string
-      order_count:
-        type: integer
       price:
         type: number
       rating:

@@ -33,9 +33,8 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	loc, _ := time.LoadLocation("Asia/Tashkent")
 	currentTime := time.Now().In(loc)
 
-	// Calculate the final price based on the status
 	var finalPrice float64
-	var discountEndTime interface{} // Use interface{} to allow NULL values
+	var discountEndTime interface{}
 	switch req.Status {
 	case "vremennaya_skidka":
 		if req.DiscountPercent > 0 {
@@ -64,11 +63,21 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 
 	query := `
 	INSERT INTO "product"(
-		id, category_id, favorite, name, price, with_discount, rating,
-		description, order_count, status, discount_percent, discount_end_time, created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		id, 
+		category_id, 
+		favorite, 
+		name, 
+		price, 
+		with_discount, 
+		rating,
+		description, 
+		status, 
+		discount_percent, 
+		discount_end_time, 
+		created_at
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 	RETURNING id, category_id, favorite, name, price, with_discount, rating,
-		description, order_count, status, discount_percent, discount_end_time, created_at
+		description, status, discount_percent, discount_end_time, created_at
 	`
 
 	var (
@@ -80,7 +89,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		withDiscount      sql.NullFloat64
 		rating            sql.NullFloat64
 		description       sql.NullString
-		orderCount        sql.NullInt64
 		status            sql.NullString
 		discountPercent   sql.NullFloat64
 		discountEndTimeDB sql.NullTime
@@ -96,7 +104,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		finalPrice, // Final price with discount applied
 		req.Rating,
 		req.Description,
-		req.Order_count,
 		req.Status,
 		req.DiscountPercent,
 		discountEndTime, // Corrected parameter for discount end time
@@ -110,7 +117,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		&withDiscount,
 		&rating,
 		&description,
-		&orderCount,
 		&status,
 		&discountPercent,
 		&discountEndTimeDB,
@@ -131,7 +137,6 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		WithDiscount:    withDiscount.Float64,
 		Rating:          rating.Float64,
 		Description:     description.String,
-		OrderCount:      int(orderCount.Int64),
 		Status:          status.String,
 		DiscountPercent: discountPercent.Float64,
 		DiscountEndTime: discountEndTimeDB.Time.Format(time.RFC3339),
@@ -149,7 +154,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		with_discount sql.NullFloat64
 		rating        sql.NullFloat64
 		description   sql.NullString
-		order_count   sql.NullInt64
+		item_count    sql.NullInt64
 		status        sql.NullString
 		discount      sql.NullFloat64
 		discount_end  sql.NullString
@@ -166,7 +171,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 			with_discount,
 			rating,
 			description,
-			order_count,
+			item_count,
 			status,
 			discount_percent,
 			discount_end_time,
@@ -184,7 +189,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		&with_discount,
 		&rating,
 		&description,
-		&order_count,
+		&item_count,
 		&status,
 		&discount,
 		&discount_end,
@@ -205,7 +210,7 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		WithDiscount:    with_discount.Float64,
 		Rating:          rating.Float64,
 		Description:     description.String,
-		OrderCount:      int(order_count.Int64),
+		ItemCount:       int(item_count.Int64),
 		Status:          status.String,
 		DiscountPercent: discount.Float64,
 		DiscountEndTime: discount_end.String,
@@ -242,17 +247,19 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				p.with_discount, 
 				p.rating, 
 				p.description, 
-				p.order_count, 
+				COALESCE(SUM(c.count), 0) AS item_count,  -- Sum color counts
 				p.status,
 				p.discount_percent,
 				p.discount_end_time,
 				p.created_at,
 				c.id AS color_id,
 				c.color_name,
-				c.color_url AS color_url
+				c.color_url AS color_url,
+				c.count
 			FROM "product" p
 			LEFT JOIN "color" c ON p.id = c.product_id
 			WHERE p.category_id IN (SELECT id FROM category_hierarchy)
+			GROUP BY p.id, c.id  -- Group by product and color id
 		`
 		args = append(args, req.CategoryId)
 	} else {
@@ -267,38 +274,32 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				p.with_discount, 
 				p.rating, 
 				p.description, 
-				p.order_count, 
+				COALESCE(SUM(c.count), 0) AS item_count,  -- Sum color counts
 				p.status,
 				p.discount_percent,
 				p.discount_end_time,
 				p.created_at,
 				c.id AS color_id,
 				c.color_name,
-				c.color_url AS color_url
+				c.color_url AS color_url,
+				c.count 
 			FROM "product" p
 			LEFT JOIN "color" c ON p.id = c.product_id
 			WHERE 1=1
+			GROUP BY p.id, c.id  -- Group by product and color id
 		`
 	}
 
-	// Add favorite filtering
 	if req.Favorite != nil {
-		if *req.Favorite {
-			filter += " AND p.favorite = true"
-		} else {
-			filter += " AND p.favorite = false"
-		}
+		filter += fmt.Sprintf(" AND p.favorite = %t", *req.Favorite)
 	}
 
-	// Add filter if not empty
 	if filter != "" {
 		query += filter
 	}
 
-	// Add ordering
 	query += " ORDER BY p.created_at DESC"
 
-	// Set offset and limit
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
@@ -329,7 +330,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			with_discount     sql.NullFloat64
 			rating            sql.NullFloat64
 			description       sql.NullString
-			order_count       sql.NullInt64
+			item_count        sql.NullInt64 // This will hold the sum of color counts
 			status            sql.NullString
 			discount_percent  sql.NullFloat64
 			discount_end_time sql.NullString
@@ -337,6 +338,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			color_id          sql.NullString
 			color_name        sql.NullString
 			color_url         pq.StringArray
+			color_count       sql.NullInt32
 		)
 
 		err = rows.Scan(
@@ -349,7 +351,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&with_discount,
 			&rating,
 			&description,
-			&order_count,
+			&item_count,
 			&status,
 			&discount_percent,
 			&discount_end_time,
@@ -357,11 +359,15 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&color_id,
 			&color_name,
 			&color_url,
+			&color_count,
 		)
 		if err != nil {
 			u.log.Error("Error while scanning product list data: " + err.Error())
 			return nil, err
 		}
+
+		// Assign summed item_count to product
+		product.ItemCount = int(item_count.Int64)
 
 		// Check discount end time
 		if discount_end_time.Valid {
@@ -391,7 +397,7 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				WithDiscount:    with_discount.Float64,
 				Rating:          rating.Float64,
 				Description:     description.String,
-				OrderCount:      int(order_count.Int64),
+				ItemCount:       product.ItemCount, // Use the summed item_count
 				Status:          status.String,
 				DiscountPercent: discount_percent.Float64,
 				DiscountEndTime: discount_end_time.String,
@@ -405,15 +411,17 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			for _, color := range productsMap[id.String].Color {
 				if color.Id == color_id.String {
 					color.Url = color_url
+					color.Count = int(color_count.Int32)
 					found = true
 					break
 				}
 			}
 			if !found {
 				productsMap[id.String].Color = append(productsMap[id.String].Color, models.Color{
-					Id:   color_id.String,
-					Name: color_name.String,
-					Url:  color_url,
+					Id:    color_id.String,
+					Name:  color_name.String,
+					Url:   color_url,
+					Count: int(color_count.Int32),
 				})
 			}
 		}
@@ -486,7 +494,6 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
         with_discount = :with_discount,
         rating = :rating,
         description = :description,
-        order_count = :order_count,
 		status = :status,
 		discount_percent = :discount_percent,
 		discount_end_time = :discount_end_time,
@@ -503,7 +510,6 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
 		"with_discount":     req.With_discount,
 		"rating":            req.Rating,
 		"description":       req.Description,
-		"order_count":       req.Order_count,
 		"status":            req.Status,
 		"discount_percent":  req.DiscountPercent,
 		"discount_end_time": req.DiscountEndTime,
