@@ -189,12 +189,20 @@ definitions:
         type: string
       delete_at:
         type: string
+      delivery_cost:
+        type: number
+      delivery_status:
+        type: string
       id:
         type: string
       order_items:
         items:
           $ref: '#/definitions/models.OrderItems'
         type: array
+      payment_method:
+        type: string
+      payment_status:
+        type: string
       status:
         type: string
       total_price:
@@ -205,6 +213,14 @@ definitions:
   models.OrderCreate:
     properties:
       customer_id:
+        type: string
+      delivery_cost:
+        type: number
+      delivery_status:
+        type: string
+      payment_method:
+        type: string
+      payment_status:
         type: string
     type: object
   models.OrderCreateRequest:
@@ -241,7 +257,15 @@ definitions:
     properties:
       customer_id:
         type: string
+      delivery_cost:
+        type: number
+      delivery_status:
+        type: string
       id:
+        type: string
+      payment_method:
+        type: string
+      payment_status:
         type: string
       status:
         type: string

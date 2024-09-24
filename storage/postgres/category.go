@@ -159,7 +159,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	query += filter + offset + limit
+	query += filter + limit + offset
 
 	rows, err := u.db.Query(ctx, query, args...)
 	if err != nil {

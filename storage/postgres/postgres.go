@@ -22,6 +22,7 @@ type store struct {
 	banner   *bannerRepo
 	color    *colorRepo
 	location *locationRepo
+	// auth     *authRepo
 }
 
 func NewConnectionPostgres(cfg *config.Config) (storage.StorageI, error) {

@@ -3888,6 +3888,12 @@
                 "delete_at": {
                     "type": "string"
                 },
+                "delivery_cost": {
+                    "type": "number"
+                },
+                "delivery_status": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -3896,6 +3902,12 @@
                     "items": {
                         "$ref": "#/definitions/models.OrderItems"
                     }
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "string"
@@ -3912,6 +3924,18 @@
             "type": "object",
             "properties": {
                 "customer_id": {
+                    "type": "string"
+                },
+                "delivery_cost": {
+                    "type": "number"
+                },
+                "delivery_status": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
                     "type": "string"
                 }
             }
@@ -3968,7 +3992,19 @@
                 "customer_id": {
                     "type": "string"
                 },
+                "delivery_cost": {
+                    "type": "number"
+                },
+                "delivery_status": {
+                    "type": "string"
+                },
                 "id": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
                     "type": "string"
                 },
                 "status": {

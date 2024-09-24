@@ -1,10 +1,16 @@
 package models
 
 type Order struct {
-	Id         string       `json:"id,omitempty"`
-	CustomerId string       `json:"customer_id,omitempty"`
-	TotalPrice float64      `json:"total_price,omitempty"`
-	Status     string       `json:"status,omitempty"`
+	Id         string  `json:"id,omitempty"`
+	CustomerId string  `json:"customer_id,omitempty"`
+	TotalPrice float64 `json:"total_price,omitempty"`
+	Status     string  `json:"status,omitempty"`
+
+	DeliveryStatus string  `json:"delivery_status,omitempty"`
+	DeliveryCost   float64 `json:"delivery_cost,omitempty"`
+	PaymentMethod  string  `json:"payment_method,omitempty"`
+	PaymentStatus  string  `json:"payment_status,omitempty"`
+
 	CreatedAt  string       `json:"created_at,omitempty"`
 	UpdatedAt  string       `json:"updated_at,omitempty"`
 	DeletedAt  string       `json:"delete_at,omitempty"`
@@ -12,14 +18,22 @@ type Order struct {
 }
 
 type OrderCreate struct {
-	CustomerId string `json:"customer_id"`
+	CustomerId     string  `json:"customer_id"`
+	DeliveryStatus string  `json:"delivery_status"`
+	DeliveryCost   float64 `json:"delivery_cost"`
+	PaymentMethod  string  `json:"payment_method"`
+	PaymentStatus  string  `json:"payment_status"`
 }
 
 type OrderUpdate struct {
-	Id         string  `json:"id"`
-	CustomerId string  `json:"customer_id"`
-	TotalPrice float64 `json:"total_price"`
-	Status     string  `json:"status"`
+	Id             string  `json:"id"`
+	CustomerId     string  `json:"customer_id"`
+	DeliveryStatus string  `json:"delivery_status"`
+	DeliveryCost   float64 `json:"delivery_cost"`
+	PaymentMethod  string  `json:"payment_method"`
+	PaymentStatus  string  `json:"payment_status"`
+	TotalPrice     float64 `json:"total_price"`
+	Status         string  `json:"status"`
 }
 
 type OrderPrimaryKey struct {
@@ -27,9 +41,13 @@ type OrderPrimaryKey struct {
 }
 
 type OrderGetListRequest struct {
-	CustomerId string `json:"customer_id"`
-	Offset     int    `json:"offset"`
-	Limit      int    `json:"limit"`
+	CustomerId     string  `json:"customer_id"`
+	DeliveryStatus string  `json:"delivery_status"`
+	DeliveryCost   float64 `json:"delivery_cost"`
+	PaymentMethod  string  `json:"payment_method"`
+	PaymentStatus  string  `json:"payment_status"`
+	Offset         int     `json:"offset"`
+	Limit          int     `json:"limit"`
 }
 
 type OrderGetListResponse struct {

@@ -54,10 +54,13 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 		totalSum += order.Items[i].TotalPrice
 	}
 
-	orderQuery := `INSERT INTO "orders" (id, customer_id, total_price, created_at, updated_at) 
-		  VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
+	if order.Order.DeliveryStatus == "pochta" {
+		order.Order.DeliveryCost = 0
+	}
+	orderQuery := `INSERT INTO "orders" (id, customer_id, delivery_status, delivery_cost, payment_method, payment_status, total_price, created_at, updated_at) 
+				   VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
 
-	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, totalSum)
+	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, order.Order.DeliveryStatus, order.Order.DeliveryCost, order.Order.PaymentMethod, order.Order.PaymentStatus, totalSum)
 	if err != nil {
 		return &models.OrderCreateRequest{}, err
 	}
@@ -80,7 +83,7 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 }
 
 func (o *orderRepo) GetOrder(orderId string) (*models.Order, error) {
-	query := `SELECT id, customer_id, total_price, status, created_at, updated_at FROM "orders" WHERE id = $1`
+	query := `SELECT id, customer_id,  total_price, status, created_at, updated_at FROM "orders" WHERE id = $1`
 	row := o.db.QueryRow(context.Background(), query, orderId)
 
 	var order models.Order
@@ -100,7 +103,7 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 
 	// Query to retrieve all orders
 	orderQuery := `
-	 SELECT id, customer_id, total_price, status, created_at
+	 SELECT id, customer_id, delivery_status, delivery_cost, payment_method, payment_status, total_price, status, created_at
 	 FROM "orders"
 	`
 	rows, err := o.db.Query(ctx, orderQuery)
@@ -112,17 +115,22 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 	// Iterate over the retrieved orders
 	for rows.Next() {
 		var order models.Order
-		err = rows.Scan(&order.Id, &order.CustomerId, &order.TotalPrice, &order.Status, &created_at)
+		err = rows.Scan(&order.Id, &order.CustomerId, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, &order.TotalPrice, &order.Status, &created_at)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan order: %w", err)
 		}
 
+		// Agar delivery_status "pochta" bo'lsa, delivery_cost ni 0 ga teng qilamiz
+		if order.DeliveryStatus == "pochta" {
+			order.DeliveryCost = 0
+		}
+
 		// Query to retrieve order items for the current order
 		orderItemQuery := `
-	  SELECT id, product_id, order_id, quantity, price, total, created_at
-	  FROM "order_items"
-	  WHERE order_id = $1
-	 `
+		SELECT id, product_id, order_id, quantity, price, total, created_at
+		FROM "order_items"
+		WHERE order_id = $1
+		`
 		itemRows, err := o.db.Query(ctx, orderItemQuery, order.Id)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve items for order %s: %w", order.Id, err)
@@ -147,17 +155,18 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 			})
 		}
 
-		// Add order items to the order struct
-		// order.OrderItems = orderItems
-
 		// Append the order to the result set
 		orders = append(orders, models.OrderCreateRequest{
 			Order: models.Order{
-				Id:         order.Id,
-				CustomerId: order.CustomerId,
-				TotalPrice: order.TotalPrice,
-				Status:     order.Status,
-				CreatedAt:  created_at.String,
+				Id:             order.Id,
+				CustomerId:     order.CustomerId,
+				DeliveryStatus: order.DeliveryStatus,
+				DeliveryCost:   order.DeliveryCost,
+				PaymentMethod:  order.PaymentMethod,
+				PaymentStatus:  order.PaymentStatus,
+				TotalPrice:     order.TotalPrice,
+				Status:         order.Status,
+				CreatedAt:      created_at.String,
 			},
 			Items: orderItems,
 		})
@@ -171,8 +180,8 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 }
 
 func (o *orderRepo) UpdateOrder(order models.Order) error {
-	query := `UPDATE "orders" SET customer_id = $1, total_price = $2, status = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4`
-	_, err := o.db.Exec(context.Background(), query, order.CustomerId, order.TotalPrice, order.Status, order.Id)
+	query := `UPDATE "orders" SET customer_id = $1,delivery_status=$2,delivery_cost=$3,payment_method=$4,payment_status=$5, total_price=$6, status=$7, updated_at = CURRENT_TIMESTAMP WHERE id = $8`
+	_, err := o.db.Exec(context.Background(), query, order.CustomerId, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, order.TotalPrice, order.Status, order.Id)
 	return err
 }
 

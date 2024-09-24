@@ -3899,6 +3899,12 @@ const docTemplate = `{
                 "delete_at": {
                     "type": "string"
                 },
+                "delivery_cost": {
+                    "type": "number"
+                },
+                "delivery_status": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -3907,6 +3913,12 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.OrderItems"
                     }
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "string"
@@ -3923,6 +3935,18 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "customer_id": {
+                    "type": "string"
+                },
+                "delivery_cost": {
+                    "type": "number"
+                },
+                "delivery_status": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
                     "type": "string"
                 }
             }
@@ -3979,7 +4003,19 @@ const docTemplate = `{
                 "customer_id": {
                     "type": "string"
                 },
+                "delivery_cost": {
+                    "type": "number"
+                },
+                "delivery_status": {
+                    "type": "string"
+                },
                 "id": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
                     "type": "string"
                 },
                 "status": {

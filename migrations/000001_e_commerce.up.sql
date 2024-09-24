@@ -39,12 +39,23 @@ CREATE TABLE IF NOT EXISTS "category" (
     "deleted_at" TIMESTAMP 
 );
 
+
+
 CREATE TYPE order_status AS ENUM ('yangi', 'tasdiqlandi', 'yetkazib berildi');
 
+CREATE TYPE delivery_status AS ENUM ('kuryer', 'pochta');
+CREATE TYPE payment_method AS ENUM ('naxt')
+CREATE TYPE payment_status AS ENUM ('to`langan', 'kutilmoqda')
+
+ 
 CREATE TABLE IF NOT EXISTS "orders" (
     "id" UUID PRIMARY KEY,
     "total_price" DECIMAL(10, 2) NOT NULL,  
-    "status" order_status DEFAULT 'yangi',  -- Buyurtma holati uchun enum
+    "status" order_status DEFAULT 'yangi',  
+    "delivery_status" VARCHAR(50) NOT NULL, 
+    "delivery_cost" DECIMAL(10, 2) DEFAULT 0,  
+    "payment_method" VARCHAR(50) NOT NULL,  
+    "payment_status" VARCHAR(50) NOT NULL,  
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Buyurtma yaratilgan vaqt
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Buyurtma yangilangan vaqt
     "customer_id" UUID,  -- Foydalanuvchi jadvaliga bog'lanadi
@@ -66,6 +77,8 @@ CREATE TABLE IF NOT EXISTS "order_items" (
 
 CREATE TYPE product_status AS ENUM ('novinka', 'rasprodaja', 'vremennaya_skidka', '');
     "status" product_status,
+
+
 
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
@@ -119,10 +132,6 @@ CREATE TYPE delivery_status AS ENUM ('kuryer', 'pochta');
 CREATE TABLE IF NOT EXISTS "shipping_details" (
     "id" UUID PRIMARY KEY,
     "order_id" UUID REFERENCES "orders"("id"),  -- Buyurtma ID'si
-    "address" TEXT NOT NULL,  -- Yetkazib berish manzili
-    "city" VARCHAR(255) NOT NULL,  -- Shahar
-    "postal_code" VARCHAR(10),  -- Pochta indeksi
-    "phone_number" VARCHAR(20) NOT NULL,  -- Telefon raqami
     "delivery_status" VARCHAR(50) NOT NULL,  -- Yetkazib berish turi (masalan, 'kuryer', 'pochta')
     "delivery_cost" DECIMAL(10, 2) DEFAULT 0,  -- Yetkazib berish narxi
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -16,6 +16,7 @@ type StorageI interface {
 	Banner() BannerI
 	Color() ColorI
 	Location() LocationI
+	// Register() AuthRepoI
 }
 
 type AdminI interface {
@@ -95,3 +96,9 @@ type LocationI interface {
 	Update(ctx context.Context, req *models.LocationUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.LacationPrimaryKey) error
 }
+
+// type AuthRepoI interface {
+// 	VerifyCode(ctx context.Context, req *models.RegisterRequest) (string, error)
+// 	DeleteVerifiedCode(ctx context.Context, req *models.RegisterRequest) error
+// 	Create(ctx context.Context, reg *models.Register) error
+// }
