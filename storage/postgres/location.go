@@ -100,7 +100,7 @@ func (u *locationRepo) GetByID(ctx context.Context, req *models.LacationPrimaryK
 			latitude,
 			longitude,
 			image,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "location" 
 		WHERE id = $1
 
@@ -149,7 +149,7 @@ func (u *locationRepo) GetList(ctx context.Context, req *models.LocationGetListR
 			latitude,
 			longitude,
 			image,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "location" 
 		
 	`

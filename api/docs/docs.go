@@ -3968,6 +3968,10 @@ const docTemplate = `{
         "models.OrderItems": {
             "type": "object",
             "properties": {
+                "color_id": {
+                    "description": "Yangi qo'shilgan maydon",
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4029,6 +4033,9 @@ const docTemplate = `{
         "models.Product": {
             "type": "object",
             "properties": {
+                "brand_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -4059,6 +4066,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "image": {
+                    "type": "string"
+                },
                 "item_count": {
                     "type": "integer"
                 },
@@ -4085,6 +4095,9 @@ const docTemplate = `{
         "models.ProductCreate": {
             "type": "object",
             "properties": {
+                "brand_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -4099,6 +4112,9 @@ const docTemplate = `{
                 },
                 "favorite": {
                     "type": "boolean"
+                },
+                "image": {
+                    "type": "string"
                 },
                 "item_count": {
                     "type": "integer"
@@ -4137,6 +4153,9 @@ const docTemplate = `{
         "models.ProductUpdate": {
             "type": "object",
             "properties": {
+                "brand_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -4153,6 +4172,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "image": {
                     "type": "string"
                 },
                 "item_count": {
@@ -4192,6 +4214,10 @@ const docTemplate = `{
         "models.SwaggerOrderItems": {
             "type": "object",
             "properties": {
+                "color_id": {
+                    "description": "Yangi qo'shilgan maydon",
+                    "type": "string"
+                },
                 "product_id": {
                     "type": "string"
                 },

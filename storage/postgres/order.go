@@ -44,9 +44,27 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 
 		var productPrice float64
 		productQuery := `SELECT price FROM "product" WHERE id = $1`
-		err = o.db.QueryRow(context.Background(), productQuery, item.ProductId).Scan(&productPrice)
+		err = tx.QueryRow(context.Background(), productQuery, item.ProductId).Scan(&productPrice)
 		if err != nil {
 			return &models.OrderCreateRequest{}, fmt.Errorf("failed to retrieve price for product %s: %w", item.ProductId, err)
+		}
+
+		// Color miqdorini tekshirish va yangilash
+		var currentColorQuantity int
+		colorQuery := `SELECT count FROM "color" WHERE id = $1 FOR UPDATE`
+		err = tx.QueryRow(context.Background(), colorQuery, item.ColorId).Scan(&currentColorQuantity)
+		if err != nil {
+			return &models.OrderCreateRequest{}, fmt.Errorf("failed to retrieve color quantity for color %s: %w", item.ColorId, err)
+		}
+
+		if currentColorQuantity < item.Quantity {
+			return &models.OrderCreateRequest{}, fmt.Errorf("insufficient color quantity for color %s", item.ColorId)
+		}
+
+		updateColorQuery := `UPDATE "color" SET count = count - $1 WHERE id = $2`
+		_, err = tx.Exec(context.Background(), updateColorQuery, item.Quantity, item.ColorId)
+		if err != nil {
+			return &models.OrderCreateRequest{}, fmt.Errorf("failed to update color quantity for color %s: %w", item.ColorId, err)
 		}
 
 		order.Items[i].Price = productPrice
@@ -57,7 +75,7 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 	if order.Order.DeliveryStatus == "pochta" {
 		order.Order.DeliveryCost = 0
 	}
-	orderQuery := `INSERT INTO "orders" (id, customer_id, delivery_status, delivery_cost, payment_method, payment_status, total_price, created_at, updated_at) 
+	orderQuery := `INSERT INTO "orders" (id, customer_id, delivery_status, delivery_cost, payment_method, payment_status, total_price, created_at, updated_at)
 				   VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
 
 	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, order.Order.DeliveryStatus, order.Order.DeliveryCost, order.Order.PaymentMethod, order.Order.PaymentStatus, totalSum)
@@ -65,12 +83,12 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 		return &models.OrderCreateRequest{}, err
 	}
 
-	itemQuery := `INSERT INTO "order_items" (id, quantity, order_id, product_id, price, total, created_at, updated_at) 
-		 VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+	itemQuery := `INSERT INTO "order_items" (id, quantity, order_id, product_id, color_id, price, total, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
 
 	for _, item := range order.Items {
 		itemId := uuid.New().String()
-		_, err = tx.Exec(context.Background(), itemQuery, itemId, item.Quantity, orderId, item.ProductId, item.Price, item.TotalPrice)
+		_, err = tx.Exec(context.Background(), itemQuery, itemId, item.Quantity, orderId, item.ProductId, item.ColorId, item.Price, item.TotalPrice)
 		if err != nil {
 			return &models.OrderCreateRequest{}, err
 		}

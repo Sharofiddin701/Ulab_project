@@ -4,6 +4,7 @@ type OrderItems struct {
 	Id         string  `json:"id,omitempty"`
 	OrderId    string  `json:"order_id,omitempty"`
 	ProductId  string  `json:"product_id,omitempty"`
+	ColorId    string  `json:"color_id,omitempty"` // Yangi qo'shilgan maydon
 	Quantity   int     `json:"quantity,omitempty"`
 	Price      float64 `json:"price,omitempty"`
 	TotalPrice float64 `json:"total,omitempty"`
@@ -14,12 +15,14 @@ type OrderItems struct {
 
 type SwaggerOrderItems struct {
 	ProductId string `json:"product_id,omitempty"`
+	ColorId   string `json:"color_id,omitempty"` // Yangi qo'shilgan maydon
 	Quantity  int    `json:"quantity,omitempty"`
 }
 
 type OrderItemsCreate struct {
 	OrderId    string  `json:"order_id"`
 	ProductId  string  `json:"product_id"`
+	ColorId    string  `json:"color_id"` // Yangi qo'shilgan maydon
 	Quantity   int     `json:"quantity"`
 	Price      float64 `json:"price"`
 	TotalPrice float64 `json:"total_price"`
@@ -29,6 +32,7 @@ type OrderItemsUpdate struct {
 	Id         string  `json:"id"`
 	OrderId    string  `json:"order_id"`
 	ProductId  string  `json:"product_id"`
+	ColorId    string  `json:"color_id"` // Yangi qo'shilgan maydon
 	Quantity   int     `json:"quantity"`
 	Price      float64 `json:"price"`
 	TotalPrice float64 `json:"total_price"`

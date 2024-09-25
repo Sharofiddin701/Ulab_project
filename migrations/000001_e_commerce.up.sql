@@ -42,7 +42,6 @@ CREATE TABLE IF NOT EXISTS "category" (
 
 
 CREATE TYPE order_status AS ENUM ('yangi', 'tasdiqlandi', 'yetkazib berildi');
-
 CREATE TYPE delivery_status AS ENUM ('kuryer', 'pochta');
 CREATE TYPE payment_method AS ENUM ('naxt')
 CREATE TYPE payment_status AS ENUM ('to`langan', 'kutilmoqda')
@@ -65,13 +64,14 @@ CREATE TABLE IF NOT EXISTS "orders" (
 
 CREATE TABLE IF NOT EXISTS "order_items" (
     "id" UUID PRIMARY KEY,
-    "quantity" INT NOT NULL,  
+    "quantity" INT NOT NULL,
     "price" DECIMAL(10, 2) NOT NULL,  -- Mahsulotning bitta narxi
     "total" DECIMAL(10, 2),  -- Jami narx
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Mahsulot qo'shilgan vaqt
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Ma'lumot yangilangan vaqt
-    "order_id" REFERENCES "orders"("id"),  -- Buyurtma bilan bog'lanadi
-    "product_id" REFERENCES "product"("id")  -- Mahsulot bilan bog'lanadi
+    "order_id" UUID REFERENCES "orders"("id"),  -- Buyurtma bilan bog'lanadi
+    "product_id" UUID REFERENCES "product"("id"),  -- Mahsulot bilan bog'lanadi
+    "color_id" UUID REFERENCES "color"("id")  -- Rang bilan bog'lanadi
 );
 
 
@@ -83,6 +83,8 @@ CREATE TYPE product_status AS ENUM ('novinka', 'rasprodaja', 'vremennaya_skidka'
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id"),
+    "brand_id" UUID REFERENCES "brand"("id"),
+    "image" TEXT[],
     "favorite" BOOLEAN,
     "name" VARCHAR(100) NOT NULL,s
     "price" DECIMAL(10, 2) NOT NULL,
@@ -95,6 +97,7 @@ CREATE TABLE IF NOT EXISTS "product" (
     "updated_at" TIMESTAMP
 );
 
+ALTER TABLE "product" ADD COLUMN "brand_id" UUID REFERENCES "brand"("id");
 
 CREATE TABLE IF NOT EXISTS "banner" (
     "id" UUID PRIMARY KEY,

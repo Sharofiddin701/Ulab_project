@@ -65,6 +65,8 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	INSERT INTO "product"(
 		id, 
 		category_id, 
+		brand_id, 
+		image,
 		favorite, 
 		name, 
 		price, 
@@ -75,14 +77,16 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		discount_percent, 
 		discount_end_time, 
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-	RETURNING id, category_id, favorite, name, price, with_discount, rating,
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+	RETURNING id, category_id, brand_id, image,  favorite, name, price, with_discount, rating,
 		description, status, discount_percent, discount_end_time, created_at
 	`
 
 	var (
 		idd               sql.NullString
 		categoryId        sql.NullString
+		brandId           sql.NullString
+		image             sql.NullString
 		favorite          sql.NullBool
 		name              sql.NullString
 		price             sql.NullFloat64
@@ -98,6 +102,8 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	err := u.db.QueryRow(ctx, query,
 		id,
 		req.CategoryId,
+		req.BrandId,
+		req.Image,
 		req.Favorite,
 		req.Name,
 		req.Price,  // Original price
@@ -111,6 +117,8 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	).Scan(
 		&idd,
 		&categoryId,
+		&brandId,
+		&image,
 		&favorite,
 		&name,
 		&price,
@@ -131,6 +139,8 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 	return &models.Product{
 		Id:              idd.String,
 		CategoryId:      categoryId.String,
+		BrandId:         brandId.String,
+		Image:           image.String,
 		Favorite:        favorite.Bool,
 		Name:            name.String,
 		Price:           price.Float64,
@@ -148,6 +158,8 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	var (
 		id            sql.NullString
 		category_id   sql.NullString
+		brand_id      sql.NullString
+		image         sql.NullString
 		favorite      sql.NullBool
 		name          sql.NullString
 		price         sql.NullFloat64
@@ -165,6 +177,8 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 		SELECT 
 			id,
 			category_id,
+			brand_id,
+			image,
 			favorite,
 			name,
 			price,
@@ -183,6 +197,8 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
 		&category_id,
+		&brand_id,
+		&image,
 		&favorite,
 		&name,
 		&price,
@@ -204,6 +220,8 @@ func (u *productRepo) GetByID(ctx context.Context, req *models.ProductPrimaryKey
 	return &models.Product{
 		Id:              id.String,
 		CategoryId:      category_id.String,
+		BrandId:         brand_id.String,
+		Image:           image.String,
 		Favorite:        favorite.Bool,
 		Name:            name.String,
 		Price:           price.Float64,
@@ -245,6 +263,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				(SELECT total_count FROM product_count),
 				p.id, 
 				p.category_id,
+				p.brand_id,
+				p.image,
 				p.favorite, 
 				p.name, 
 				p.price, 
@@ -275,6 +295,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 				(SELECT total_count FROM product_count),
 				p.id, 
 				p.category_id,
+				p.brand_id,
+				p.image,
 				p.favorite, 
 				p.name, 
 				p.price, 
@@ -333,6 +355,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			product           models.Product
 			id                sql.NullString
 			category_id       sql.NullString
+			brand_id          sql.NullString
+			image             sql.NullString
 			name              sql.NullString
 			price             sql.NullFloat64
 			with_discount     sql.NullFloat64
@@ -353,6 +377,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			&totalCount,
 			&id,
 			&category_id,
+			&brand_id,
+			&image,
 			&product.Favorite,
 			&name,
 			&price,
@@ -399,6 +425,8 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 			productsMap[id.String] = &models.Product{
 				Id:              id.String,
 				CategoryId:      category_id.String,
+				BrandId:         brand_id.String,
+				Image:           image.String,
 				Favorite:        product.Favorite,
 				Name:            name.String,
 				Price:           price.Float64,
@@ -524,21 +552,25 @@ func (u *productRepo) Update(ctx context.Context, req *models.ProductUpdate) (in
     UPDATE "product"
     SET
 		category_id = $1,
-        favorite = $2,
-        name = $3,
-        price = $4,
-        with_discount = $5,
-        rating = $6,
-        description = $7,
-		status = $8,
-		discount_percent = $9,
-		discount_end_time = $10,
-        updated_at = $11
-    WHERE id = $12
+        brand_id = $2,
+        image = $3,
+        favorite = $4,
+        name = $5,
+        price = $6,
+        with_discount = $7,
+        rating = $8,
+        description = $9,
+		status = $10,
+		discount_percent = $11,
+		discount_end_time = $12,
+        updated_at = $13
+    WHERE id = $14
     `
 
 	result, err := u.db.Exec(ctx, query,
 		req.CategoryId,
+		req.BrandId,
+		req.Image,
 		req.Favorite,
 		req.Name,
 		req.Price,  // Original price

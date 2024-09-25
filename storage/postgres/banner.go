@@ -73,7 +73,7 @@ func (u *bannerRepo) GetByID(ctx context.Context, req *models.BannerPrimaryKey) 
 		SELECT 
 			id,
 			banner_image,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "banner" 
 		WHERE id = $1
 	`
@@ -116,7 +116,7 @@ func (u *bannerRepo) GetList(ctx context.Context, req *models.BannerGetListReque
 			COUNT(*) OVER(),
 			id,
 			banner_image,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "banner" 
 	`
 

@@ -101,7 +101,7 @@ func (u *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryK
 			name,
 			url,
 			parent_id,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "category" 
 		WHERE id = $1
 	`
@@ -147,7 +147,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			name,
 			url,
 			parent_id,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "category"
 	`
 

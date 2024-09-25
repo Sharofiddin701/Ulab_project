@@ -85,7 +85,7 @@ func (u *brandRepo) GetByID(ctx context.Context, req *models.BrandPrimaryKey) (*
 			id,
 			name,
 			brand_image,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "brand" 
 		WHERE id = $1
 
@@ -125,7 +125,7 @@ func (u *brandRepo) GetList(ctx context.Context, req *models.BrandGetListRequest
 			id,
 			name,
 			brand_image,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "brand" 
 		
 	`

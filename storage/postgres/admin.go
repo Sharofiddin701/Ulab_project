@@ -111,7 +111,7 @@ func (u *adminRepo) GetByID(ctx context.Context, req *models.AdminPrimaryKey) (*
 			email,
 			password,
 			address,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "admin" 
 		WHERE id = $1
 
@@ -160,7 +160,7 @@ func (u *adminRepo) GetList(ctx context.Context, req *models.AdminGetListRequest
 			email,
 			password,
 			address,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "admin" 
 		
 	`

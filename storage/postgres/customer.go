@@ -108,7 +108,7 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 			address,
 			email,
 			password,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "customer" 
 		WHERE id = $1
 
@@ -157,7 +157,7 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			address,
 			email,
 			password,
-			TO_CHAR(created_at,'dd/mm/yyyy')
+			created_at
 		FROM "customer" 
 	`
 
