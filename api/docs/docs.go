@@ -3847,6 +3847,9 @@ const docTemplate = `{
         "models.LocationCreate": {
             "type": "object",
             "properties": {
+                "closes_at": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -3861,12 +3864,18 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "opens_at": {
+                    "type": "string"
                 }
             }
         },
         "models.LocationUpdate": {
             "type": "object",
             "properties": {
+                "closes_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -3883,6 +3892,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "opens_at": {
                     "type": "string"
                 }
             }

@@ -7,6 +7,8 @@ type Location struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Image     string  `json:"image"`
+	OpensAt   string  `json:"opens_at"`
+	ClosesAt  string  `json:"closes_at"`
 	CreatedAt string  `json:"created_at,omitempty"`
 	UpdatedAt string  `json:"updated_at,omitempty"`
 	DeletedAt string  `json:"delete_at,omitempty"`
@@ -18,6 +20,8 @@ type LocationCreate struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Image     string  `json:"image"`
+	OpensAt   string  `json:"opens_at"`
+	ClosesAt  string  `json:"closes_at"`
 }
 
 type LocationUpdate struct {
@@ -27,6 +31,8 @@ type LocationUpdate struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Image     string  `json:"image"`
+	OpensAt   string  `json:"opens_at"`
+	ClosesAt  string  `json:"closes_at"`
 }
 
 type LacationPrimaryKey struct {

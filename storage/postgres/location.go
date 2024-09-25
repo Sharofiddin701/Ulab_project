@@ -36,10 +36,12 @@ func (u *locationRepo) Create(ctx context.Context, req *models.LocationCreate) (
 			latitude,
 			longitude,
 			image,
+			opens_at,
+			closes_at,
 			created_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
-		RETURNING id, name, info, latitude, longitude, image, created_at, updated_at
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+		RETURNING id, name, info, latitude, longitude, image, opens_at, closes_at, created_at, updated_at
 	`
 
 	var (
@@ -49,17 +51,21 @@ func (u *locationRepo) Create(ctx context.Context, req *models.LocationCreate) (
 		latitude   sql.NullFloat64
 		longitude  sql.NullFloat64
 		image      sql.NullString
+		opens_at   sql.NullString
+		closes_at  sql.NullString
 		created_at sql.NullString
 		updated_at sql.NullString
 	)
 
-	err := u.db.QueryRow(ctx, query, id, req.Name, req.Info, req.Latitude, req.Longitude, req.Image).Scan(
+	err := u.db.QueryRow(ctx, query, id, req.Name, req.Info, req.Latitude, req.Longitude, req.Image, req.OpensAt, req.ClosesAt).Scan(
 		&idd,
 		&name,
 		&info,
 		&latitude,
 		&longitude,
 		&image,
+		&opens_at,
+		&closes_at,
 		&created_at,
 		&updated_at,
 	)
@@ -75,6 +81,8 @@ func (u *locationRepo) Create(ctx context.Context, req *models.LocationCreate) (
 		Latitude:  latitude.Float64,
 		Longitude: longitude.Float64,
 		Image:     image.String,
+		OpensAt:   opens_at.String,
+		ClosesAt:  closes_at.String,
 		CreatedAt: created_at.String,
 		UpdatedAt: updated_at.String,
 	}, nil
@@ -89,6 +97,8 @@ func (u *locationRepo) GetByID(ctx context.Context, req *models.LacationPrimaryK
 		latitude   sql.NullFloat64
 		longitude  sql.NullFloat64
 		image      sql.NullString
+		opens_at   sql.NullString
+		closes_at  sql.NullString
 		created_at sql.NullString
 	)
 
@@ -100,6 +110,8 @@ func (u *locationRepo) GetByID(ctx context.Context, req *models.LacationPrimaryK
 			latitude,
 			longitude,
 			image,
+			opens_at,
+			closes_at,
 			created_at
 		FROM "location" 
 		WHERE id = $1
@@ -113,6 +125,8 @@ func (u *locationRepo) GetByID(ctx context.Context, req *models.LacationPrimaryK
 		&latitude,
 		&longitude,
 		&image,
+		&opens_at,
+		&closes_at,
 		&created_at,
 	)
 
@@ -128,6 +142,8 @@ func (u *locationRepo) GetByID(ctx context.Context, req *models.LacationPrimaryK
 		Latitude:  latitude.Float64,
 		Longitude: longitude.Float64,
 		Image:     image.String,
+		OpensAt:   opens_at.String,
+		ClosesAt:  closes_at.String,
 		CreatedAt: created_at.String,
 	}, nil
 }
@@ -149,6 +165,8 @@ func (u *locationRepo) GetList(ctx context.Context, req *models.LocationGetListR
 			latitude,
 			longitude,
 			image,
+			opens_at,
+			closes_at,
 			created_at
 		FROM "location" 
 		
@@ -177,6 +195,8 @@ func (u *locationRepo) GetList(ctx context.Context, req *models.LocationGetListR
 			latitude   sql.NullFloat64
 			longitude  sql.NullFloat64
 			image      sql.NullString
+			opens_at   sql.NullString
+			closes_at  sql.NullString
 			created_at sql.NullString
 		)
 
@@ -188,6 +208,8 @@ func (u *locationRepo) GetList(ctx context.Context, req *models.LocationGetListR
 			&latitude,
 			&longitude,
 			&image,
+			&opens_at,
+			&closes_at,
 			&created_at,
 		)
 		if err != nil {
@@ -202,6 +224,8 @@ func (u *locationRepo) GetList(ctx context.Context, req *models.LocationGetListR
 			Latitude:  latitude.Float64,
 			Longitude: longitude.Float64,
 			Image:     image.String,
+			OpensAt:   opens_at.String,
+			ClosesAt:  closes_at.String,
 			CreatedAt: created_at.String,
 		})
 	}
@@ -234,6 +258,8 @@ func (u *locationRepo) Update(ctx context.Context, req *models.LocationUpdate) (
 			latitude = :latitude,
 			longitude = :longitude,
 			image = :image,
+			opens_at = :opens_at,
+			closes_at = :closes_at,
 			updated_at = NOW()
 		WHERE id = :id
 	`
@@ -245,6 +271,8 @@ func (u *locationRepo) Update(ctx context.Context, req *models.LocationUpdate) (
 		"latitude":  req.Latitude,
 		"longitude": req.Longitude,
 		"image":     req.Image,
+		"opens_at":  req.OpensAt,
+		"closes_at": req.ClosesAt,
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)

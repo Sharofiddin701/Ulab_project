@@ -125,6 +125,8 @@ CREATE TABLE IF NOT EXISTS "location" (
     "latitude" DECIMAL(9, 6) NOT NULL,
     "longitude" DECIMAL(9, 6) NOT NULL,
     "image" TEXT,
+    "opens_at" VARCHAR(255),
+    "closes_at"VARCHAR(255),
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP
 );

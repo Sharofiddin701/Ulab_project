@@ -5,12 +5,10 @@ type Order struct {
 	CustomerId string  `json:"customer_id,omitempty"`
 	TotalPrice float64 `json:"total_price,omitempty"`
 	Status     string  `json:"status,omitempty"`
-
 	DeliveryStatus string  `json:"delivery_status,omitempty"`
 	DeliveryCost   float64 `json:"delivery_cost,omitempty"`
 	PaymentMethod  string  `json:"payment_method,omitempty"`
 	PaymentStatus  string  `json:"payment_status,omitempty"`
-
 	CreatedAt  string       `json:"created_at,omitempty"`
 	UpdatedAt  string       `json:"updated_at,omitempty"`
 	DeletedAt  string       `json:"delete_at,omitempty"`
