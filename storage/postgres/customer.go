@@ -6,10 +6,12 @@ import (
 	"e-commerce/models"
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type customerRepo struct {
@@ -24,6 +26,80 @@ func NewCustomerRepo(db *pgxpool.Pool, log logger.LoggerI) *customerRepo {
 	}
 }
 
+func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Customer, error) {
+	var (
+		name      sql.NullString
+		phone     sql.NullString
+		email     sql.NullString
+		createdat sql.NullString
+		updatedat sql.NullString
+	)
+
+	query := `SELECT 
+	 id, 
+	 name, 
+	 phone_number,
+	 email,
+	 created_at, 
+	 updated_at,
+	 password
+	 FROM "customer" WHERE phone_number= $1 `
+
+	row := c.db.QueryRow(ctx, query, login)
+
+	user := models.Customer{}
+
+	err := row.Scan(
+		&user.Id,
+		&name,
+		&phone,
+		&email,
+		&createdat,
+		&updatedat,
+		&user.Password,
+	)
+
+	if err != nil {
+		c.log.Error("failed to scan user by LOGIN from database", logger.Error(err))
+		return models.Customer{}, err
+	}
+
+	user.Name = name.String
+	user.Phone_number = phone.String
+	user.Email = email.String
+	user.CreatedAt = createdat.String
+	user.UpdatedAt = updatedat.String
+
+	return user, nil
+}
+
+func (c *customerRepo) Login(ctx context.Context, login models.Customer) (string, error) {
+	var hashedPass string
+
+	query := `SELECT password
+	FROM "customer"
+	WHERE phone_number = $1`
+
+	err := c.db.QueryRow(ctx, query,
+		login.Phone_number,
+	).Scan(&hashedPass)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", errors.New("incorrect login")
+		}
+		c.log.Error("failed to get user password from database", logger.Error(err))
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(login.Password))
+	if err != nil {
+		return "", errors.New("password mismatch")
+	}
+
+	return "Logged in successfully", nil
+}
+
 func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (*models.Customer, error) {
 
 	if !helper.IsValidPhone(req.Phone_number) {
@@ -31,10 +107,10 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		return nil, fmt.Errorf("invalid phone number format")
 	}
 
-	if !helper.IsValidEmail(req.Email) {
-		u.log.Error("Invalid email format")
-		return nil, fmt.Errorf("invalid email format")
-	}
+	// if !helper.IsValidEmail(req.Email) {
+	// 	u.log.Error("Invalid email format")
+	// 	return nil, fmt.Errorf("invalid email format")
+	// }
 
 	id := uuid.New().String()
 	query := `

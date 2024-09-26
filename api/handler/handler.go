@@ -3,6 +3,7 @@ package handler
 import (
 	"e-commerce/config"
 	"e-commerce/pkg/logger"
+	"e-commerce/service"
 	"e-commerce/storage"
 	"strconv"
 )
@@ -11,6 +12,7 @@ type handler struct {
 	cfg     *config.Config
 	logger  logger.LoggerI
 	storage storage.StorageI
+	service service.IServiceManager
 }
 
 type Response struct {
@@ -24,11 +26,12 @@ type ErrorResponse struct {
 	Error interface{} `json:"error"`
 }
 
-func NewHandler(cfg *config.Config, storage storage.StorageI, logger logger.LoggerI) *handler {
+func NewHandler(cfg *config.Config, storage storage.StorageI, logger logger.LoggerI, service service.IServiceManager) *handler {
 	return &handler{
 		cfg:     cfg,
 		logger:  logger,
 		storage: storage,
+		service: service,
 	}
 }
 

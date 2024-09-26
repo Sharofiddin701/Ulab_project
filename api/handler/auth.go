@@ -1,162 +1,125 @@
 package handler
 
 import (
-	"context"
+	"e-commerce/models"
 	"fmt"
-	"log"
-	"math/rand"
-	"time"
+
+	// check "food/pkg/validation"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
-	"github.com/twilio/twilio-go"
-	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
-var (
-	ctx = context.Background()
-	rdb *redis.Client
-)
+// UserLogin godoc
+// @Router       /e_commerce/api/v1/login [POST]
+// @Summary      Customer login
+// @Description  Login to Voltify
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        login body models.UserLoginRequest true "login"
+// @Success      201  {object}  models.UserLoginResponse
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h *handler) UserLogin(c *gin.Context) {
+	loginReq := models.UserLoginRequest{}
 
-// Twilio credentials
-const (
-	AccountSID        = "ACc39725a654edb7264186eca22f221a47"
-	AuthToken         = "0f95c1f4de45c8e8fed7a68302acea7d"
-	TwilioPhoneNumber = "+13026045203"
-	RedisAddr         = "localhost:6379" // Redis server address
-)
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		h.logger.Error(err.Error() + ":" + "error while binding body")
+		c.JSON(http.StatusBadRequest, "error while binding body")
+		return
+	}
 
-// User model
-type User struct {
-	PhoneNumber string `json:"phone_number"`
-	Code        string `json:"code"`
-}
+	fmt.Println("loginReq: ", loginReq)
 
-func main() {
-	// Initialize Redis client
-	rdb = redis.NewClient(&redis.Options{
-		Addr: RedisAddr,
-	})
+	//TODO: need validate login & password
 
-	// Check Redis connection
-	_, err := rdb.Ping(ctx).Result()
+	loginResp, err := h.service.Auth().UserLogin(c.Request.Context(), loginReq)
 	if err != nil {
-		log.Fatalf("Could not connect to Redis: %v", err)
+		h.logger.Error(err.Error() + ":" + "error while login")
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		return
 	}
 
-	// Initialize Gin router
-	router := gin.Default()
+	h.logger.Info("Successfully login")
+	c.JSON(http.StatusOK, loginResp)
 
-	// Define routes
-	router.POST("/register", registerUserHandler)
-	router.GET("/send-code", sendCodeHandler)
-	router.GET("/verify-code", verifyCodeHandler)
-
-	// Start the server
-	log.Println("Server started at :8080")
-	router.Run(":8080")
 }
 
-func registerUserHandler(c *gin.Context) {
-	var user User
-	if err := c.BindJSON(&user); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid input"})
+// UserRegister godoc
+// @Router       /e_commerce/api/v1/sendcode [POST]
+// @Summary      Customer register
+// @Description  Registering to Voltify
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        register body models.UserRegisterRequest true "register"
+// @Success      201  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h *handler) UserRegister(c *gin.Context) {
+	loginReq := models.UserRegisterRequest{}
+
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		h.logger.Error(err.Error() + ":" + "error while binding body")
+		c.JSON(http.StatusBadRequest, "error while binding body")
 		return
 	}
+	fmt.Println("loginReq: ", loginReq)
 
-	// Check if phone number already exists (in Redis)
-	_, err := rdb.Get(ctx, user.PhoneNumber).Result()
-	if err != redis.Nil {
-		c.JSON(400, gin.H{"error": "Phone number already registered"})
-		return
-	}
+	// if err := check.ValidateEmailAddress(loginReq.MobilePhone); err != nil {
+	//  handleResponseLog(c, h.log, "error while validating email" + loginReq.MobilePhone, http.StatusBadRequest, err.Error())
+	//  return
+	// }
 
-	// Save user data (in a real app, save it in a database)
-	err = rdb.Set(ctx, user.PhoneNumber, "", 0).Err()
+	// if err := check.CheckEmailExists(loginReq.MobilePhone); err != nil {
+	//  handleResponseLog(c, h.log, "error email does not exist" + loginReq.MobilePhone, http.StatusBadRequest, err.Error())
+	// }
+
+	err := h.service.Auth().UserRegister(c.Request.Context(), loginReq)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to register user"})
+		h.logger.Error(err.Error() + ":" + "error while registering")
+		c.JSON(http.StatusInternalServerError, "error while registering")
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "User registered successfully"})
+	h.logger.Info("Successfully registered")
+	c.JSON(http.StatusOK, "Successfully registered")
 }
 
-func sendCodeHandler(c *gin.Context) {
-	phone := c.Query("phone")
+// UserRegisterConfirm godoc
+// @Router       /e_commerce/api/v1/verifycode [POST]
+// @Summary      Customer register
+// @Description  Registering to Voltify
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        register body models.UserRegisterConfRequest true "register"
+// @Success      201  {object}  models.UserLoginResponse
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h *handler) UserRegisterConfirm(c *gin.Context) {
+	req := models.UserRegisterConfRequest{}
 
-	if phone == "" {
-		c.JSON(400, gin.H{"error": "Phone number is required"})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error(err.Error() + ":" + "error while binding body")
+		c.JSON(http.StatusBadRequest, "error while binding body")
 		return
 	}
+	fmt.Println("req: ", req)
 
-	// Generate a random 6-digit code
-	code := generateCode()
+	//TODO: need validate login & password
 
-	// Save the code in Redis with an expiration time (e.g., 10 minutes)
-	err := rdb.Set(ctx, phone, code, 10*time.Minute).Err()
+	confResp, err := h.service.Auth().UserRegisterConfirm(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to save code in Redis"})
+		h.logger.Error(err.Error() + ":" + "error while registering")
+		c.JSON(http.StatusInternalServerError, "error while registering")
 		return
 	}
+	h.logger.Info("Successfully login")
+	c.JSON(http.StatusOK, confResp)
 
-	// Send the code via Twilio
-	err = sendSMS(phone, code)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to send SMS"})
-		return
-	}
-
-	c.JSON(200, gin.H{"message": fmt.Sprintf("Verification code sent to %s", phone)})
-}
-
-func verifyCodeHandler(c *gin.Context) {
-	phone := c.Query("phone")
-	code := c.Query("code")
-
-	if phone == "" || code == "" {
-		c.JSON(400, gin.H{"error": "Phone number and code are required"})
-		return
-	}
-
-	// Retrieve the code from Redis
-	storedCode, err := rdb.Get(ctx, phone).Result()
-	if err == redis.Nil {
-		c.JSON(404, gin.H{"error": "Phone number not found or code expired"})
-		return
-	} else if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to retrieve code from Redis"})
-		return
-	}
-
-	if storedCode == code {
-		c.JSON(200, gin.H{"message": fmt.Sprintf("Phone number %s verified successfully!", phone)})
-	} else {
-		c.JSON(401, gin.H{"error": "Invalid code"})
-	}
-}
-
-func generateCode() string {
-	rand.Seed(time.Now().UnixNano())
-	return fmt.Sprintf("%06d", rand.Intn(1000000))
-}
-
-func sendSMS(to string, code string) error {
-	client := twilio.NewRestClientWithParams(twilio.ClientParams{
-		Username: AccountSID,
-		Password: AuthToken,
-	})
-
-	params := &openapi.CreateMessageParams{}
-	params.SetTo(to)
-	params.SetFrom(TwilioPhoneNumber)
-	params.SetBody(fmt.Sprintf("Your verification code is %s", code))
-
-	resp, err := client.Api.CreateMessage(params)
-	if err != nil {
-		log.Printf("Failed to send SMS: %v", err)
-		return err
-	}
-
-	log.Printf("Message sent successfully: SID %s", *resp.Sid)
-	return nil
 }

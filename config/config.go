@@ -33,6 +33,12 @@ type Config struct {
 	PostgresPassword string
 	PostgresDatabase string
 
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+
+	RedisURL string
+
 	PostgresMaxConnections int32
 	DefaultOffset          string
 	DefaultLimit           string
@@ -68,6 +74,11 @@ func Load() Config {
 	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "Z4T0tGG7VskI6i2liRFQqrhGJOa8uqFq")) //
 	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "e_commerce_project_p87q"))          //
 	config.PostgresMaxConnections = cast.ToInt32(getOrReturnDefaultValue("POSTGRES_MAX_CONNECTIONS", 30))
+
+	config.RedisURL = cast.ToString(getOrReturnDefaultValue("REDIS_URL", "rediss://default:AbmGAAIjcDEwMTM2YWU1YTgxYWE0OGVhOGEwZTEyNTFmMjY0YmUyMHAxMA@select-manatee-47494.upstash.io:6379"))
+	config.RedisHost = cast.ToString(getOrReturnDefaultValue("REDIS_HOST", "select-manatee-47494.upstash.io"))
+	config.RedisPort = cast.ToString(getOrReturnDefaultValue("REDIS_PORT", "6379"))
+	config.RedisPassword = cast.ToString(getOrReturnDefaultValue("REDIS_PASSWORD", "AbmGAAIjcDEwMTM2YWU1YTgxYWE0OGVhOGEwZTEyNTFmMjY0YmUyMHAxMA"))
 
 	config.AuthServiceHost = cast.ToString(getOrReturnDefaultValue("AUTH_SERVICE_HOST", "localhost"))
 	config.AuthGRPCPort = cast.ToString(getOrReturnDefaultValue("AUTH_GRPC_PORT", ":9103"))

@@ -3,11 +3,13 @@ package storage
 import (
 	"context"
 	"e-commerce/models"
+	"time"
 )
 
 type StorageI interface {
 	Close()
 	Admin() AdminI
+	Redis() RedisI
 	Customer() CustomerI
 	Brand() BrandI
 	Category() CategoryI
@@ -17,6 +19,12 @@ type StorageI interface {
 	Color() ColorI
 	Location() LocationI
 	// Register() AuthRepoI
+}
+
+type RedisI interface {
+	SetX(ctx context.Context, key string, value interface{}, duration time.Duration) error
+	Get(ctx context.Context, key string) (interface{}, error)
+	Del(ctx context.Context, key string) error
 }
 
 type AdminI interface {
@@ -33,6 +41,8 @@ type CustomerI interface {
 	GetList(ctx context.Context, req *models.CustomerGetListRequest) (*models.CustomerGetListResponse, error)
 	Update(ctx context.Context, req *models.CustomerUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.CustomerPrimaryKey) error
+	Login(ctx context.Context, login models.Customer) (string, error)
+	GetByLogin(ctx context.Context, login string) (models.Customer, error)
 }
 
 type BrandI interface {

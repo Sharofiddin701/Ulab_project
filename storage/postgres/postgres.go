@@ -5,6 +5,8 @@ import (
 	"e-commerce/config"
 	"e-commerce/pkg/logger"
 	"e-commerce/storage"
+
+	"e-commerce/storage/redis"
 	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -22,6 +24,7 @@ type store struct {
 	banner   *bannerRepo
 	color    *colorRepo
 	location *locationRepo
+	cfg      *config.Config
 	// auth     *authRepo
 }
 
@@ -60,6 +63,10 @@ func NewConnectionPostgres(cfg *config.Config) (storage.StorageI, error) {
 
 func (s *store) Close() {
 	s.db.Close()
+}
+
+func (s *store) Redis() storage.RedisI {
+	return redis.New(*s.cfg)
 }
 
 func (s *store) Admin() storage.AdminI {

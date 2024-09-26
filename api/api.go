@@ -4,6 +4,7 @@ import (
 	"e-commerce/api/handler"
 	"e-commerce/config"
 	"e-commerce/pkg/logger"
+	"e-commerce/service"
 	"e-commerce/storage"
 
 	_ "e-commerce/api/docs"
@@ -13,14 +14,14 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger logger.LoggerI) {
-	h := handler.NewHandler(cfg, storage, logger)
+func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger logger.LoggerI, service service.IServiceManager) {
+	h := handler.NewHandler(cfg, storage, logger, service)
 	r.Use(customCORSMiddleware())
 	v1 := r.Group("/e_commerce/api/v1")
 
-	// router.POST("/register", registerUserHandler)
-	// router.GET("/send-code", sendCodeHandler)
-	// router.GET("/verify-code", verifyCodeHandler)
+	v1.POST("/login", h.UserLogin)
+	v1.POST("/sendcode", h.UserRegister)
+	v1.POST("/verifycode", h.UserRegisterConfirm)
 
 	v1.POST("/admin", h.CreateAdmin)
 	v1.GET("/admin/:id", h.GetByIdAdmin)

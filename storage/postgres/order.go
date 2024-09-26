@@ -75,10 +75,10 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 	if order.Order.DeliveryStatus == "pochta" {
 		order.Order.DeliveryCost = 0
 	}
-	orderQuery := `INSERT INTO "orders" (id, customer_id, delivery_status, delivery_cost, payment_method, payment_status, total_price, created_at, updated_at)
-				   VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
+	orderQuery := `INSERT INTO "orders" (id, customer_id, delivery_status, payment_method, payment_status, total_price, created_at, updated_at)
+				   VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
 
-	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, order.Order.DeliveryStatus, order.Order.DeliveryCost, order.Order.PaymentMethod, order.Order.PaymentStatus, totalSum)
+	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, order.Order.DeliveryStatus, order.Order.PaymentMethod, order.Order.PaymentStatus, totalSum)
 	if err != nil {
 		return &models.OrderCreateRequest{}, err
 	}
@@ -212,6 +212,22 @@ func (o *orderRepo) DeleteOrder(orderId string) error {
 	// Delete order items
 	itemQuery := `DELETE FROM "order_items" WHERE order_id = $1`
 	_, err = tx.Exec(context.Background(), itemQuery, orderId)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+
+	// Delete related colors in order_items before deleting color itself
+	colorItemsQuery := `DELETE FROM "order_items" WHERE color_id = $1`
+	_, err = tx.Exec(context.Background(), colorItemsQuery, orderId)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+
+	// Delete the color
+	colorQuery := `DELETE FROM "color" WHERE id = $1`
+	_, err = tx.Exec(context.Background(), colorQuery, orderId)
 	if err != nil {
 		tx.Rollback(context.Background())
 		return err

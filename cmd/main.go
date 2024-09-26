@@ -3,9 +3,11 @@ package main
 import (
 	"e-commerce/api"
 	"e-commerce/config"
+	"e-commerce/service"
 	"fmt"
 
 	postgres "e-commerce/storage/postgres"
+	"e-commerce/storage/redis"
 
 	"github.com/gin-gonic/gin"
 	"github.com/saidamir98/udevs_pkg/logger"
@@ -47,7 +49,10 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery(), gin.Logger())
 
-	api.NewApi(r, &cfg, pgconn, log)
+	newRedis := redis.New(cfg)
+	services := service.New(pgconn, log, newRedis)
+
+	api.NewApi(r, &cfg, pgconn, log, services)
 
 	fmt.Println("Listening server", cfg.PostgresHost+cfg.HTTPPort)
 	err = r.Run(cfg.HTTPPort)
