@@ -27,7 +27,7 @@ func SendSms(phone string, message string) error {
 	formDataReader := strings.NewReader(encodedFormData)
 	readerWithCloser := nopCloser{formDataReader}
 
-	filepathh, _ := filepath.Abs("./auth.json")
+	filepathh, _ := filepath.Abs("../auth.json")
 
 	fmt.Println(filepathh)
 
