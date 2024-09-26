@@ -123,3 +123,49 @@ func (h *handler) UserRegisterConfirm(c *gin.Context) {
 	c.JSON(http.StatusOK, confResp)
 
 }
+
+// UserLoginByPhoneConfirm godoc
+// @Router       /e_commerce/api/v1/byphoneconfirm [POST]
+// @Summary      Customer login by phone confirmation
+// @Description  Login to the system using phone number and OTP
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        login body models.UserLoginByPhoneConfirmRequest true "login"
+// @Success      200  {object}  models.UserLoginResponse
+// @Failure      400  {object}  models.Response
+// @Failure      401  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h *handler) UserLoginByPhoneConfirm(c *gin.Context) {
+	var req models.UserLoginByPhoneConfirmRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("error while binding request body: " + err.Error())
+		c.JSON(http.StatusBadRequest, models.Response{
+			StatusCode:  http.StatusBadRequest,
+			Description: err.Error(),
+		})
+
+		return
+	}
+	resp, err := h.service.Auth().UserLoginByPhoneConfirm(c.Request.Context(), req)
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+		message := "Tizim xatosi yuz berdi"
+
+		if err.Error() == "OTP kod topilmadi yoki muddati tugagan" || err.Error() == "Noto'g'ri OTP kod" {
+			statusCode = http.StatusUnauthorized
+			message = err.Error()
+		}
+
+		h.logger.Error("error in UserLoginByPhoneConfirm: " + err.Error())
+		c.JSON(statusCode, models.Response{
+			StatusCode:  statusCode,
+			Description: message,
+		})
+		return
+	}
+
+	h.logger.Info("Successfully logged in by phone")
+	c.JSON(http.StatusOK, resp)
+}

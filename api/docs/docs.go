@@ -1200,6 +1200,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/e_commerce/api/v1/byphoneconfirm": {
+            "post": {
+                "description": "Login to the system using phone number and OTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Customer login by phone confirmation",
+                "parameters": [
+                    {
+                        "description": "login",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLoginByPhoneConfirmRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/e_commerce/api/v1/category": {
             "get": {
                 "description": "Get List Category",
@@ -4412,6 +4464,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.UserLoginByPhoneConfirmRequest": {
+            "type": "object",
+            "properties": {
+                "otp_code": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UserLoginRequest": {
             "type": "object",
             "properties": {
@@ -4427,6 +4490,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "phone_number": {
                     "type": "string"
                 },
                 "refresh_token": {

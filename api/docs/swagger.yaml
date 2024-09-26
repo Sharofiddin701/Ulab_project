@@ -424,6 +424,13 @@ definitions:
       quantity:
         type: integer
     type: object
+  models.UserLoginByPhoneConfirmRequest:
+    properties:
+      otp_code:
+        type: string
+      phone_number:
+        type: string
+    type: object
   models.UserLoginRequest:
     properties:
       login:
@@ -434,6 +441,10 @@ definitions:
   models.UserLoginResponse:
     properties:
       access_token:
+        type: string
+      id:
+        type: string
+      phone_number:
         type: string
       refresh_token:
         type: string
@@ -1113,6 +1124,40 @@ paths:
       summary: Update Brand
       tags:
       - Brand
+  /e_commerce/api/v1/byphoneconfirm:
+    post:
+      consumes:
+      - application/json
+      description: Login to the system using phone number and OTP
+      parameters:
+      - description: login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginByPhoneConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Customer login by phone confirmation
+      tags:
+      - auth
   /e_commerce/api/v1/category:
     get:
       consumes:

@@ -81,6 +81,26 @@ func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Cus
 	return user, nil
 }
 
+func (c *customerRepo) GetByPhoneNumber(ctx context.Context, req string) (models.Customer, error) {
+
+	var resp models.Customer
+
+	query := `
+		SELECT 
+			id
+		FROM "customer"
+		WHERE phone_number = $1
+	`
+
+	err := c.db.QueryRow(ctx, query, req).Scan(&resp.Id)
+	if err != nil {
+		return models.Customer{}, err
+	}
+
+	return resp, nil
+
+}
+
 func (c *customerRepo) Login(ctx context.Context, login models.Customer) (string, error) {
 	var hashedPass string
 

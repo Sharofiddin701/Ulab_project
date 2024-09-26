@@ -1,4 +1,4 @@
-package pkg
+package nmagap
 
 import (
 	"encoding/json"
@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -27,12 +26,10 @@ func SendSms(phone string, message string) error {
 	formDataReader := strings.NewReader(encodedFormData)
 	readerWithCloser := nopCloser{formDataReader}
 
-	filepathh, _ := filepath.Abs("../auth.json")
-
-	fmt.Println(filepathh)
+	filepath := "./auth.json"
 
 	var token SmsToken
-	jsonFile, err := os.Open(filepathh)
+	jsonFile, err := os.Open(filepath)
 	if err != nil {
 		return err
 	}
