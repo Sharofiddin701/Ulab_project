@@ -127,9 +127,9 @@ definitions:
     type: object
   models.CustomerCreate:
     properties:
-      address:
+      birthday:
         type: string
-      email:
+      gender:
         type: string
       name:
         type: string
@@ -137,12 +137,14 @@ definitions:
         type: string
       phone_number:
         type: string
+      surname:
+        type: string
     type: object
   models.CustomerUpdate:
     properties:
-      address:
+      birthday:
         type: string
-      email:
+      gender:
         type: string
       id:
         type: string
@@ -151,6 +153,8 @@ definitions:
       password:
         type: string
       phone_number:
+        type: string
+      surname:
         type: string
     type: object
   models.LocationCreate:

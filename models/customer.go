@@ -1,12 +1,13 @@
 package models
 
 type Customer struct {
-	Id           string `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Phone_number string `json:"phone_number,omitempty"`
-	Address      string `json:"address,omitempty"`
-	Email        string `json:"email,omitempty"`
-	Password     string `json:"password,omitempty"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Surname      string `json:"surname"`
+	Phone_number string `json:"phone_number"`
+	Birthday     string `json:"birthday"`
+	Gender       string `json:"gender"`
+	Password     string `json:"password"`
 	CreatedAt    string `json:"created_at,omitempty"`
 	UpdatedAt    string `json:"updated_at,omitempty"`
 	DeletedAt    string `json:"delete_at,omitempty"`
@@ -14,18 +15,20 @@ type Customer struct {
 
 type CustomerCreate struct {
 	Name         string `json:"name"`
+	Surname      string `json:"surname"`
 	Phone_number string `json:"phone_number"`
-	Address      string `json:"address"`
-	Email        string `json:"email"`
+	Birthday     string `json:"birthday"`
+	Gender       string `json:"gender"`
 	Password     string `json:"password"`
 }
 
 type CustomerUpdate struct {
 	Id           string `json:"id"`
 	Name         string `json:"name"`
+	Surname      string `json:"surname"`
 	Phone_number string `json:"phone_number"`
-	Address      string `json:"address"`
-	Email        string `json:"email"`
+	Birthday     string `json:"birthday"`
+	Gender       string `json:"gender"`
 	Password     string `json:"password"`
 }
 

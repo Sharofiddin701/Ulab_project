@@ -3960,10 +3960,10 @@ const docTemplate = `{
         "models.CustomerCreate": {
             "type": "object",
             "properties": {
-                "address": {
+                "birthday": {
                     "type": "string"
                 },
-                "email": {
+                "gender": {
                     "type": "string"
                 },
                 "name": {
@@ -3974,16 +3974,19 @@ const docTemplate = `{
                 },
                 "phone_number": {
                     "type": "string"
+                },
+                "surname": {
+                    "type": "string"
                 }
             }
         },
         "models.CustomerUpdate": {
             "type": "object",
             "properties": {
-                "address": {
+                "birthday": {
                     "type": "string"
                 },
-                "email": {
+                "gender": {
                     "type": "string"
                 },
                 "id": {
@@ -3996,6 +3999,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone_number": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }

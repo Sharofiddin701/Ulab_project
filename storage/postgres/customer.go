@@ -29,8 +29,10 @@ func NewCustomerRepo(db *pgxpool.Pool, log logger.LoggerI) *customerRepo {
 func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Customer, error) {
 	var (
 		name      sql.NullString
+		surname   sql.NullString
 		phone     sql.NullString
-		email     sql.NullString
+		birthday  sql.NullString
+		gender    sql.NullString
 		createdat sql.NullString
 		updatedat sql.NullString
 	)
@@ -38,8 +40,10 @@ func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Cus
 	query := `SELECT 
 	 id, 
 	 name, 
+	 surname, 
 	 phone_number,
-	 email,
+	 birthday,
+	 gender,
 	 created_at, 
 	 updated_at,
 	 password
@@ -52,8 +56,10 @@ func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Cus
 	err := row.Scan(
 		&user.Id,
 		&name,
+		&surname,
 		&phone,
-		&email,
+		&birthday,
+		&gender,
 		&createdat,
 		&updatedat,
 		&user.Password,
@@ -65,8 +71,10 @@ func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Cus
 	}
 
 	user.Name = name.String
+	user.Surname = surname.String // Yangi qo'shilgan ustun
 	user.Phone_number = phone.String
-	user.Email = email.String
+	user.Birthday = birthday.String // Yangi qo'shilgan ustun
+	user.Gender = gender.String     // Yangi qo'shilgan ustun
 	user.CreatedAt = createdat.String
 	user.UpdatedAt = updatedat.String
 
@@ -117,32 +125,35 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 	INSERT INTO "customer"(
 		id,
 		name,
+		surname,
 		phone_number,
-		address,
-		email,
+		birthday,
+		gender,
 		password,
 		created_at
 )
-	VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
-	RETURNING id, name, phone_number, address, email, password, created_at, updated_at
+	VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+	RETURNING id, name, surname, phone_number, birthday, gender, password, created_at, updated_at
 	`
 	var (
 		idd          sql.NullString
 		name         sql.NullString
+		surname      sql.NullString
 		phone_number sql.NullString
-		address      sql.NullString
-		email        sql.NullString
+		birthday     sql.NullString
+		gender       sql.NullString
 		password     sql.NullString
 		created_at   sql.NullString
 		updated_at   sql.NullString
 	)
 
-	err := u.db.QueryRow(ctx, query, id, req.Name, req.Phone_number, req.Address, req.Email, req.Password).Scan(
+	err := u.db.QueryRow(ctx, query, id, req.Name, req.Surname, req.Phone_number, req.Birthday, req.Gender, req.Password).Scan(
 		&idd,
 		&name,
+		&surname,
 		&phone_number,
-		&address,
-		&email,
+		&birthday,
+		&gender,
 		&password,
 		&created_at,
 		&updated_at,
@@ -155,9 +166,10 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 	return &models.Customer{
 		Id:           idd.String,
 		Name:         name.String,
+		Surname:      surname.String,
 		Phone_number: phone_number.String,
-		Address:      address.String,
-		Email:        email.String,
+		Birthday:     birthday.String,
+		Gender:       gender.String,
 		Password:     password.String,
 		CreatedAt:    created_at.String,
 		UpdatedAt:    updated_at.String,
@@ -169,9 +181,10 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 		query        string
 		id           sql.NullString
 		name         sql.NullString
+		surname      sql.NullString
 		phone_number sql.NullString
-		address      sql.NullString
-		email        sql.NullString
+		birthday     sql.NullString
+		gender       sql.NullString
 		password     sql.NullString
 		created_at   sql.NullString
 	)
@@ -180,9 +193,10 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 		SELECT 
 			id,
 			name,
+			surname,
 			phone_number,
-			address,
-			email,
+			birthday,
+			gender,
 			password,
 			created_at
 		FROM "customer" 
@@ -193,9 +207,10 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 	err := u.db.QueryRow(ctx, query, req.Id).Scan(
 		&id,
 		&name,
+		&surname,
 		&phone_number,
-		&address,
-		&email,
+		&birthday,
+		&gender,
 		&password,
 		&created_at,
 	)
@@ -208,9 +223,10 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 	return &models.Customer{
 		Id:           id.String,
 		Name:         name.String,
+		Surname:      surname.String,
 		Phone_number: phone_number.String,
-		Address:      address.String,
-		Email:        email.String,
+		Birthday:     birthday.String,
+		Gender:       gender.String,
 		Password:     password.String,
 		CreatedAt:    created_at.String,
 	}, nil
@@ -229,9 +245,10 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			COUNT(*) OVER(),
 			id,
 			name,
+			surname,
 			phone_number,
-			address,
-			email,
+			birthday,
+			gender,
 			password,
 			created_at
 		FROM "customer" 
@@ -256,9 +273,10 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 		var (
 			id           sql.NullString
 			name         sql.NullString
+			surname      sql.NullString
 			phone_number sql.NullString
-			address      sql.NullString
-			email        sql.NullString
+			birthday     sql.NullString
+			gender       sql.NullString
 			password     sql.NullString
 			created_at   sql.NullString
 		)
@@ -267,9 +285,10 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			&resp.Count,
 			&id,
 			&name,
+			&surname,
 			&phone_number,
-			&address,
-			&email,
+			&birthday,
+			&gender,
 			&password,
 			&created_at,
 		)
@@ -281,9 +300,10 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 		resp.Customer = append(resp.Customer, &models.Customer{
 			Id:           id.String,
 			Name:         name.String,
+			Surname:      surname.String,
 			Phone_number: phone_number.String,
-			Address:      address.String,
-			Email:        email.String,
+			Birthday:     birthday.String,
+			Gender:       gender.String,
 			Password:     password.String,
 			CreatedAt:    created_at.String,
 		})
@@ -309,11 +329,6 @@ func (u *customerRepo) Update(ctx context.Context, req *models.CustomerUpdate) (
 		return 0, fmt.Errorf("invalid phone number format")
 	}
 
-	if !helper.IsValidEmail(req.Email) {
-		u.log.Error("Invalid email format")
-		return 0, fmt.Errorf("invalid email format")
-	}
-
 	var (
 		query  string
 		params map[string]interface{}
@@ -324,9 +339,10 @@ func (u *customerRepo) Update(ctx context.Context, req *models.CustomerUpdate) (
 			"customer"
 		SET
 			name = :name,
+			surname = :surname,
 			phone_number = :phone_number,
-			address = :address,
-			email = :email,
+			birthday = :birthday,
+			gender = :gender,
 			password = :password,
 			updated_at = NOW()
 		WHERE id = :id
@@ -335,9 +351,10 @@ func (u *customerRepo) Update(ctx context.Context, req *models.CustomerUpdate) (
 	params = map[string]interface{}{
 		"id":           req.Id,
 		"name":         req.Name,
+		"surname":      req.Surname,
 		"phone_number": req.Phone_number,
-		"address":      req.Address,
-		"email":        req.Email,
+		"birthday":     req.Birthday,
+		"gender":       req.Gender,
 		"password":     req.Password,
 	}
 

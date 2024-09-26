@@ -12,9 +12,10 @@ CREATE TABLE IF NOT EXISTS "admin" (
 CREATE TABLE IF NOT EXISTS "customer" (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(100) NOT NULL,
+    "surname" VARCHAR(255),
+    "birthday" DATE, 
+    "gender" VARCHAR(20),
     "phone_number" VARCHAR(100) NOT NULL,
-    "address" VARCHAR(255),
-    "email" VARCHAR(100) NOT NULL,
     "password" VARCHAR(100) NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP

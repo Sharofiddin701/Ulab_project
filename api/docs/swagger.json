@@ -3949,10 +3949,10 @@
         "models.CustomerCreate": {
             "type": "object",
             "properties": {
-                "address": {
+                "birthday": {
                     "type": "string"
                 },
-                "email": {
+                "gender": {
                     "type": "string"
                 },
                 "name": {
@@ -3963,16 +3963,19 @@
                 },
                 "phone_number": {
                     "type": "string"
+                },
+                "surname": {
+                    "type": "string"
                 }
             }
         },
         "models.CustomerUpdate": {
             "type": "object",
             "properties": {
-                "address": {
+                "birthday": {
                     "type": "string"
                 },
-                "email": {
+                "gender": {
                     "type": "string"
                 },
                 "id": {
@@ -3985,6 +3988,9 @@
                     "type": "string"
                 },
                 "phone_number": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }
