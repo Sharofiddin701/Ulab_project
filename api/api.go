@@ -85,7 +85,16 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 func customCORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		c.Header("Access-Control-Allow-Origin", "*")
+		allowedOrigins := map[string]bool{
+			"https://yourdomain.com":    true,
+			"https://anotherdomain.com": true,
+		}
+
+		origin := c.Request.Header.Get("Origin")
+		if _, ok := allowedOrigins[origin]; ok {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
+
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE, HEAD")
 		c.Header("Access-Control-Allow-Headers", "Platform-Id, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
