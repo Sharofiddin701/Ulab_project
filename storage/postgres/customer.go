@@ -6,12 +6,10 @@ import (
 	"e-commerce/models"
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type customerRepo struct {
@@ -46,7 +44,6 @@ func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Cus
 	 gender,
 	 created_at, 
 	 updated_at,
-	 password
 	 FROM "customer" WHERE phone_number= $1 `
 
 	row := c.db.QueryRow(ctx, query, login)
@@ -62,7 +59,6 @@ func (c *customerRepo) GetByLogin(ctx context.Context, login string) (models.Cus
 		&gender,
 		&createdat,
 		&updatedat,
-		&user.Password,
 	)
 
 	if err != nil {
@@ -101,32 +97,32 @@ func (c *customerRepo) GetByPhoneNumber(ctx context.Context, req string) (models
 
 }
 
-func (c *customerRepo) Login(ctx context.Context, login models.Customer) (string, error) {
-	var hashedPass string
+// func (c *customerRepo) Login(ctx context.Context, login models.Customer) (string, error) {
+// 	var hashedPass string
 
-	query := `SELECT password
-	FROM "customer"
-	WHERE phone_number = $1`
+// 	query := `SELECT password
+// 	FROM "customer"
+// 	WHERE phone_number = $1`
 
-	err := c.db.QueryRow(ctx, query,
-		login.Phone_number,
-	).Scan(&hashedPass)
+// 	err := c.db.QueryRow(ctx, query,
+// 		login.Phone_number,
+// 	).Scan(&hashedPass)
 
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return "", errors.New("incorrect login")
-		}
-		c.log.Error("failed to get user password from database", logger.Error(err))
-		return "", err
-	}
+// 	if err != nil {
+// 		if err == sql.ErrNoRows {
+// 			return "", errors.New("incorrect login")
+// 		}
+// 		c.log.Error("failed to get user password from database", logger.Error(err))
+// 		return "", err
+// 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(login.Password))
-	if err != nil {
-		return "", errors.New("password mismatch")
-	}
+// 	err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(login.Password))
+// 	if err != nil {
+// 		return "", errors.New("password mismatch")
+// 	}
 
-	return "Logged in successfully", nil
-}
+// 	return "Logged in successfully", nil
+// }
 
 func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (*models.Customer, error) {
 

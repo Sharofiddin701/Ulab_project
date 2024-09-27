@@ -7,7 +7,6 @@ type Customer struct {
 	Phone_number string `json:"phone_number"`
 	Birthday     string `json:"birthday"`
 	Gender       string `json:"gender"`
-	Password     string `json:"password"`
 	CreatedAt    string `json:"created_at,omitempty"`
 	UpdatedAt    string `json:"updated_at,omitempty"`
 	DeletedAt    string `json:"delete_at,omitempty"`
@@ -19,7 +18,6 @@ type CustomerCreate struct {
 	Phone_number string `json:"phone_number"`
 	Birthday     string `json:"birthday"`
 	Gender       string `json:"gender"`
-	// Password     string `json:"password"`
 }
 
 type CustomerUpdate struct {
@@ -29,7 +27,6 @@ type CustomerUpdate struct {
 	Phone_number string `json:"phone_number"`
 	Birthday     string `json:"birthday"`
 	Gender       string `json:"gender"`
-	Password     string `json:"password"`
 }
 
 type CustomerPrimaryKey struct {

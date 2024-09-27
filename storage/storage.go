@@ -41,7 +41,7 @@ type CustomerI interface {
 	GetList(ctx context.Context, req *models.CustomerGetListRequest) (*models.CustomerGetListResponse, error)
 	Update(ctx context.Context, req *models.CustomerUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.CustomerPrimaryKey) error
-	Login(ctx context.Context, login models.Customer) (string, error)
+	// Login(ctx context.Context, login models.Customer) (string, error)
 	GetByLogin(ctx context.Context, login string) (models.Customer, error)
 	GetByPhoneNumber(ctx context.Context, req string) (models.Customer, error)
 }
