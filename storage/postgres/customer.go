@@ -201,7 +201,6 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 		phone_number sql.NullString
 		birthday     sql.NullString
 		gender       sql.NullString
-		password     sql.NullString
 		created_at   sql.NullString
 	)
 
@@ -213,7 +212,6 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 			phone_number,
 			birthday,
 			gender,
-			password,
 			created_at
 		FROM "customer" 
 		WHERE id = $1
@@ -227,7 +225,6 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 		&phone_number,
 		&birthday,
 		&gender,
-		&password,
 		&created_at,
 	)
 
@@ -243,7 +240,6 @@ func (u *customerRepo) GetByID(ctx context.Context, req *models.CustomerPrimaryK
 		Phone_number: phone_number.String,
 		Birthday:     birthday.String,
 		Gender:       gender.String,
-		Password:     password.String,
 		CreatedAt:    created_at.String,
 	}, nil
 }
@@ -265,7 +261,6 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			phone_number,
 			birthday,
 			gender,
-			password,
 			created_at
 		FROM "customer" 
 	`
@@ -293,7 +288,6 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			phone_number sql.NullString
 			birthday     sql.NullString
 			gender       sql.NullString
-			password     sql.NullString
 			created_at   sql.NullString
 		)
 
@@ -305,7 +299,6 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			&phone_number,
 			&birthday,
 			&gender,
-			&password,
 			&created_at,
 		)
 		if err != nil {
@@ -320,7 +313,6 @@ func (u *customerRepo) GetList(ctx context.Context, req *models.CustomerGetListR
 			Phone_number: phone_number.String,
 			Birthday:     birthday.String,
 			Gender:       gender.String,
-			Password:     password.String,
 			CreatedAt:    created_at.String,
 		})
 	}
@@ -359,7 +351,6 @@ func (u *customerRepo) Update(ctx context.Context, req *models.CustomerUpdate) (
 			phone_number = :phone_number,
 			birthday = :birthday,
 			gender = :gender,
-			password = :password,
 			updated_at = NOW()
 		WHERE id = :id
 	`
@@ -371,7 +362,6 @@ func (u *customerRepo) Update(ctx context.Context, req *models.CustomerUpdate) (
 		"phone_number": req.Phone_number,
 		"birthday":     req.Birthday,
 		"gender":       req.Gender,
-		"password":     req.Password,
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)
