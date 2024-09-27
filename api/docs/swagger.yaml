@@ -133,8 +133,6 @@ definitions:
         type: string
       name:
         type: string
-      password:
-        type: string
       phone_number:
         type: string
       surname:
@@ -453,10 +451,6 @@ definitions:
     properties:
       customer:
         $ref: '#/definitions/models.CustomerCreate'
-      phone_number:
-        type: string
-      sms_code:
-        type: string
     type: object
   models.UserRegisterRequest:
     properties:

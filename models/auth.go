@@ -31,7 +31,5 @@ type UserLoginByPhoneConfirmRequest struct {
 }
 
 type UserRegisterConfRequest struct {
-	MobilePhone string          `json:"phone_number"`
-	Otp         string          `json:"sms_code"`
-	Customer    *CustomerCreate `json:"customer"`
+	Customer *CustomerCreate `json:"customer"`
 }

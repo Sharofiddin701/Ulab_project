@@ -149,11 +149,10 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		phone_number,
 		birthday,
 		gender,
-		password,
 		created_at
 )
-	VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
-	RETURNING id, name, surname, phone_number, birthday, gender, password, created_at, updated_at
+	VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+	RETURNING id, name, surname, phone_number, birthday, gender, created_at, updated_at
 	`
 	var (
 		idd          sql.NullString
@@ -162,19 +161,17 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		phone_number sql.NullString
 		birthday     sql.NullString
 		gender       sql.NullString
-		password     sql.NullString
 		created_at   sql.NullString
 		updated_at   sql.NullString
 	)
 
-	err := u.db.QueryRow(ctx, query, id, req.Name, req.Surname, req.Phone_number, req.Birthday, req.Gender, req.Password).Scan(
+	err := u.db.QueryRow(ctx, query, id, req.Name, req.Surname, req.Phone_number, req.Birthday, req.Gender).Scan(
 		&idd,
 		&name,
 		&surname,
 		&phone_number,
 		&birthday,
 		&gender,
-		&password,
 		&created_at,
 		&updated_at,
 	)
@@ -190,7 +187,6 @@ func (u *customerRepo) Create(ctx context.Context, req *models.CustomerCreate) (
 		Phone_number: phone_number.String,
 		Birthday:     birthday.String,
 		Gender:       gender.String,
-		Password:     password.String,
 		CreatedAt:    created_at.String,
 		UpdatedAt:    updated_at.String,
 	}, nil

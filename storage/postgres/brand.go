@@ -23,7 +23,7 @@ func NewBrandRepo(db *pgxpool.Pool, log logger.LoggerI) *brandRepo {
 		db:  db,
 		log: log,
 	}
-}
+} 
 
 // Create inserts a new admin into the database
 func (u *brandRepo) Create(ctx context.Context, req *models.BrandCreate) (*models.Brand, error) {

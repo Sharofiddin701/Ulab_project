@@ -83,16 +83,16 @@ func (a authService) UserRegister(ctx context.Context, loginRequest models.UserR
 func (a authService) UserRegisterConfirm(ctx context.Context, req models.UserRegisterConfRequest) (models.UserLoginResponse, error) {
 	resp := models.UserLoginResponse{}
 
-	otp, err := a.redis.Get(ctx, req.MobilePhone)
-	if err != nil {
-		a.log.Error("error while getting sms code for user register confirm", logger.Error(err))
-		return resp, err
-	}
-	if req.Otp != otp {
-		a.log.Error("incorrect sms code for user register confirm", logger.Error(err))
-		return resp, errors.New("incorrect otp code")
-	}
-	req.Customer.Phone_number = req.MobilePhone
+	// otp, err := a.redis.Get(ctx, req.MobilePhone)
+	// if err != nil {
+	// 	a.log.Error("error while getting sms code for user register confirm", logger.Error(err))
+	// 	return resp, err
+	// }
+	// if req.Otp != otp {
+	// 	a.log.Error("incorrect sms code for user register confirm", logger.Error(err))
+	// 	return resp, errors.New("incorrect otp code")
+	// }
+	// req.Customer.Phone_number = req.MobilePhone
 	id, err := a.storage.Customer().Create(ctx, req.Customer)
 	if err != nil {
 		a.log.Error("error while creating user", logger.Error(err))
@@ -114,23 +114,23 @@ func (a authService) UserRegisterConfirm(ctx context.Context, req models.UserReg
 	return resp, nil
 }
 
-func (a authService) UserLoginByPhone(ctx context.Context, req models.UserLoginByPhoneRequest) error {
-	otpCode := pkg.GenerateOTP()
-	msg := fmt.Sprintf("iBron ilovasi ro'yxatdan o'tish uchun tasdiqlash kodi: %v", otpCode)
+// func (a authService) UserLoginByPhone(ctx context.Context, req models.UserLoginByPhoneRequest) error {
+// 	otpCode := pkg.GenerateOTP()
+// 	msg := fmt.Sprintf("iBron ilovasi ro'yxatdan o'tish uchun tasdiqlash kodi: %v", otpCode)
 
-	err := a.redis.SetX(ctx, req.PhoneNumber, otpCode, time.Minute*5)
-	if err != nil {
-		a.log.Error("error while setting smsCode to redis for user login", logger.Error(err))
-		return err
-	}
+// 	err := a.redis.SetX(ctx, req.PhoneNumber, otpCode, time.Minute*5)
+// 	if err != nil {
+// 		a.log.Error("error while setting smsCode to redis for user login", logger.Error(err))
+// 		return err
+// 	}
 
-	err = nmagap.SendSms(req.PhoneNumber, msg)
-	if err != nil {
-		a.log.Error("error while sending sms code for user login", logger.Error(err))
-		return err
-	}
-	return nil
-}
+// 	err = nmagap.SendSms(req.PhoneNumber, msg)
+// 	if err != nil {
+// 		a.log.Error("error while sending sms code for user login", logger.Error(err))
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (a authService) UserLoginByPhoneConfirm(ctx context.Context, req models.UserLoginByPhoneConfirmRequest) (models.UserLoginResponse, error) {
 	resp := models.UserLoginResponse{}
@@ -142,12 +142,12 @@ func (a authService) UserLoginByPhoneConfirm(ctx context.Context, req models.Use
 			return resp, errors.New("OTP kod topilmadi yoki muddati tugagan")
 		}
 		a.log.Error("error while getting OTP code from redis", logger.Error(err))
-		return resp, errors.New("Tizim xatosi yuz berdi")
+		return resp, errors.New("tizim xatosi yuz berdi")
 	}
 
 	if req.OtpCode != storedOTP {
 		a.log.Error("incorrect OTP code", logger.Error(errors.New("OTP code mismatch")))
-		return resp, errors.New("Noto'g'ri OTP kod")
+		return resp, errors.New("noto'g'ri OTP kod")
 	}
 
 	err = a.redis.Del(ctx, req.PhoneNumber)

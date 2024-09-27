@@ -4021,9 +4021,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "phone_number": {
                     "type": "string"
                 },
@@ -4508,12 +4505,6 @@ const docTemplate = `{
             "properties": {
                 "customer": {
                     "$ref": "#/definitions/models.CustomerCreate"
-                },
-                "phone_number": {
-                    "type": "string"
-                },
-                "sms_code": {
-                    "type": "string"
                 }
             }
         },

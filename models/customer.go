@@ -19,7 +19,7 @@ type CustomerCreate struct {
 	Phone_number string `json:"phone_number"`
 	Birthday     string `json:"birthday"`
 	Gender       string `json:"gender"`
-	Password     string `json:"password"`
+	// Password     string `json:"password"`
 }
 
 type CustomerUpdate struct {
