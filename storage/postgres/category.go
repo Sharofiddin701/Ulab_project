@@ -7,6 +7,9 @@ import (
 	"e-commerce/pkg/helper"
 	"e-commerce/pkg/logger"
 	"fmt"
+	"sort"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -168,7 +171,7 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 	}
 	defer rows.Close()
 
-	categoryMap := make(map[string]*models.Category)
+	var categories []*models.Category
 
 	for rows.Next() {
 		var (
@@ -192,13 +195,14 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 			return nil, err
 		}
 
-		categoryMap[id.String] = &models.Category{
+		category := &models.Category{
 			Id:        id.String,
 			Name:      name.String,
 			Url:       url.String,
 			ParentId:  parent_id.String,
 			CreatedAt: created_at.String,
 		}
+		categories = append(categories, category)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -206,26 +210,24 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		return nil, err
 	}
 
+	// Sort categories by created_at in descending order
+	sort.Slice(categories, func(i, j int) bool {
+		timeI, _ := time.Parse(time.RFC3339, categories[i].CreatedAt)
+		timeJ, _ := time.Parse(time.RFC3339, categories[j].CreatedAt)
+		return timeI.After(timeJ)
+	})
+
 	if req.Name != "" {
-		categoryNames := make([]string, 0, len(categoryMap))
-		for _, category := range categoryMap {
-			categoryNames = append(categoryNames, category.Name)
-		}
-
-		filteredNames := filterStrings(categoryNames, req.Name)
-
-		filteredCategoryMap := make(map[string]*models.Category)
-		for _, category := range categoryMap {
-			if contains(filteredNames, category.Name) {
-				filteredCategoryMap[category.Id] = category
+		var filteredCategories []*models.Category
+		for _, category := range categories {
+			if strings.Contains(strings.ToLower(category.Name), strings.ToLower(req.Name)) {
+				filteredCategories = append(filteredCategories, category)
 			}
 		}
-		categoryMap = filteredCategoryMap
+		categories = filteredCategories
 	}
 
-	for _, category := range categoryMap {
-		resp.Category = append(resp.Category, category)
-	}
+	resp.Category = categories
 
 	return resp, nil
 }

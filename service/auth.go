@@ -83,24 +83,16 @@ func (a authService) UserRegister(ctx context.Context, loginRequest models.UserR
 func (a authService) UserRegisterConfirm(ctx context.Context, req models.UserRegisterConfRequest) (models.UserLoginResponse, error) {
 	resp := models.UserLoginResponse{}
 
-	// otp, err := a.redis.Get(ctx, req.MobilePhone)
-	// if err != nil {
-	// 	a.log.Error("error while getting sms code for user register confirm", logger.Error(err))
-	// 	return resp, err
-	// }
-	// if req.Otp != otp {
-	// 	a.log.Error("incorrect sms code for user register confirm", logger.Error(err))
-	// 	return resp, errors.New("incorrect otp code")
-	// }
-	// req.Customer.Phone_number = req.MobilePhone
-	id, err := a.storage.Customer().Create(ctx, req.Customer)
+	// OTP tekshiruvi hozircha o'chirilgan
+
+	customer, err := a.storage.Customer().Create(ctx, req.Customer)
 	if err != nil {
 		a.log.Error("error while creating user", logger.Error(err))
 		return resp, err
 	}
 	var m = make(map[interface{}]interface{})
 
-	m["user_id"] = id
+	m["user_id"] = customer.Id // Faraz qilamizki, Customer strukturasida ID maydoni bor
 	m["user_role"] = config.CUSTOMER_ROLE
 
 	accessToken, refreshToken, err := jwt.GenJWT(m)
@@ -108,6 +100,7 @@ func (a authService) UserRegisterConfirm(ctx context.Context, req models.UserReg
 		a.log.Error("error while generating tokens for user register confirm", logger.Error(err))
 		return resp, err
 	}
+	resp.ID = customer.Id // ID ni javobga qo'shamiz
 	resp.AccessToken = accessToken
 	resp.RefreshToken = refreshToken
 

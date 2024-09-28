@@ -1,35 +1,35 @@
 package models
 
-type UserLoginRequest struct {
+type AdminLoginRequest struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 
-type UserLoginResponse struct {
+type AdminLoginResponse struct {
 	PhoneNumber  string `json:"phone_number"`
 	ID           string `json:"id"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
 
-type AuthInfo struct {
+type AuthInfoAdmin struct {
 	UserID   string `json:"user_id"`
 	UserRole string `json:"user_role"`
 }
 
-type UserRegisterRequest struct {
+type AdminRegisterRequest struct {
 	MobilePhone string `json:"mobile_phone"`
 }
 
-type UserLoginByPhoneRequest struct {
+type AdminLoginByPhoneRequest struct {
 	PhoneNumber string `json:"phone_number"`
 }
 
-type UserLoginByPhoneConfirmRequest struct {
+type AdminLoginByPhoneConfirmRequest struct {
 	PhoneNumber string `json:"phone_number"`
 	OtpCode     string `json:"otp_code"`
 }
 
-type UserRegisterConfRequest struct {
-	Customer    *CustomerCreate `json:"customer"`
+type AdminRegisterConfRequest struct {
+	Customer *CustomerCreate `json:"customer"`
 }

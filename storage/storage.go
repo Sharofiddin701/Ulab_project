@@ -33,6 +33,8 @@ type AdminI interface {
 	GetList(ctx context.Context, req *models.AdminGetListRequest) (*models.AdminGetListResponse, error)
 	Update(ctx context.Context, req *models.AdminUpdate) (int64, error)
 	Delete(ctx context.Context, req *models.AdminPrimaryKey) error
+	GetByLogin(ctx context.Context, login string) (models.Admin, error)
+	GetByPhoneNumber(ctx context.Context, req string) (*models.Admin, error)
 }
 
 type CustomerI interface {

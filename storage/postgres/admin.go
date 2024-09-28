@@ -25,6 +25,107 @@ func NewAdminRepo(db *pgxpool.Pool, log logger.LoggerI) *adminRepo {
 	}
 }
 
+func (u *adminRepo) GetByPhoneNumber(ctx context.Context, req string) (*models.Admin, error) {
+	var (
+		query        string
+		id           sql.NullString
+		name         sql.NullString
+		phone_number sql.NullString
+		email        sql.NullString
+		password     sql.NullString
+		address      sql.NullString
+		created_at   sql.NullString
+	)
+
+	query = `
+		SELECT 
+			id,
+			name,
+			phone_number,
+			email,
+			password,
+			address,
+			created_at
+		FROM "admin" 
+		WHERE phone_number = $1
+
+	`
+
+	err := u.db.QueryRow(ctx, query, req).Scan(
+		&id,
+		&name,
+		&phone_number,
+		&email,
+		&password,
+		&address,
+		&created_at,
+	)
+
+	if err != nil && err.Error() != "no rows in result set" {
+		u.log.Error("error while scanning data" + err.Error())
+		return nil, err
+	}
+
+	return &models.Admin{
+		Id:           id.String,
+		Name:         name.String,
+		Phone_number: phone_number.String,
+		Email:        email.String,
+		Password:     password.String,
+		Address:      address.String,
+		CreatedAt:    created_at.String,
+	}, nil
+}
+
+func (c *adminRepo) GetByLogin(ctx context.Context, login string) (models.Admin, error) {
+	var (
+		name      sql.NullString
+		address   sql.NullString
+		phone     sql.NullString
+		password  sql.NullString
+		createdat sql.NullString
+		updatedat sql.NullString
+	)
+
+	query := `SELECT 
+	 id, 
+	 name,
+	 address,
+	 phone_number,
+	 password,
+	 created_at, 
+	 updated_at
+	 FROM "admin" WHERE phone_number = $1 `
+
+	row := c.db.QueryRow(ctx, query, login)
+
+	admin := models.Admin{}
+
+	err := row.Scan(
+		&admin.Id,
+		&name,
+		&address,
+		&phone,
+		&password,
+		&createdat,
+		&updatedat,
+	)
+
+	if err != nil {
+		c.log.Error("failed to scan admin by LOGIN from database", logger.Error(err))
+		return models.Admin{}, err
+	}
+
+	admin.Name = name.String
+	admin.Phone_number = phone.String
+	admin.Address = address.String
+	admin.Password = password.String
+	admin.CreatedAt = createdat.String
+	admin.UpdatedAt = updatedat.String
+
+	return admin, nil
+}
+
 // Create inserts a new admin into the database
 func (u *adminRepo) Create(ctx context.Context, req *models.AdminCreate) (*models.Admin, error) {
 
@@ -202,7 +303,7 @@ func (u *adminRepo) GetList(ctx context.Context, req *models.AdminGetListRequest
 			&created_at,
 		)
 		if err != nil {
-			u.log.Error("error is while getting user list (scanning data)", logger.Error(err))
+			u.log.Error("error is while getting admin list (scanning data)", logger.Error(err))
 			return nil, err
 		}
 

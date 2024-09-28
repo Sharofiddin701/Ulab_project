@@ -3,6 +3,7 @@ package handler
 import (
 	"e-commerce/models"
 	"e-commerce/pkg/helper"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -206,4 +207,47 @@ func (h *handler) DeleteAdmin(c *gin.Context) {
 
 	h.logger.Info("Admin Deleted Successfully!")
 	c.JSON(http.StatusNoContent, nil)
+}
+
+// AdminLogin godoc
+// @Router       /e_commerce/api/v1/admin/login [POST]
+// @Summary      Admin login
+// @Description  Login to Khorezm_Shashlik
+// @Tags         admin_auth
+// @Accept       json
+// @Produce      json
+// @Param        login body models.AdminLoginRequest true "login"
+// @Success      201  {object}  models.AdminLoginResponse
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h *handler) AdminLogin(c *gin.Context) {
+	loginReq := models.AdminLoginRequest{}
+
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		handleResponseLog(c, h.logger, "error while binding body", http.StatusInternalServerError, err)
+		return
+	}
+
+	password, err := h.storage.Admin().GetByPhoneNumber(c.Request.Context(), loginReq.Login)
+	if err != nil {
+		handleResponseLog(c, h.logger, "error getting admin", http.StatusInternalServerError, err)
+		return
+	}
+
+	fmt.Println("loginReq: ", loginReq)
+	if loginReq.Password != password.Password {
+		handleResponseLog(c, h.logger, "wrong password", http.StatusBadRequest, err)
+		return
+	}
+ 
+	//TODO: need validate login & password
+
+	loginResp, err := h.service.AuthAdmin().AdminLogin(c.Request.Context(), loginReq)
+	if err != nil {
+		handleResponseLog(c, h.logger, "unauthorized", http.StatusUnauthorized, err)
+		return
+	}
+
+	handleResponseLog(c, h.logger, "Success", http.StatusOK, loginResp)
 }

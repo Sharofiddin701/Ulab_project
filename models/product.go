@@ -1,10 +1,10 @@
 package models
 
 type Product struct {
-	Id              string  `json:"id,omitempty"`
-	CategoryId      string  `json:"category_id,omitempty"`
-	BrandId         string  `json:"brand_id,omitempty"`
-	Image           string  `json:"image,omitempty"`
+	Id              string  `json:"id"`
+	CategoryId      string  `json:"category_id"`
+	BrandId         string  `json:"brand_id"`
+	Image           string  `json:"image"`
 	Favorite        bool    `json:"favorite"`
 	Name            string  `json:"name,omitempty"`
 	Price           float64 `json:"price,omitempty"`

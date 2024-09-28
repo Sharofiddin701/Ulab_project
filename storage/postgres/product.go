@@ -6,6 +6,7 @@ import (
 	"e-commerce/models"
 	"e-commerce/pkg/logger"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -73,13 +74,14 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		with_discount, 
 		rating,
 		description, 
+		item_count,
 		status, 
 		discount_percent, 
 		discount_end_time, 
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 	RETURNING id, category_id, brand_id, image,  favorite, name, price, with_discount, rating,
-		description, status, discount_percent, discount_end_time, created_at
+		description, item_count, status, discount_percent, discount_end_time, created_at
 	`
 
 	var (
@@ -93,6 +95,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		withDiscount      sql.NullFloat64
 		rating            sql.NullFloat64
 		description       sql.NullString
+		itemCount         sql.NullInt64
 		status            sql.NullString
 		discountPercent   sql.NullFloat64
 		discountEndTimeDB sql.NullTime
@@ -106,13 +109,14 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		req.Image,
 		req.Favorite,
 		req.Name,
-		req.Price,  // Original price
-		finalPrice, // Final price with discount applied
+		req.Price,
+		finalPrice,
 		req.Rating,
 		req.Description,
+		req.ItemCount,
 		req.Status,
 		req.DiscountPercent,
-		discountEndTime, // Corrected parameter for discount end time
+		discountEndTime,
 		currentTime,
 	).Scan(
 		&idd,
@@ -125,6 +129,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		&withDiscount,
 		&rating,
 		&description,
+		&itemCount,
 		&status,
 		&discountPercent,
 		&discountEndTimeDB,
@@ -147,6 +152,7 @@ func (u *productRepo) Create(ctx context.Context, req *models.ProductCreate) (*m
 		WithDiscount:    withDiscount.Float64,
 		Rating:          rating.Float64,
 		Description:     description.String,
+		ItemCount:       int(itemCount.Int64),
 		Status:          status.String,
 		DiscountPercent: discountPercent.Float64,
 		DiscountEndTime: discountEndTimeDB.Time.Format(time.RFC3339),
@@ -479,7 +485,19 @@ func (u *productRepo) GetList(ctx context.Context, req *models.ProductGetListReq
 		productsMap = filteredProductsMap
 	}
 
+	// Mahsulotlarni yaratilish vaqti bo'yicha tartiblash
+	var sortedProducts []*models.Product
 	for _, product := range productsMap {
+		sortedProducts = append(sortedProducts, product)
+	}
+	sort.Slice(sortedProducts, func(i, j int) bool {
+		timeI, _ := time.Parse(time.RFC3339, sortedProducts[i].CreatedAt)
+		timeJ, _ := time.Parse(time.RFC3339, sortedProducts[j].CreatedAt)
+		return timeI.After(timeJ)
+	})
+
+	// Tartiblangan mahsulotlarni javobga qo'shish
+	for _, product := range sortedProducts {
 		resp.Product = append(resp.Product, *product)
 	}
 

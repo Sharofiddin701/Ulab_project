@@ -176,6 +176,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/e_commerce/api/v1/admin/login": {
+            "post": {
+                "description": "Login to Khorezm_Shashlik",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin_auth"
+                ],
+                "summary": "Admin login",
+                "parameters": [
+                    {
+                        "description": "login",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AdminLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.AdminLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/e_commerce/api/v1/admin/{id}": {
             "get": {
                 "description": "Get By ID Admin",
@@ -3844,6 +3896,34 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AdminLoginRequest": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AdminLoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }

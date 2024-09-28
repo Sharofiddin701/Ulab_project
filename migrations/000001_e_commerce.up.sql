@@ -79,13 +79,11 @@ CREATE TABLE IF NOT EXISTS "order_items" (
 CREATE TYPE product_status AS ENUM ('novinka', 'rasprodaja', 'vremennaya_skidka', '');
     "status" product_status,
 
-
-
 CREATE TABLE IF NOT EXISTS "product" (
     "id" UUID PRIMARY KEY,
     "category_id" UUID REFERENCES "category"("id"),
     "brand_id" UUID REFERENCES "brand"("id"),
-    "image" TEXT[],
+    "image" TEXT,
     "favorite" BOOLEAN,
     "name" VARCHAR(100) NOT NULL,s
     "price" DECIMAL(10, 2) NOT NULL,

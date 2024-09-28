@@ -21,6 +21,24 @@ definitions:
       phone_number:
         type: string
     type: object
+  models.AdminLoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  models.AdminLoginResponse:
+    properties:
+      access_token:
+        type: string
+      id:
+        type: string
+      phone_number:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   models.AdminUpdate:
     properties:
       addres:
@@ -679,6 +697,40 @@ paths:
       summary: Update Admin
       tags:
       - Admin
+  /e_commerce/api/v1/admin/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to Khorezm_Shashlik
+      parameters:
+      - description: login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.AdminLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AdminLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Admin login
+      tags:
+      - admin_auth
   /e_commerce/api/v1/banner:
     get:
       consumes:

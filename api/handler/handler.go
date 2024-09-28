@@ -2,10 +2,13 @@ package handler
 
 import (
 	"e-commerce/config"
+	"e-commerce/models"
 	"e-commerce/pkg/logger"
 	"e-commerce/service"
 	"e-commerce/storage"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type handler struct {
@@ -51,4 +54,29 @@ func (h *handler) getLimitQuery(limit string) (int, error) {
 	}
 
 	return strconv.Atoi(limit)
+}
+
+func handleResponseLog(c *gin.Context, log logger.LoggerI, msg string, statusCode int, data interface{}) {
+	resp := models.Response{}
+
+	if statusCode >= 100 && statusCode <= 199 {
+		resp.Description = config.ERR_INFORMATION
+	} else if statusCode >= 200 && statusCode <= 299 {
+		resp.Description = config.SUCCESS
+		log.Info("REQUEST SUCCEEDED", logger.Any("msg: ", msg), logger.Int("status: ", statusCode))
+
+	} else if statusCode >= 300 && statusCode <= 399 {
+		resp.Description = config.ERR_REDIRECTION
+	} else if statusCode >= 400 && statusCode <= 499 {
+		resp.Description = config.ERR_BADREQUEST
+		log.Error("!!!!!!!! BAD REQUEST !!!!!!!!", logger.Any("error: ", msg), logger.Int("status: ", statusCode))
+	} else {
+		resp.Description = config.ERR_INTERNAL_SERVER
+		log.Error("!!!!!!!! ERR_INTERNAL_SERVER !!!!!!!!", logger.Any("error: ", msg), logger.Int("status: ", statusCode))
+	}
+
+	resp.StatusCode = statusCode
+	resp.Data = data
+
+	c.JSON(resp.StatusCode, resp)
 }

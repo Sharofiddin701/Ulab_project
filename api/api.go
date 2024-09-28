@@ -24,6 +24,8 @@ func NewApi(r *gin.Engine, cfg *config.Config, storage storage.StorageI, logger 
 	v1.POST("/verifycode", h.UserRegisterConfirm)
 	v1.POST("/byphoneconfirm", h.UserLoginByPhoneConfirm)
 
+	v1.POST("/admin/login", h.AdminLogin)
+
 	v1.POST("/admin", h.CreateAdmin)
 	v1.GET("/admin/:id", h.GetByIdAdmin)
 	v1.GET("/admin", h.GetListAdmin)
