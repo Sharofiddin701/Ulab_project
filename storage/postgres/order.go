@@ -100,17 +100,71 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 	return order, tx.Commit(context.Background())
 }
 
-func (o *orderRepo) GetOrder(orderId string) (*models.Order, error) {
-	query := `SELECT id, customer_id, longtitude, latitude, address_name, total_price, status, created_at, updated_at FROM "orders" WHERE id = $1`
+func (o *orderRepo) GetOrder(orderId string) (*models.OrderCreateRequest, error) {
+	var (
+		created_at sql.NullString
+		updated_at sql.NullString
+	)
+	query := `
+		SELECT id, customer_id, longtitude, latitude, address_name, total_price, status, 
+		created_at::TEXT, updated_at::TEXT
+		FROM "orders" 
+		WHERE id = $1`
 	row := o.db.QueryRow(context.Background(), query, orderId)
 
 	var order models.Order
-	err := row.Scan(&order.Id, &order.CustomerId, &order.Longtitude, &order.Latitude, &order.AddressName, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt)
+	err := row.Scan(
+		&order.Id,
+		&order.CustomerId,
+		&order.Longtitude,
+		&order.Latitude,
+		&order.AddressName,
+		&order.TotalPrice,
+		&order.Status,
+		&order.CreatedAt, // string expected
+		&order.UpdatedAt, // string expected
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &order, nil
+	orderItemQuery := `SELECT id, product_id, order_id, quantity, color_id, price, total FROM "order_items" WHERE order_id = $1`
+
+	itemRows, err := o.db.Query(context.Background(), orderItemQuery, orderId)
+	if err != nil {
+		return nil, err
+	}
+	defer itemRows.Close()
+
+	var orderItems []models.OrderItems
+
+	for itemRows.Next() {
+		var item models.OrderItems
+		err = itemRows.Scan(
+			&item.Id,
+			&item.ProductId,
+			&item.OrderId,
+			&item.Quantity,
+			&item.ColorId,
+			&item.Price,
+			&item.TotalPrice,
+		)
+		if err != nil {
+			return nil, err
+		}
+		item.CreatedAt = created_at.String
+		item.UpdatedAt = updated_at.String
+
+		orderItems = append(orderItems, item)
+
+		if err = itemRows.Err(); err != nil {
+			return nil, err
+		}
+	}
+	return &models.OrderCreateRequest{
+		Order: order,
+		Items: orderItems}, nil
+
 }
 
 func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequest) (*[]models.OrderCreateRequest, error) {

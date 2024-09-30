@@ -8,7 +8,6 @@ import (
 	"e-commerce/pkg/logger"
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -87,52 +86,6 @@ func (u *categoryRepo) Create(ctx context.Context, req *models.CategoryCreate) (
 	}, nil
 }
 
-func (u *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryKey) (*models.Category, error) {
-	var (
-		query      string
-		id         sql.NullString
-		name       sql.NullString
-		url        sql.NullString
-		parent_id  sql.NullString
-		created_at sql.NullString
-		updated_at sql.NullString
-	)
-
-	query = `
-		SELECT 
-			id,
-			name,
-			url,
-			parent_id,
-			created_at
-		FROM "category" 
-		WHERE id = $1
-	`
-
-	err := u.db.QueryRow(ctx, query, req.Id).Scan(
-		&id,
-		&name,
-		&url,
-		&parent_id,
-		&created_at,
-		&updated_at,
-	)
-
-	if err != nil && err.Error() != "no rows in result set" {
-		u.log.Error("Error while scanning data: " + err.Error())
-		return nil, err
-	}
-
-	return &models.Category{
-		Id:        id.String,
-		Name:      name.String,
-		Url:       url.String,
-		ParentId:  parent_id.String,
-		CreatedAt: created_at.String,
-		UpdatedAt: updated_at.String,
-	}, nil
-}
-
 func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListRequest) (*models.CategoryGetListResponse, error) {
 	var (
 		resp   = &models.CategoryGetListResponse{}
@@ -161,6 +114,11 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
+
+	// Add filtering by name if the query is provided
+	// if req.Name != "" {
+	// 	// filter += fmt.Sprintf(" AND name ILIKE '%%s%'", req.Name) // Use ILIKE for case-insensitive search
+	// }
 
 	query += filter + limit + offset
 
@@ -217,19 +175,75 @@ func (u *categoryRepo) GetList(ctx context.Context, req *models.CategoryGetListR
 		return timeI.After(timeJ)
 	})
 
+	// If a query is provided, filter the category names using filterStrings
 	if req.Name != "" {
+		categoryNames := make([]string, len(categories))
+		for i, cat := range categories {
+			categoryNames[i] = cat.Name
+		}
+
+		filteredNames := filterStrings(categoryNames, req.Name)
 		var filteredCategories []*models.Category
-		for _, category := range categories {
-			if strings.Contains(strings.ToLower(category.Name), strings.ToLower(req.Name)) {
-				filteredCategories = append(filteredCategories, category)
+		for _, name := range filteredNames {
+			for _, cat := range categories {
+				if cat.Name == name {
+					filteredCategories = append(filteredCategories, cat)
+					break
+				}
 			}
 		}
-		categories = filteredCategories
+		resp.Category = filteredCategories
+	} else {
+		resp.Category = categories
 	}
 
-	resp.Category = categories
-
 	return resp, nil
+}
+
+func (u *categoryRepo) GetByID(ctx context.Context, req *models.CategoryPrimaryKey) (*models.Category, error) {
+	var (
+		query      string
+		id         sql.NullString
+		name       sql.NullString
+		url        sql.NullString
+		parent_id  sql.NullString
+		created_at sql.NullString
+		updated_at sql.NullString
+	)
+
+	query = `
+		SELECT 
+			id,
+			name,
+			url,
+			parent_id,
+			created_at
+		FROM "category" 
+		WHERE id = $1
+	`
+
+	err := u.db.QueryRow(ctx, query, req.Id).Scan(
+		&id,
+		&name,
+		&url,
+		&parent_id,
+		&created_at,
+		&updated_at,
+	)
+
+	if err != nil && err.Error() != "no rows in result set" {
+		u.log.Error("Error while scanning data: " + err.Error())
+		return nil, err
+	}
+
+	return &models.Category{
+		Id:        id.String,
+		Name:      name.String,
+		Url:       url.String,
+		ParentId:  parent_id.String,
+		CreatedAt: created_at.String,
+		UpdatedAt: updated_at.String,
+	}, nil
 }
 
 func (u *categoryRepo) Delete(ctx context.Context, req *models.CategoryPrimaryKey) error {

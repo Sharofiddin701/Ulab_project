@@ -11,16 +11,16 @@ type IServiceManager interface {
 }
 
 type Service struct {
-	auth   authService
+	auth      authService
 	authAdmin authadminService
-	logger logger.LoggerI
+	logger    logger.LoggerI
 }
 
 func New(storage storage.StorageI, log logger.LoggerI, redis storage.RedisI) Service {
 	return Service{
-		auth:   NewAuthService(storage, log, redis),
+		auth:      NewAuthService(storage, log, redis),
 		authAdmin: NewAuthAdminService(storage, log, redis),
-		logger: log,
+		logger:    log,
 	}
 }
 
@@ -31,3 +31,5 @@ func (s Service) Auth() authService {
 func (s Service) AuthAdmin() authadminService {
 	return s.authAdmin
 }
+
+
