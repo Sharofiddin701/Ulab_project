@@ -2095,7 +2095,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve all products
+      description: Retrieve all orders
       operationId: get_all_orders
       parameters:
       - description: offset
@@ -2105,6 +2105,10 @@ paths:
       - description: limit
         in: query
         name: limit
+        type: string
+      - description: customer_id
+        in: query
+        name: customer_id
         type: string
       produces:
       - application/json
@@ -2133,7 +2137,7 @@ paths:
                 data:
                   type: string
               type: object
-      summary: Get All Products
+      summary: Get All Orders
       tags:
       - Order
     post:

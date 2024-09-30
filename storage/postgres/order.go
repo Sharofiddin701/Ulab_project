@@ -177,8 +177,24 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 	orderQuery := `
 	 SELECT id, customer_id, longtitude, latitude, address_name, delivery_status, delivery_cost, payment_method, payment_status, total_price, status, created_at
 	 FROM "orders"
+	 WHERE 1=1
 	`
-	rows, err := o.db.Query(ctx, orderQuery)
+
+	args := []interface{}{}
+	argId := 1
+
+	// Add customer_id filter if provided
+	if request.CustomerId != "" {
+		orderQuery += fmt.Sprintf(" AND customer_id = $%d", argId)
+		args = append(args, request.CustomerId)
+		argId++
+	}
+
+	// Add LIMIT and OFFSET
+	orderQuery += fmt.Sprintf(" LIMIT $%d OFFSET $%d", argId, argId+1)
+	args = append(args, request.Limit, request.Offset)
+
+	rows, err := o.db.Query(ctx, orderQuery, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve orders: %w", err)
 	}
@@ -250,6 +266,7 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 
 	return &orders, nil
 }
+
 func (o *orderRepo) UpdateOrder(order models.Order) error {
 	query := `UPDATE "orders" SET customer_id = $1, delivery_status=$2, delivery_cost=$3, payment_method=$4, payment_status=$5, total_price=$6, status=$7, longtitude = $8, latitude = $9, address_name = $10, updated_at = CURRENT_TIMESTAMP WHERE id = $11`
 	_, err := o.db.Exec(context.Background(), query, order.CustomerId, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, order.TotalPrice, order.Status, order.Longtitude, order.Latitude, order.AddressName, order.Id)

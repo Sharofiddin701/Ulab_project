@@ -2866,7 +2866,7 @@ const docTemplate = `{
         },
         "/e_commerce/api/v1/order": {
             "get": {
-                "description": "Retrieve all products",
+                "description": "Retrieve all orders",
                 "consumes": [
                     "application/json"
                 ],
@@ -2876,7 +2876,7 @@ const docTemplate = `{
                 "tags": [
                     "Order"
                 ],
-                "summary": "Get All Products",
+                "summary": "Get All Orders",
                 "operationId": "get_all_orders",
                 "parameters": [
                     {
@@ -2889,6 +2889,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "limit",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "customer_id",
+                        "name": "customer_id",
                         "in": "query"
                     }
                 ],

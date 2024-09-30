@@ -102,16 +102,17 @@ func (h *handler) GetByIdOrder(c *gin.Context) {
 // GetList 		Order godoc
 // @ID   		get_all_orders
 // @Router      /e_commerce/api/v1/order [GET]
-// @Summary     Get All Products
-// @Description Retrieve all products
-// @Tags     Order
-// @Accept   json
-// @Produce  json
-// @Param offset query string false "offset"
-// @Param limit query string false "limit"
-// @Success  200 {object} []models.OrderCreateRequest
-// @Response  400 {object} Response{data=string} "Bad Request"
-// @Failure  500 {object} Response{data=string} "Server error"
+// @Summary     Get All Orders
+// @Description Retrieve all orders
+// @Tags        Order
+// @Accept      json
+// @Produce     json
+// @Param       offset query string false "offset"
+// @Param       limit query string false "limit"
+// @Param       customer_id query string false "customer_id"
+// @Success     200 {object} []models.OrderCreateRequest
+// @Response    400 {object} Response{data=string} "Bad Request"
+// @Failure     500 {object} Response{data=string} "Server error"
 func (h *handler) GetAllOrders(c *gin.Context) {
 
 	var req models.OrderGetListRequest
@@ -131,6 +132,9 @@ func (h *handler) GetAllOrders(c *gin.Context) {
 		return
 	}
 	req.Limit = limit
+
+	// Add customer_id filter
+	req.CustomerId = c.Query("customer_id")
 
 	orders, err := h.storage.Order().GetAll(context.Background(), &req)
 	if err != nil {
