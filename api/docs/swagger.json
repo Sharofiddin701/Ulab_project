@@ -4179,6 +4179,9 @@
         "models.Order": {
             "type": "object",
             "properties": {
+                "address_name": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4196,6 +4199,12 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longtitude": {
+                    "type": "number"
                 },
                 "order_items": {
                     "type": "array",
@@ -4223,6 +4232,9 @@
         "models.OrderCreate": {
             "type": "object",
             "properties": {
+                "address_name": {
+                    "type": "string"
+                },
                 "customer_id": {
                     "type": "string"
                 },
@@ -4231,6 +4243,12 @@
                 },
                 "delivery_status": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longtitude": {
+                    "type": "number"
                 },
                 "payment_method": {
                     "type": "string"
@@ -4293,6 +4311,9 @@
         "models.OrderUpdate": {
             "type": "object",
             "properties": {
+                "address_name": {
+                    "type": "string"
+                },
                 "customer_id": {
                     "type": "string"
                 },
@@ -4304,6 +4325,12 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longtitude": {
+                    "type": "number"
                 },
                 "payment_method": {
                     "type": "string"

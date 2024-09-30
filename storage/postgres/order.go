@@ -75,10 +75,10 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 	if order.Order.DeliveryStatus == "pochta" {
 		order.Order.DeliveryCost = 0
 	}
-	orderQuery := `INSERT INTO "orders" (id, customer_id, delivery_status, payment_method, payment_status, total_price, created_at, updated_at)
-				   VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
+	orderQuery := `INSERT INTO "orders" (id, customer_id, longtitude, latitude, address_name, delivery_status, payment_method, payment_status, total_price, created_at, updated_at)
+				   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`
 
-	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, order.Order.DeliveryStatus, order.Order.PaymentMethod, order.Order.PaymentStatus, totalSum)
+	_, err = tx.Exec(context.Background(), orderQuery, orderId, order.Order.CustomerId, order.Order.Longtitude, order.Order.Latitude, order.Order.AddressName, order.Order.DeliveryStatus, order.Order.PaymentMethod, order.Order.PaymentStatus, totalSum)
 	if err != nil {
 		return &models.OrderCreateRequest{}, err
 	}
@@ -101,11 +101,11 @@ func (o *orderRepo) CreateOrder(order *models.OrderCreateRequest) (*models.Order
 }
 
 func (o *orderRepo) GetOrder(orderId string) (*models.Order, error) {
-	query := `SELECT id, customer_id,  total_price, status, created_at, updated_at FROM "orders" WHERE id = $1`
+	query := `SELECT id, customer_id, longtitude, latitude, address_name, total_price, status, created_at, updated_at FROM "orders" WHERE id = $1`
 	row := o.db.QueryRow(context.Background(), query, orderId)
 
 	var order models.Order
-	err := row.Scan(&order.Id, &order.CustomerId, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt)
+	err := row.Scan(&order.Id, &order.CustomerId, &order.Longtitude, &order.Latitude, &order.AddressName, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 
 	// Query to retrieve all orders
 	orderQuery := `
-	 SELECT id, customer_id, delivery_status, delivery_cost, payment_method, payment_status, total_price, status, created_at
+	 SELECT id, customer_id, longtitude, latitude, address_name, delivery_status, delivery_cost, payment_method, payment_status, total_price, status, created_at
 	 FROM "orders"
 	`
 	rows, err := o.db.Query(ctx, orderQuery)
@@ -133,7 +133,7 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 	// Iterate over the retrieved orders
 	for rows.Next() {
 		var order models.Order
-		err = rows.Scan(&order.Id, &order.CustomerId, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, &order.TotalPrice, &order.Status, &created_at)
+		err = rows.Scan(&order.Id, &order.CustomerId, &order.Longtitude, &order.Latitude, &order.AddressName, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, &order.TotalPrice, &order.Status, &created_at)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan order: %w", err)
 		}
@@ -196,10 +196,9 @@ func (o *orderRepo) GetAll(ctx context.Context, request *models.OrderGetListRequ
 
 	return &orders, nil
 }
-
 func (o *orderRepo) UpdateOrder(order models.Order) error {
-	query := `UPDATE "orders" SET customer_id = $1,delivery_status=$2,delivery_cost=$3,payment_method=$4,payment_status=$5, total_price=$6, status=$7, updated_at = CURRENT_TIMESTAMP WHERE id = $8`
-	_, err := o.db.Exec(context.Background(), query, order.CustomerId, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, order.TotalPrice, order.Status, order.Id)
+	query := `UPDATE "orders" SET customer_id = $1, delivery_status=$2, delivery_cost=$3, payment_method=$4, payment_status=$5, total_price=$6, status=$7, longtitude = $8, latitude = $9, address_name = $10, updated_at = CURRENT_TIMESTAMP WHERE id = $11`
+	_, err := o.db.Exec(context.Background(), query, order.CustomerId, &order.DeliveryStatus, &order.DeliveryCost, &order.PaymentMethod, &order.PaymentStatus, order.TotalPrice, order.Status, order.Longtitude, order.Latitude, order.AddressName, order.Id)
 	return err
 }
 

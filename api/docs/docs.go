@@ -4190,6 +4190,9 @@ const docTemplate = `{
         "models.Order": {
             "type": "object",
             "properties": {
+                "address_name": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4207,6 +4210,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longtitude": {
+                    "type": "number"
                 },
                 "order_items": {
                     "type": "array",
@@ -4234,6 +4243,9 @@ const docTemplate = `{
         "models.OrderCreate": {
             "type": "object",
             "properties": {
+                "address_name": {
+                    "type": "string"
+                },
                 "customer_id": {
                     "type": "string"
                 },
@@ -4242,6 +4254,12 @@ const docTemplate = `{
                 },
                 "delivery_status": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longtitude": {
+                    "type": "number"
                 },
                 "payment_method": {
                     "type": "string"
@@ -4304,6 +4322,9 @@ const docTemplate = `{
         "models.OrderUpdate": {
             "type": "object",
             "properties": {
+                "address_name": {
+                    "type": "string"
+                },
                 "customer_id": {
                     "type": "string"
                 },
@@ -4315,6 +4336,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longtitude": {
+                    "type": "number"
                 },
                 "payment_method": {
                     "type": "string"

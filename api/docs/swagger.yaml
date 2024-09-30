@@ -209,6 +209,8 @@ definitions:
     type: object
   models.Order:
     properties:
+      address_name:
+        type: string
       created_at:
         type: string
       customer_id:
@@ -221,6 +223,10 @@ definitions:
         type: string
       id:
         type: string
+      latitude:
+        type: number
+      longtitude:
+        type: number
       order_items:
         items:
           $ref: '#/definitions/models.OrderItems'
@@ -238,12 +244,18 @@ definitions:
     type: object
   models.OrderCreate:
     properties:
+      address_name:
+        type: string
       customer_id:
         type: string
       delivery_cost:
         type: number
       delivery_status:
         type: string
+      latitude:
+        type: number
+      longtitude:
+        type: number
       payment_method:
         type: string
       payment_status:
@@ -284,6 +296,8 @@ definitions:
     type: object
   models.OrderUpdate:
     properties:
+      address_name:
+        type: string
       customer_id:
         type: string
       delivery_cost:
@@ -292,6 +306,10 @@ definitions:
         type: string
       id:
         type: string
+      latitude:
+        type: number
+      longtitude:
+        type: number
       payment_method:
         type: string
       payment_status:
